@@ -513,12 +513,12 @@ local.properties
 *.slo
 *.lo
 *.o
-*.a
+# *.a
 *.la
 *.lai
 *.so
 *.so.*
-*.dll
+# *.dll
 *.dylib
 
 # Qt-es
@@ -1010,12 +1010,12 @@ _deps
 
 # Libraries
 *.lib
-*.a
+# *.a
 *.la
 *.lo
 
 # Shared objects (inc. Windows DLLs)
-*.dll
+# *.dll
 *.so
 *.so.*
 *.dylib
