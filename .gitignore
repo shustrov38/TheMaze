@@ -972,7 +972,7 @@ _deps
 # Compiled Dynamic libraries
 *.so
 *.dylib
-*.dll
+# *.dll
 
 # Fortran module files
 *.mod
@@ -981,7 +981,7 @@ _deps
 # Compiled Static libraries
 *.lai
 *.la
-*.a
+# *.a
 *.lib
 
 # Executables
@@ -1002,7 +1002,7 @@ _deps
 # Linker output
 *.ilk
 *.map
-*.exp
+# *.exp
 
 # Precompiled Headers
 *.gch
