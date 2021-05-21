@@ -14,6 +14,5 @@ set(SOURCE_FILES
 		${SOURCE_DIRECTORY}/sqlite3.h
 )
 
-add_executable(TheMaze main.c ${SOURCE_FILES})
-
-target_link_libraries(${PROJECT_NAME} sqlite3)
+add_subdirectory(${SOURCE_DIRECTORY}/server)
+add_subdirectory(${SOURCE_DIRECTORY}/client)
