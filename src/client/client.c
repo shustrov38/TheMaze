@@ -3,12 +3,10 @@
 #include <time.h>
 #include <stdlib.h>
 
-void SendData2Server(int count, int number)
-{
+void SendData2Server(int count, int number) {
     SOCKET client;
     client = socket(AF_INET, SOCK_STREAM, IPPROTO_IP);
-    if (client == INVALID_SOCKET)
-    {
+    if (client == INVALID_SOCKET) {
         printf("Error create socket\n");
         return;
     }
@@ -16,8 +14,7 @@ void SendData2Server(int count, int number)
     server.sin_family = AF_INET;
     server.sin_port = htons(5510); //the same as in server
     server.sin_addr.S_un.S_addr = inet_addr("127.0.0.1"); //special look-up address
-    if (connect(client, (struct sockaddr*)&server, sizeof(server)) == SOCKET_ERROR)
-    {
+    if (connect(client, (struct sockaddr *) &server, sizeof(server)) == SOCKET_ERROR) {
         printf("Can't connect to server\n");
         closesocket(client);
         return;
@@ -25,43 +22,35 @@ void SendData2Server(int count, int number)
     char message[1024];
     sprintf(message, "<%d client> %s %d", number, "test", count);
     int ret = send(client, message, strlen(message), 0);
-    if (ret == SOCKET_ERROR)
-    {
+    if (ret == SOCKET_ERROR) {
         printf("Can't send message\n");
         closesocket(client);
         return;
     }
     printf("Sent: %s\nbytes: %d\n\n", message, ret);
     ret = SOCKET_ERROR;
-    int i = 0;
-    while (ret == SOCKET_ERROR)
-    {
+    while (ret == SOCKET_ERROR) {
         //полчение ответа
         ret = recv(client, message, 1024, 0);
         //обработка ошибок
-        if (ret == 0 || ret == WSAECONNRESET)
-        {
+        if (ret == 0 || ret == WSAECONNRESET) {
             printf("Connection closed\n");
             break;
         }
-        if (ret < 0)
-        {
-            //printf("Can't resieve message\n");
-            /*closesocket(client);
-            return;*/
-            continue;
+        if (ret < 0) {
+            printf("Can't receive message\n");
+            closesocket(client);
+            return;
         }
         //вывод на экран количества полученных байт и сообщение
-        printf("Recieve: %s\n bytes: %d\n", message, ret);
+        printf("Receive: %s\n bytes: %d\n", message, ret);
     }
     closesocket(client);
 }
 
-int main()
-{
+int main() {
     WSADATA wsd;
-    if (WSAStartup(MAKEWORD(1, 1), &wsd) != 0)
-    {
+    if (WSAStartup(MAKEWORD(1, 1), &wsd) != 0) {
         printf("Can't connect to socket lib");
         return 1;
     }
@@ -69,10 +58,9 @@ int main()
     srand(time(0));
     rand();
     int number = rand();
-    while (i<1000)
-    {
+    while (i < 1000) {
         SendData2Server(++i, number);
-        Sleep(rand()%10);
+        Sleep(rand() % 10);
     }
     printf("Session is closed\n");
     Sleep(1000);

@@ -3,8 +3,6 @@ project(TheMaze C)
 
 set(CMAKE_C_STANDARD 11)
 
-link_directories(sqlite3_lib)
-
 set(SOURCE_DIRECTORY src)
 
 set(SOURCE_FILES

@@ -1,3 +1,5 @@
+link_directories(../../sqlite3_lib)
+
 set(SERVER_SOURCES
         MazeGenerator.c
         MazeGenerator.h
