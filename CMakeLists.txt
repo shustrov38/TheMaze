@@ -16,3 +16,4 @@ set(SOURCE_FILES
 
 add_subdirectory(${SOURCE_DIRECTORY}/server)
 add_subdirectory(${SOURCE_DIRECTORY}/client)
+add_subdirectory(${SOURCE_DIRECTORY}/local_game)

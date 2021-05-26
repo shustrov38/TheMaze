@@ -104,7 +104,7 @@ int **generator(int **maze, int x1, int x2, int y1, int y2) {
         }
 
         pair hole;
-        hole.x = rand() % (pos.x - x1 - 1) + x1 + 1;             //по x слева пересечения
+        hole.x = rand() % (pos.x - x1 - 1) + x1 + 1;        //по x слева пересечения
         hole.y = rand() % (x2 - pos.x - 1) + pos.x + 1;     //по x справа пересечения
 
 
