@@ -10,24 +10,35 @@ playerInfo *initPlayerInfo(char **name, int count, int *id) {
         players[i].name = (char*) malloc(100 * sizeof(char));
         strcpy(players[i].name, name[i]);
 
-        if (k == 1){
+        if (i == 0){
             players[i].coord.X = 1;
             players[i].coord.Y = 1;
         }
-        if (k == 2){
+        if (i == 1){
             players[i].coord.X = MAZE_SIZE - 2;
             players[i].coord.Y = 1;
         }
-        if (k == 3){
+        if (i == 2){
             players[i].coord.Y = MAZE_SIZE - 2;
             players[i].coord.X = 1;
         }
-        if (k == 4){
+        if (i == 3){
             players[i].coord.X = MAZE_SIZE - 2;
             players[i].coord.Y = MAZE_SIZE - 2;
         }
 
-        players[i].color = k;
+        if (i == 0){
+            players[i].color = 2;
+        }
+        if (i == 1){
+            players[i].color = 4;
+        }
+        if (i == 2){
+            players[i].color = 14;
+        }
+        if (i == 3){
+            players[i].color = 3;
+        }
 
         k++;
     }
@@ -57,42 +68,60 @@ int main() {
 //players generation
     char **names;
     int *id;
-    int namesCount;
+    int playersCount;
 
     printf("Enter names count - ");
-    scanf("%d", &namesCount);
+    scanf("%d", &playersCount);
 
 
-    names = (char**) malloc(namesCount * sizeof(char*));
-    for (int i = 0; i < namesCount; ++i){
+    names = (char**) malloc(playersCount * sizeof(char*));
+    for (int i = 0; i < playersCount; ++i){
         names[i] = (char*) malloc(50 * sizeof(char));
         printf("\nEnter name: ");
         scanf("%s", names[i]);
     }
 
-    id = (int*) malloc(namesCount * sizeof(int));
-    for (int i = 0; i < namesCount; ++i){
+    id = (int*) malloc(playersCount * sizeof(int));
+    for (int i = 0; i < playersCount; ++i){
         printf("\nEnter id: ");
         scanf("%d", &id[i]);
     }
 
-    playerInfo *players = initPlayerInfo(names, namesCount, id);
+    playerInfo *players = initPlayerInfo(names, playersCount, id);
 //players generation
 
 
 //game
     printMaze(maze, height, width);
     int winFlag = -1;
-    SetConsoleCursorPosition(consoleHandle, players[0].coord);
-    printf("@");
+
+    for (int i = 0; i < playersCount; ++i) {
+        SetConsoleCursorPosition(consoleHandle, players[i].coord);
+        SetConsoleTextAttribute(consoleHandle, (WORD) ((0 << 4) | players[i].color));
+        printf("@");
+    }
 
 
     while(1){
+        //bot1
+        players[3].coord = botAction(maze, players[3].coord, consoleHandle);
+        SetConsoleCursorPosition(consoleHandle, players[3].coord);
+        SetConsoleTextAttribute(consoleHandle, (WORD) ((0 << 4) | players[3].color));
+        printf("@");
+
+        //bot2
+        players[2].coord = botAction(maze, players[2].coord, consoleHandle);
+        SetConsoleCursorPosition(consoleHandle, players[2].coord);
+        SetConsoleTextAttribute(consoleHandle, (WORD) ((0 << 4) | players[2].color));
+        printf("@");
+
+        //bot3
         players[1].coord = botAction(maze, players[1].coord, consoleHandle);
         SetConsoleCursorPosition(consoleHandle, players[1].coord);
         SetConsoleTextAttribute(consoleHandle, (WORD) ((0 << 4) | players[1].color));
         printf("@");
 
+        //local player
         players[0].coord = action(maze, players[0].coord, consoleHandle);
         SetConsoleCursorPosition(consoleHandle, players[0].coord);
         SetConsoleTextAttribute(consoleHandle, (WORD) ((0 << 4) | players[0].color));
@@ -100,7 +129,19 @@ int main() {
 
 
 
-        for (int i = 0; i < namesCount; ++i){
+        for (int i = 0; i < playersCount; ++i){
+            if (maze[players[3].coord.Y][players[3].coord.X] == 5){
+                system("cls");
+                winFlag = 3;
+                break;
+            }
+
+            if (maze[players[2].coord.Y][players[2].coord.X] == 5){
+                system("cls");
+                winFlag = 2;
+                break;
+            }
+
             if (maze[players[1].coord.Y][players[1].coord.X] == 5){
                 system("cls");
                 winFlag = 1;
@@ -112,16 +153,14 @@ int main() {
                 winFlag = 0;
                 break;
             }
-
-
-            //more players
         }
         if (winFlag != -1){
             break;
         }
     }
 
-    printf("Winner is PLAYER %d", winFlag);
+    SetConsoleTextAttribute(consoleHandle, (WORD) ((0 << 4) | 15));
+    printf("Winner is PLAYER %s", players[winFlag].name);
 
 //game
 

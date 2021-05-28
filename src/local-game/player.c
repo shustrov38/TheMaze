@@ -64,35 +64,41 @@ COORD botAction(int **maze, COORD coord, HANDLE consoleHandle){
     SetConsoleCursorInfo(consoleHandle, &info);
 
     int button;
+    int printFlag = 0;
     button = catch();
 
     button = rand() % 4;
 
     if (button == 0) {
         if (maze[coord.Y - 1][coord.X] == 0 || maze[coord.Y - 1][coord.X] == 5) {
+            printFlag = 1;
             SetConsoleCursorPosition(consoleHandle, coord);
             printf(" ");
             coord.Y--;
         }
     } else if (button == 1) {
         if (maze[coord.Y + 1][coord.X] == 0 || maze[coord.Y + 1][coord.X] == 5) {
+            printFlag = 1;
             SetConsoleCursorPosition(consoleHandle, coord);
             printf(" ");
             coord.Y++;
         }
     } else if (button == 2) {
         if (maze[coord.Y][coord.X - 1] == 0 || maze[coord.Y][coord.X - 1] == 5) {
+            printFlag = 1;
             SetConsoleCursorPosition(consoleHandle, coord);
             printf(" ");
             coord.X--;
         }
     } else if (button == 3) {
         if (maze[coord.Y][coord.X + 1] == 0 || maze[coord.Y][coord.X + 1] == 5) {
+            printFlag = 1;
             SetConsoleCursorPosition(consoleHandle, coord);
             printf(" ");
             coord.X++;
         }
     }
-
-    return coord;
+    //if (printFlag) {
+        return coord;
+    //}
 }
