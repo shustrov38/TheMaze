@@ -5,69 +5,72 @@
 
 #include "../sqlite3.h"
 
-pthread_mutex_t mutex;
-pthread_mutex_t mutex_file;
+#define CLIENT_THREAD_OK 0
+#define CLIENT_THREAD_RECEIVE_ERROR 1
+#define CLIENT_THREAD_SEND_ERROR 2
 
-typedef struct thread_in {
-    sqlite3_mutex *cur_mutex;
+typedef struct server_data_t {
+    pthread_mutex_t *p_mutex;
+    pthread_mutex_t *p_mutex_file;
+
+    sqlite3_mutex *db_mutex;
     sqlite3 *db;
-    SOCKET cur_socket;
-} th_input;
 
-void *ClientStart(void *param) {
-    th_input *input_data = (th_input *) param;
-    SOCKET client = input_data->cur_socket;
-    char recieve[1024], transmit[1024];
-    int ret;
+    SOCKET client_socket;
+} server_data;
 
-    int state = sqlite3_mutex_try(input_data->cur_mutex);
+void *client_callback(void *param) {
+    server_data *input_data = (server_data *) param;
+    SOCKET client = input_data->client_socket;
 
-    if (state == SQLITE_BUSY){
-        pthread_mutex_lock(&mutex);
-        pthread_mutex_lock(&mutex_file);
-        fprintf(stderr, "[SQL ERROR] Cannot open database: it's already in use\n");
-        pthread_mutex_unlock(&mutex_file);
-        pthread_mutex_unlock(&mutex);
-        sqlite3_mutex_leave(input_data->cur_mutex);
-        return (void *) 3;
+    while (1) {
+        char receive[1024], transmit[1024];
+        int ret; // count of received bytes
+
+        ret = recv(client, receive, 1024, 0);
+        if (!ret || ret == SOCKET_ERROR) {
+            pthread_mutex_lock(input_data->p_mutex);
+            pthread_mutex_lock(input_data->p_mutex_file);
+            fprintf(stderr, "[SERVER ERROR] Can't receive data.\n");
+            pthread_mutex_unlock(input_data->p_mutex_file);
+            pthread_mutex_unlock(input_data->p_mutex);
+            return (void *) CLIENT_THREAD_RECEIVE_ERROR;
+        }
+
+        receive[ret] = '\0';
+
+        char tag[128];
+        sscanf(receive, "%s", tag);
+
+        if (!strcmp(tag, "<end>")) {
+            break;
+        }
+
+        pthread_mutex_lock(input_data->p_mutex);
+        pthread_mutex_lock(input_data->p_mutex_file);
+        printf("%s\n", receive);
+        pthread_mutex_unlock(input_data->p_mutex_file);
+        pthread_mutex_unlock(input_data->p_mutex);
+
+        sprintf(transmit, "%s %s %s\n", "Your data", receive, "received");
+
+//    Sleep(2000);
+
+        ret = send(client, transmit, sizeof(transmit), 0);
+        if (ret == SOCKET_ERROR) {
+            pthread_mutex_lock(input_data->p_mutex);
+            pthread_mutex_lock(input_data->p_mutex_file);
+            fprintf(stderr, "[SERVER ERROR] Can't send data.\n");
+            pthread_mutex_unlock(input_data->p_mutex_file);
+            pthread_mutex_unlock(input_data->p_mutex);
+            return (void *) CLIENT_THREAD_SEND_ERROR;
+        }
     }
 
-    ret = recv(client, recieve, 1024, 0);
-    if (!ret || ret == SOCKET_ERROR) {
-        pthread_mutex_lock(&mutex);
-        pthread_mutex_lock(&mutex_file);
-        printf("Error getting data\n");
-        fprintf(stdout, "test");
-        pthread_mutex_unlock(&mutex_file);
-        pthread_mutex_unlock(&mutex);
-        sqlite3_mutex_leave(input_data->cur_mutex);
-        return (void *) 1;
-    }
-    recieve[ret] = '\0';
-    pthread_mutex_lock(&mutex);
-    pthread_mutex_lock(&mutex_file);
-    fprintf(stdout, "test");
-    printf("%s\n", recieve);
-    pthread_mutex_unlock(&mutex_file);
-    pthread_mutex_unlock(&mutex);
-    sprintf(transmit, "%s %s %s\n", "Your data", recieve, "recieved");
-    Sleep(2000);
-    ret = send(client, transmit, sizeof(transmit), 0);
-    if (ret == SOCKET_ERROR) {
-        pthread_mutex_lock(&mutex);
-        pthread_mutex_lock(&mutex_file);
-        printf("Error sending data\n");
-        pthread_mutex_unlock(&mutex_file);
-        pthread_mutex_unlock(&mutex);
-        sqlite3_mutex_leave(input_data->cur_mutex);
-        return (void *) 2;
-    }
-
-    sqlite3_mutex_leave(input_data->cur_mutex);
-    return (void *) 0;
+    return (void *) CLIENT_THREAD_OK;
 }
 
-int CreateServer() {
+int create_server() {
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // DB things
 
@@ -82,7 +85,9 @@ int CreateServer() {
         return EXIT_FAILURE;
     }
 
-    rc = sqlite3_exec(db, "DROP TABLE IF EXISTS Data; CREATE TABLE Data(Id INT, Name TEXT);", 0, 0, &err);
+    const char *sql_create_table = "DROP TABLE IF EXISTS Data; CREATE TABLE Data(Id INT, Name TEXT);";
+
+    rc = sqlite3_exec(db, sql_create_table, 0, 0, &err);
 
     if (rc != SQLITE_OK) {
         fprintf(stderr, "[SQL ERROR] %s\n", err);
@@ -103,15 +108,19 @@ int CreateServer() {
     }
     localaddr.sin_addr.S_un.S_addr = htonl(INADDR_ANY);
     localaddr.sin_family = AF_INET;
-    localaddr.sin_port = htons(5510);//port number is for example, must be more than 1024
+    localaddr.sin_port = htons(5510); //port number is for example, must be more than 1024
     if (bind(server, (struct sockaddr *) &localaddr, sizeof(localaddr)) == SOCKET_ERROR) {
-        printf("[SERVER ERROR] Can't start server session.\n");
+        fprintf(stderr, "[SERVER ERROR] Can't start server session.\n");
         return EXIT_FAILURE;
     } else {
         printf("[SERVER] Server session is started.\n");
     }
 
-    listen(server, 50);//50 клиентов в очереди могут стоять
+    listen(server, 50); // max clients in the queue
+
+    pthread_mutex_t mutex;
+    pthread_mutex_t mutex_file;
+
     pthread_mutex_init(&mutex, NULL);
     pthread_mutex_init(&mutex_file, NULL);
 
@@ -129,22 +138,32 @@ int CreateServer() {
             printf("[SERVER] Client is accepted.\n");
         }
 
-        pthread_t client_thread;
-        th_input cur_client = {.cur_mutex = db_mutex, .cur_socket = client, .db = db};
-        status = pthread_create(&client_thread, NULL, ClientStart, (void *) &cur_client);
+        pthread_t tid;
+        server_data data = {
+                .p_mutex = &mutex,
+                .p_mutex_file = &mutex_file,
+
+                .db_mutex = db_mutex,
+                .db = db,
+
+                .client_socket = client
+        };
+
+        status = pthread_create(&tid, NULL, client_callback, (void *) &data);
         if (status != 0) {
-            printf("[THREAD ERROR] CreateServer(): can't create client_thread, status = %d\n", status);
+            fprintf(stderr, "[THREAD ERROR] create_server(): can't create \"tid\", status = %d\n", status);
             exit(EXIT_FAILURE);
         }
-        status = pthread_detach(client_thread);
+        status = pthread_detach(tid);
         if (status != 0) {
-            printf("[THREAD ERROR] CreateServer(): can't detatch client_thread, status = %d\n", status);
+            fprintf(stderr, "[THREAD ERROR] create_server(): can't detach \"tid\", status = %d\n", status);
             exit(EXIT_FAILURE);
         }
     }
 
     pthread_mutex_destroy(&mutex_file);
     pthread_mutex_destroy(&mutex);
+
     printf("[SERVER] Server is stopped.\n");
 
     closesocket(server);
@@ -162,6 +181,6 @@ int main() {
         return EXIT_FAILURE;
     }
 
-    return CreateServer();
+    return create_server();
 }
 
