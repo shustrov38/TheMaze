@@ -1,12 +1,19 @@
 #include "utilities.h"
 #include "maze_generator.h"
 
-
-
 //height - высота
 //width - ширина
 
+int **createFinishPoint(int **maze, int width, int height){
 
+    maze[width/2][height/2] = 5;
+    maze[width/2 - 1][height/2] = 0;
+    maze[width/2 + 1][height/2] = 0;
+    maze[width/2][height/2 - 1] = 0;
+    maze[width / 2][height / 2 + 1] = 0;
+
+    return maze;
+}
 
 int **initMaze(int **maze, int width, int height) {
     maze = (int **) malloc(width * sizeof(int *));
@@ -275,6 +282,7 @@ void go(int **used, int size, int x, int y, int *flag) {
 
 
 void printMaze(int **maze, int height, int width) {
+    system("cls");
     int **used;
     used = initMaze(used, width, height);
 
@@ -291,6 +299,10 @@ void printMaze(int **maze, int height, int width) {
         for (int j = 0; j < height; ++j) {
             if (maze[i][j] == 2) {
                 printf(".");
+                continue;
+            }
+            if (maze[i][j] == 5) {
+                printf("#");
                 continue;
             }
 

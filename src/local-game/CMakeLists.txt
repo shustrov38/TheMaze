@@ -1,7 +1,11 @@
 set(LOCAL_GAME_SOURCES
         game.c
         game.h
-        unrefatored_maze_generator.c
+        maze_generator.c
+        maze_generator.h
+        player.c
+        player.h
+        utilities.h
 )
 
 #add_compile_definitions(__DFS_DEBUG__)
