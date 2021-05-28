@@ -3,7 +3,7 @@
 #include <time.h>
 #include <stdlib.h>
 
-void SendData2Server(int number) {
+void SendData2Server(int number, char *name) {
     SOCKET client;
     client = socket(AF_INET, SOCK_STREAM, IPPROTO_IP);
     if (client == INVALID_SOCKET) {
@@ -17,6 +17,16 @@ void SendData2Server(int number) {
 //    server.sin_addr.S_un.S_addr = inet_addr("26.173.251.89");
     if (connect(client, (struct sockaddr *) &server, sizeof(server)) == SOCKET_ERROR) {
         printf("Can't connect to server\n");
+        closesocket(client);
+        return;
+    }
+
+    char new_msg[128];
+    sprintf(new_msg, "<new> %d %s", number, name);
+
+    int ret = send(client, new_msg, 128, 0);
+    if (ret == SOCKET_ERROR) {
+        printf("Can't send message\n");
         closesocket(client);
         return;
     }
@@ -52,7 +62,7 @@ void SendData2Server(int number) {
         }
     }
 
-    int ret = send(client, "<end>", 5, 0);
+    ret = send(client, "<end>", 5, 0);
     if (ret == SOCKET_ERROR) {
         printf("Can't send message\n");
         closesocket(client);
@@ -72,7 +82,7 @@ int main() {
     srand(time(0));
     rand();
     int number = rand();
-    SendData2Server(number);
+    SendData2Server(number, "pipiska");
     printf("Session is closed\n");
     Sleep(1000);
     return 0;

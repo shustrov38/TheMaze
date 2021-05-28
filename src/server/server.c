@@ -9,6 +9,8 @@
 #define CLIENT_THREAD_RECEIVE_ERROR 1
 #define CLIENT_THREAD_SEND_ERROR 2
 
+#define CLIENT_THREAD_SQL_ERROR 10
+
 typedef struct server_data_t {
     pthread_mutex_t *p_mutex;
     pthread_mutex_t *p_mutex_file;
@@ -22,6 +24,7 @@ typedef struct server_data_t {
 void *client_callback(void *param) {
     server_data *input_data = (server_data *) param;
     SOCKET client = input_data->client_socket;
+    char *err;
 
     while (1) {
         char receive[1024], transmit[1024];
@@ -39,11 +42,34 @@ void *client_callback(void *param) {
 
         receive[ret] = '\0';
 
-        char tag[128];
+        char tag[64];
         sscanf(receive, "%s", tag);
 
         if (!strcmp(tag, "<end>")) {
             break;
+        }
+
+        if (!strcmp(tag, "<new>")) {
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            char id[32], name[64];
+            sscanf(receive, "%s %s %s", tag, id, name);
+
+            while (sqlite3_mutex_try(input_data->db_mutex) == SQLITE_BUSY);
+
+            char sql_add_client[128];
+            sprintf(sql_add_client, "INSERT INTO Data VALUES(%s, \'%s\');", id, name);
+
+            int rc = sqlite3_exec(input_data->db, sql_add_client, 0, 0, &err);
+
+            if (rc != SQLITE_OK) {
+                fprintf(stderr, "[SQL ERROR] %s\n", err);
+                sqlite3_free(err);
+
+                return (void *) CLIENT_THREAD_SQL_ERROR;
+            }
+
+            sqlite3_mutex_leave(input_data->db_mutex);
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         }
 
         pthread_mutex_lock(input_data->p_mutex);
@@ -68,6 +94,47 @@ void *client_callback(void *param) {
     }
 
     return (void *) CLIENT_THREAD_OK;
+}
+
+int stopIssued = 1;
+pthread_mutex_t stopMutex;
+
+int getStopIssued(void) {
+    int ret = 0;
+    pthread_mutex_lock(&stopMutex);
+    ret = stopIssued;
+    pthread_mutex_unlock(&stopMutex);
+    return ret;
+}
+
+void setStopIssued(int val) {
+    pthread_mutex_lock(&stopMutex);
+    stopIssued = val;
+    pthread_mutex_unlock(&stopMutex);
+}
+
+_Noreturn void *command_callback(void *param) {
+    server_data *input_data = (server_data *) param;
+
+    char command[128];
+
+    while (1) {
+        scanf("%s", command);
+        if (!strcmp(command, "/off")) {
+            setStopIssued(0);
+
+            pthread_mutex_destroy(input_data->p_mutex_file);
+            pthread_mutex_destroy(input_data->p_mutex);
+
+            printf("[SERVER] Server is stopped.\n");
+
+            closesocket(input_data->client_socket);
+
+            sqlite3_close(input_data->db);
+
+            exit(0);
+        }
+    }
 }
 
 int create_server() {
@@ -108,7 +175,7 @@ int create_server() {
     }
     localaddr.sin_addr.S_un.S_addr = htonl(INADDR_ANY);
     localaddr.sin_family = AF_INET;
-    localaddr.sin_port = htons(5510); //port number is for example, must be more than 1024
+    localaddr.sin_port = htons(5510); // port number is for example, must be more than 1024
     if (bind(server, (struct sockaddr *) &localaddr, sizeof(localaddr)) == SOCKET_ERROR) {
         fprintf(stderr, "[SERVER ERROR] Can't start server session.\n");
         return EXIT_FAILURE;
@@ -124,10 +191,36 @@ int create_server() {
     pthread_mutex_init(&mutex, NULL);
     pthread_mutex_init(&mutex_file, NULL);
 
-    int status;
+    pthread_mutex_init(&stopMutex, NULL);
+
     sqlite3_mutex *db_mutex = sqlite3_db_mutex(db);
 
-    while (1) {
+    int status;
+
+    {
+        pthread_t command_thread;
+        server_data command_data = {
+                .p_mutex = &mutex,
+                .p_mutex_file = &mutex_file,
+
+                .db_mutex = db_mutex,
+                .db = db,
+
+                .client_socket = server
+        };
+        status = pthread_create(&command_thread, NULL, command_callback, (void *) &command_data);
+        if (status != 0) {
+            fprintf(stderr, "[THREAD ERROR] create_server(): can't create \"command_thread\", status = %d\n", status);
+            exit(EXIT_FAILURE);
+        }
+        status = pthread_detach(command_thread);
+        if (status != 0) {
+            fprintf(stderr, "[THREAD ERROR] create_server(): can't detach \"command_thread\", status = %d\n", status);
+            exit(EXIT_FAILURE);
+        }
+    }
+
+    while (getStopIssued()) {
         size = sizeof(clientaddr);
         client = accept(server, (struct sockaddr *) &clientaddr, &size);
 
@@ -167,6 +260,8 @@ int create_server() {
     printf("[SERVER] Server is stopped.\n");
 
     closesocket(server);
+
+    sqlite3_close(db);
 
     return 0;
 }
