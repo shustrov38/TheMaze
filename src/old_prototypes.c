@@ -28,7 +28,7 @@
 //        return EXIT_FAILURE;
 //    }
 //
-//    const char *sql1 = "DROP TABLE IF EXISTS Cars;"
+//    const char *sql1 = "DROP TABLE IF NOT EXISTS Cars;"
 //                       "CREATE TABLE Cars(Id INT, Name TEXT, Price INT);"
 //                       "INSERT INTO Cars VALUES(1, 'Audi', 52642);"
 //                       "INSERT INTO Cars VALUES(2, 'Hummer', 41400);"
