@@ -3,7 +3,17 @@
 #include <time.h>
 #include <stdlib.h>
 
-void SendData2Server(int number, char *name) {
+int hash (char *s1, char *s2){
+    int base = 23;
+    int res = 0;
+    for(int i = 0; i < min(strlen(s1),strlen(s2)); i++){
+        res+= (s1[i] + s2[i]) * base;
+        base *= base;
+    }
+    return res % (int)10e6;
+}
+
+void SendData2Server(char *name) {
     SOCKET client;
     client = socket(AF_INET, SOCK_STREAM, IPPROTO_IP);
     if (client == INVALID_SOCKET) {
@@ -13,8 +23,8 @@ void SendData2Server(int number, char *name) {
     struct sockaddr_in server;
     server.sin_family = AF_INET;
     server.sin_port = htons(5510); //the same as in server
-    server.sin_addr.S_un.S_addr = inet_addr("127.0.0.1"); //special look-up address
-//    server.sin_addr.S_un.S_addr = inet_addr("26.173.251.89");
+//    server.sin_addr.S_un.S_addr = inet_addr("127.0.0.1"); //special look-up address
+    server.sin_addr.S_un.S_addr = inet_addr("26.173.251.89");
     if (connect(client, (struct sockaddr *) &server, sizeof(server)) == SOCKET_ERROR) {
         printf("Can't connect to server\n");
         closesocket(client);
@@ -22,7 +32,13 @@ void SendData2Server(int number, char *name) {
     }
 
     char new_msg[128];
-    sprintf(new_msg, "<new> %d %s", number, name);
+
+    char *pass = malloc(sizeof(char) * 32);
+    memset(pass, 0, 32);
+    strcat(pass, "qwerty");
+    strcat(pass, name);
+
+    sprintf(new_msg, "<new> %s %s", name, pass);
 
     int ret = send(client, new_msg, 128, 0);
     if (ret == SOCKET_ERROR) {
@@ -31,10 +47,9 @@ void SendData2Server(int number, char *name) {
         return;
     }
 
-    for (int i = 0; i < 1000; ++i) {
+    for (int i = 0; i < 10000; ++i) {
         char message[1024];
-
-        sprintf(message, "<%d> %s %d", number, "test", i);
+        sprintf(message, "%s %d", "test", i);
         int ret = send(client, message, (int) strlen(message), 0);
         if (ret == SOCKET_ERROR) {
             printf("Can't send message\n");
@@ -58,11 +73,13 @@ void SendData2Server(int number, char *name) {
                 return;
             }
             //вывод на экран количества полученных байт и сообщение
-            printf("Receive: %s\n bytes: %d\n", message, ret);
+            system("cls");
+            printf("Receive: \n%s\n bytes: %d\n", message, ret);
         }
     }
 
-    ret = send(client, "<end>", 5, 0);
+    sprintf(new_msg, "<end>");
+    ret = send(client, new_msg, 5, 0);
     if (ret == SOCKET_ERROR) {
         printf("Can't send message\n");
         closesocket(client);
@@ -81,10 +98,11 @@ int main() {
     int i = 0;
     srand(time(0));
     rand();
-    int number = rand();
-    SendData2Server(number, "pipiska");
+    int number = abs(rand()) % 1000;
+    char *name = malloc(sizeof(char) * 32);
+    sprintf(name, "%d",number+1488);
+    SendData2Server(name);
     printf("Session is closed\n");
     Sleep(1000);
     return 0;
 }
-
