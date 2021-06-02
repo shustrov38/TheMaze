@@ -23,8 +23,8 @@ void SendData2Server(char *name) {
     struct sockaddr_in server;
     server.sin_family = AF_INET;
     server.sin_port = htons(5510); //the same as in server
-//    server.sin_addr.S_un.S_addr = inet_addr("127.0.0.1"); //special look-up address
-    server.sin_addr.S_un.S_addr = inet_addr("26.173.251.89");
+    server.sin_addr.S_un.S_addr = inet_addr("127.0.0.1"); //special look-up address
+//    server.sin_addr.S_un.S_addr = inet_addr("26.173.251.89");
     if (connect(client, (struct sockaddr *) &server, sizeof(server)) == SOCKET_ERROR) {
         printf("Can't connect to server\n");
         closesocket(client);
