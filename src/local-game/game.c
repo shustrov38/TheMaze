@@ -103,25 +103,6 @@ int main() {
 
 
     while(1){
-        //bot1
-        players[3].coord = botAction(maze, players[3].coord, consoleHandle);
-        SetConsoleCursorPosition(consoleHandle, players[3].coord);
-        SetConsoleTextAttribute(consoleHandle, (WORD) ((0 << 4) | players[3].color));
-        printf("@");
-
-        //bot2
-        players[2].coord = botAction(maze, players[2].coord, consoleHandle);
-        SetConsoleCursorPosition(consoleHandle, players[2].coord);
-        SetConsoleTextAttribute(consoleHandle, (WORD) ((0 << 4) | players[2].color));
-        printf("@");
-
-        //bot3
-        players[1].coord = botAction(maze, players[1].coord, consoleHandle);
-        SetConsoleCursorPosition(consoleHandle, players[1].coord);
-        SetConsoleTextAttribute(consoleHandle, (WORD) ((0 << 4) | players[1].color));
-        printf("@");
-
-        //local player
         players[0].coord = action(maze, players[0].coord, consoleHandle);
         SetConsoleCursorPosition(consoleHandle, players[0].coord);
         SetConsoleTextAttribute(consoleHandle, (WORD) ((0 << 4) | players[0].color));
@@ -130,30 +111,15 @@ int main() {
 
 
         for (int i = 0; i < playersCount; ++i){
-            if (maze[players[3].coord.Y][players[3].coord.X] == 5){
+
+            if (maze[players[i].coord.Y][players[i].coord.X] == 5){
                 system("cls");
-                winFlag = 3;
+                winFlag = i;
                 break;
             }
 
-            if (maze[players[2].coord.Y][players[2].coord.X] == 5){
-                system("cls");
-                winFlag = 2;
-                break;
-            }
-
-            if (maze[players[1].coord.Y][players[1].coord.X] == 5){
-                system("cls");
-                winFlag = 1;
-                break;
-            }
-
-            if (maze[players[0].coord.Y][players[0].coord.X] == 5){
-                system("cls");
-                winFlag = 0;
-                break;
-            }
         }
+
         if (winFlag != -1){
             break;
         }
