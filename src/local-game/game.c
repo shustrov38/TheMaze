@@ -136,9 +136,9 @@ int WinMain(int argc, char *argv[]) {
     while (game_status != GAME_OVER){
         Process_events();
         players[0] = playerMoves(maze, players[0]);
-        players[1] = botMoves(maze, players[1]);
-        players[2] = botMoves(maze, players[2]);
-        players[3] = botMoves(maze, players[1]);
+        for (int i = 1; i < playersCnt; ++i) {
+            players[i] = botMoves(maze, players[i]);
+        }
 
         for (int i = 0; i < playersCnt; ++i) {
             game_status = checkFinishPoint(players[i], maze);
