@@ -136,9 +136,16 @@ int WinMain(int argc, char *argv[]) {
     while (game_status != GAME_OVER){
         Process_events();
         players[0] = playerMoves(maze, players[0]);
-        game_status = checkFinishPoint(players[0], maze);
-        Draw_image(screen, scaled_black, TILE_SIZE * players[0].Prev_X, TILE_SIZE * players[0].Prev_Y);
-        Draw_image(screen, scaled_playerIcon, TILE_SIZE * players[0].X, TILE_SIZE * players[0].Y);
+        players[1] = botMoves(maze, players[1]);
+        players[2] = botMoves(maze, players[2]);
+        players[3] = botMoves(maze, players[1]);
+
+        for (int i = 0; i < playersCnt; ++i) {
+            game_status = checkFinishPoint(players[i], maze);
+            if (game_status == GAME_OVER) break;
+            Draw_image(screen, scaled_black, TILE_SIZE * players[i].Prev_X, TILE_SIZE * players[i].Prev_Y);
+            Draw_image(screen, scaled_playerIcon, TILE_SIZE * players[i].X, TILE_SIZE * players[i].Y);
+        }
         Update_window_rect(0, 0, SCREEN_SIZE, SCREEN_SIZE);
 
         SDL_Delay(125);
