@@ -3,6 +3,7 @@
 
 #include "maze_generator.h"
 #include "utilities.h"
+#include <windows.h>
 
 /*
 enum ConsoleColor {

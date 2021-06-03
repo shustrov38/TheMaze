@@ -1,5 +1,5 @@
 #include "player.h"
-
+#include <windows.h>
 
 int catch(){
     DWORD mode, cc;

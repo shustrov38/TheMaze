@@ -320,6 +320,7 @@ void printMaze(int **maze, int height, int width) {
             printf("%c", getCharByPattern(pattern));
         }
         printf("\n");
+
     }
 
 

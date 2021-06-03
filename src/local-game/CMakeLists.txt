@@ -5,10 +5,13 @@ set(LOCAL_GAME_SOURCES
         maze_generator.h
         player.c
         player.h
-        utilities.h
-)
+        utilities.h)
 
 #add_compile_definitions(__DFS_DEBUG__)
 
 add_executable(Local_game game.c ${LOCAL_GAME_SOURCES})
 target_link_libraries(Local_game gdi32 ws2_32)
+add_executable(Graphics graphics.c graphics.h maze_generator.c maze_generator.h)
+
+
+target_link_libraries(Graphics SDL2main SDL2_image SDL2)

@@ -6,7 +6,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <malloc.h>
-#include <windows.h>
+//#include <windows.h>
 #include <conio.h>
 
 

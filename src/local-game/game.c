@@ -1,4 +1,5 @@
 #include "game.h"
+#include <windows.h>
 
 playerInfo *initPlayerInfo(char **name, int count, int *id) {
     playerInfo *players = (playerInfo *) malloc(count * sizeof(playerInfo));
@@ -63,6 +64,7 @@ int main() {
 
     maze = createFinishPoint(maze, width, height);
 //maze generation
+
 
 
 //players generation

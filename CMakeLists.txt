@@ -12,6 +12,8 @@ set(SOURCE_FILES
 		${SOURCE_DIRECTORY}/sqlite3.h
 )
 
+
 add_subdirectory(${SOURCE_DIRECTORY}/server)
 add_subdirectory(${SOURCE_DIRECTORY}/client)
 add_subdirectory(${SOURCE_DIRECTORY}/local-game)
+

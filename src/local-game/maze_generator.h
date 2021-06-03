@@ -3,7 +3,7 @@
 
 #include "utilities.h"
 
-#define MAZE_SIZE 40
+#define MAZE_SIZE 50
 
 typedef struct {
     int x;
