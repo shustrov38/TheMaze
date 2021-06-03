@@ -2,6 +2,7 @@
 #include <winsock.h>
 #include <stdio.h>
 #include <windows.h>
+#include <time.h>
 
 #include "../sqlite3.h"
 
@@ -26,11 +27,11 @@ sqlite3_mutex *db_mutex;
 
 pthread_mutex_t mutex_file;
 
-void pthread_fprintf(FILE *stream, char *format, ...) {
+void pthread_fprintf(char *format, ...) {
     va_list arg;
     va_start(arg, format);
     pthread_mutex_lock(&mutex_file);
-    vfprintf(stream, format, arg);
+    vprintf(format, arg);
     pthread_mutex_unlock(&mutex_file);
     va_end(arg);
 }
@@ -52,13 +53,13 @@ void setStopIssued(int val) {
     pthread_mutex_unlock(&stopMutex);
 }
 
-int db_execute(char *sql, int (*callback)(void *, int, char **, char **), char *err) {
+int db_execute(char *sql, int (*callback)(void *, int, char **, char **), void *param, char *err) {
     while (sqlite3_mutex_try(db_mutex) == SQLITE_BUSY);
-    int rc = sqlite3_exec(db, sql, callback, 0, &err);
+    int rc = sqlite3_exec(db, sql, callback, param, &err);
     sqlite3_mutex_leave(db_mutex);
 
     if (rc != SQLITE_OK) {
-        pthread_fprintf(stderr, "[SQL ERROR] %s\n", err);
+        pthread_fprintf("[SQL ERROR] %s\n", err);
         sqlite3_free(err);
 
         return SQL_ERROR;
@@ -67,15 +68,36 @@ int db_execute(char *sql, int (*callback)(void *, int, char **, char **), char *
     return SUCCESS;
 }
 
-#define SQL_THREAD_EXEC(sql, callback, err) if (db_execute(sql_update_online_0, 0, err) != SUCCESS) return (void *) SQL_ERROR
+// sql thread safe execution
+#define SQL_THREAD_EXEC(sql, callback, arg, err) if (db_execute(sql, callback, arg, err) != SUCCESS) return (void *) SQL_ERROR
+
+int callback_check_if_exists(void *param, int argc, char **argv, char **col_name) {
+    int *exists = (int *) param;
+    for (int i = 0; i < argc; i++) {
+        *exists = atoi(argv[i]);
+    }
+    return 0;
+}
+
+char *get_current_time() {
+    time_t r_time;
+    time(&r_time);
+    char *buffer = asctime(localtime(&r_time));
+    buffer[strlen(buffer) - 1] = 0;
+    return buffer;
+}
 
 void *client_callback(void *param) {
     SOCKET client = (SOCKET) param;
     char *err;
 
+    char tag[64];
+    char login[64], password[64];
+
     char string_id[10] = "";
     char sql_update_online_0[128];
     char sql_update_online_1[128];
+    char sql_if_exists[128];
 
     while (1) {
         char receive[1024], transmit[1024];
@@ -83,73 +105,42 @@ void *client_callback(void *param) {
 
         ret = recv(client, receive, 1024, 0);
         if (!ret || ret == SOCKET_ERROR) {
-            SQL_THREAD_EXEC(sql_update_online_1, 0, err);
-
-            pthread_fprintf(stderr, "[SERVER ERROR] Can't receive data.\n");
-
+            pthread_fprintf("[SERVER ERROR] Can't receive data from the client {login: \"%s\"}.\n", login);
+            SQL_THREAD_EXEC(sql_update_online_0, 0, 0, err);
+            pthread_fprintf("[SERVER][%s] Client {login: \"%s\"} disconnected.\n", get_current_time(), login);
             return (void *) RECEIVE_ERROR;
         }
 
         receive[ret] = '\0';
-
-        char tag[64];
         sscanf(receive, "%s", tag);
 
         if (!strcmp(tag, "<end>")) {
-            SQL_THREAD_EXEC(sql_update_online_0, 0, err);
-
+            SQL_THREAD_EXEC(sql_update_online_0, 0, 0, err);
+            pthread_fprintf("[SERVER][%s] Client {login: \"%s\"} disconnected.\n", get_current_time(), login);
             break;
         }
 
         if (!strcmp(tag, "<new>")) {
-            pthread_fprintf(stdout, "%s\n", receive);
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-            char login[64], password[64];
             sscanf(receive, "%s %s %s", tag, login, password);
 
+            pthread_fprintf("[SERVER][%s] Client {login: \"%s\", password: \"%s\"}.\n",
+                            get_current_time(), login, password);
             itoa(hash(login, password), string_id, 10);
             sprintf(sql_update_online_0, "UPDATE Data SET Online = 0 WHERE Id = %s", string_id);
             sprintf(sql_update_online_1, "UPDATE Data SET Online = 1 WHERE Id = %s", string_id);
-
-            char sql_if_exists[128];
             sprintf(sql_if_exists, "SELECT EXISTS(SELECT Id  FROM Data WHERE Id = %s LIMIT 1) AS exist;", string_id);
+
             int exists = 0;
-
-            while (sqlite3_mutex_try(db_mutex) == SQLITE_BUSY);
-            sqlite3_stmt *stmt = NULL;
-            int retval = sqlite3_prepare_v2(db, sql_if_exists, -1, &stmt, 0);
-            if (retval) {
-                pthread_fprintf(stdout, "Selecting data from DB Failed (err_code=%d)\n", retval);
-                return (void *) SQL_ERROR;
-            }
-            int idx = 0;
-            while (1) {
-                retval = sqlite3_step(stmt);
-
-                if (retval == SQLITE_ROW) {
-                    int val = (int) sqlite3_column_int(stmt, 0);
-                    if (val == 1) {
-                        pthread_fprintf(stdout, "Gay detected\n");
-                        exists = 1;
-                    }
-                } else if (retval == SQLITE_DONE) {
-                    break;
-                } else {
-                    sqlite3_finalize(stmt);
-                    pthread_fprintf(stdout, "Some error encountered\n");
-                    break;
-                }
-            }
-            sqlite3_finalize(stmt);
-            sqlite3_mutex_leave(db_mutex);
+            SQL_THREAD_EXEC(sql_if_exists, callback_check_if_exists, (void *) &exists, err);
 
             if (!exists) {
                 char sql_add_client[128];
                 sprintf(sql_add_client, "INSERT INTO Data VALUES(%s, \'%s\', \'%s\', 1);", string_id, login, password);
 
-                SQL_THREAD_EXEC(sql_add_client, 0, err);
+                SQL_THREAD_EXEC(sql_add_client, 0, 0, err);
             } else {
-                SQL_THREAD_EXEC(sql_update_online_1, 0, err);
+                SQL_THREAD_EXEC(sql_update_online_1, 0, 0, err);
             }
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         }
@@ -162,7 +153,7 @@ void *client_callback(void *param) {
         sqlite3_stmt *stmt = NULL;
         int retval = sqlite3_prepare_v2(db, sql_get_online, -1, &stmt, 0);
         if (retval) {
-            pthread_fprintf(stdout, "Selecting data from DB Failed (err_code=%d)\n", retval);
+            pthread_fprintf("Selecting data from DB Failed (err_code=%d)\n", retval);
             return (void *) SQL_ERROR;
         }
         int idx = 0;
@@ -177,21 +168,20 @@ void *client_callback(void *param) {
                 break;
             } else {
                 sqlite3_finalize(stmt);
-                pthread_fprintf(stdout, "Some error encountered\n");
+                pthread_fprintf("Some error encountered\n");
                 break;
             }
         }
         sqlite3_finalize(stmt);
         sqlite3_mutex_leave(db_mutex);
 
-        Sleep(2000);
+        Sleep(500);
 
         ret = send(client, transmit, sizeof(transmit), 0);
         if (ret == SOCKET_ERROR) {
-            SQL_THREAD_EXEC(sql_update_online_1, 0, err);
-
-            pthread_fprintf(stderr, "[SERVER ERROR] Can't send data.\n");
-
+            pthread_fprintf("[SERVER ERROR] Can't send data to the client {login: \"%s\"}.\n", login);
+            SQL_THREAD_EXEC(sql_update_online_0, 0, 0, err);
+            pthread_fprintf("[SERVER][%s] Client {login: \"%s\"} disconnected.\n", get_current_time(), login);
             return (void *) SEND_ERROR;
         }
     }
@@ -230,21 +220,21 @@ void *server_listener(void *param) {
         }
 
         if (client == INVALID_SOCKET) {
-            pthread_fprintf(stderr, "[SERVER] Can't accept client.\n");
+            pthread_fprintf("[SERVER] Can't accept client.\n");
             continue;
         } else {
-            pthread_fprintf(stdout, "[SERVER] Client is accepted.\n");
+            pthread_fprintf("[SERVER] Client is accepted.\n");
         }
 
         pthread_t tid;
         status = pthread_create(&tid, NULL, client_callback, (void *) client);
         if (status != 0) {
-            pthread_fprintf(stderr, "[THREAD ERROR] create_server(): can't create \"tid\", status = %d\n", status);
+            pthread_fprintf("[THREAD ERROR] create_server(): can't create \"tid\", status = %d\n", status);
             return (void *) 1;
         }
         status = pthread_detach(tid);
         if (status != 0) {
-            pthread_fprintf(stderr, "[THREAD ERROR] create_server(): can't detach \"tid\", status = %d\n", status);
+            pthread_fprintf("[THREAD ERROR] create_server(): can't detach \"tid\", status = %d\n", status);
             return (void *) 1;
         }
     }
@@ -257,7 +247,7 @@ int create_server() {
 
     int rc = sqlite3_open("test.db", &db);
     if (rc != SQLITE_OK) {
-        fprintf(stderr, "[SQL ERROR] Cannot open database: %s\n", sqlite3_errmsg(db));
+        printf("[SQL ERROR] Cannot open database: %s\n", sqlite3_errmsg(db));
         sqlite3_close(db);
 
         return EXIT_FAILURE;
@@ -272,7 +262,7 @@ int create_server() {
     rc = sqlite3_exec(db, sql_create_table, 0, 0, &err);
 
     if (rc != SQLITE_OK) {
-        fprintf(stderr, "[SQL ERROR] %s\n", err);
+        printf("[SQL ERROR] %s\n", err);
         sqlite3_free(err);
         sqlite3_close(db);
 
@@ -282,7 +272,7 @@ int create_server() {
     rc = sqlite3_exec(db, "UPDATE Data SET Online = 0", 0, 0, &err);
 
     if (rc != SQLITE_OK) {
-        fprintf(stderr, "[SQL ERROR] %s\n", err);
+        printf("[SQL ERROR] %s\n", err);
         sqlite3_free(err);
         sqlite3_close(db);
 
@@ -301,7 +291,7 @@ int create_server() {
     localaddr.sin_family = AF_INET;
     localaddr.sin_port = htons(5510); // port number is for example, must be more than 1024
     if (bind(server, (struct sockaddr *) &localaddr, sizeof(localaddr)) == SOCKET_ERROR) {
-        fprintf(stderr, "[SERVER ERROR] Can't start server session.\n");
+        printf("[SERVER ERROR] Can't start server session.\n");
         return EXIT_FAILURE;
     } else {
         printf("[SERVER] Server session is started.\n");
@@ -319,13 +309,13 @@ int create_server() {
     pthread_t command_thread;
     status = pthread_create(&command_thread, NULL, command_callback, (void *) server);
     if (status != 0) {
-        pthread_fprintf(stderr, "[THREAD ERROR] create_server(): can't create \"command_thread\", status = %d\n",
+        pthread_fprintf("[THREAD ERROR] create_server(): can't create \"command_thread\", status = %d\n",
                         status);
         exit(EXIT_FAILURE);
     }
     status = pthread_detach(command_thread);
     if (status != 0) {
-        pthread_fprintf(stderr, "[THREAD ERROR] create_server(): can't detach \"command_thread\", status = %d\n",
+        pthread_fprintf("[THREAD ERROR] create_server(): can't detach \"command_thread\", status = %d\n",
                         status);
         exit(EXIT_FAILURE);
     }
@@ -333,13 +323,13 @@ int create_server() {
     pthread_t server_thread;
     status = pthread_create(&server_thread, NULL, server_listener, (void *) server);
     if (status != 0) {
-        pthread_fprintf(stderr, "[THREAD ERROR] create_server(): can't create \"server_thread\", status = %d\n",
+        pthread_fprintf("[THREAD ERROR] create_server(): can't create \"server_thread\", status = %d\n",
                         status);
         exit(EXIT_FAILURE);
     }
     status = pthread_detach(server_thread);
     if (status != 0) {
-        pthread_fprintf(stderr, "[THREAD ERROR] create_server(): can't detach \"server_thread\", status = %d\n",
+        pthread_fprintf("[THREAD ERROR] create_server(): can't detach \"server_thread\", status = %d\n",
                         status);
         exit(EXIT_FAILURE);
     }
