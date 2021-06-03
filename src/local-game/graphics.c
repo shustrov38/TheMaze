@@ -196,36 +196,33 @@ static SDL_Surface *ScaledCopy(SDL_Surface *src, SDL_Rect *dstSize) {
     return scaledCopy;
 }
 
+SDL_Surface *ScaleSurface(SDL_Surface *image, size_t width, size_t height) {
+    SDL_Surface *scaled_background = SDL_CreateRGBSurface(0,
+                                                          width, height,
+                                                          image->format->BitsPerPixel,
+                                                          image->format->Rmask, image->format->Gmask,
+                                                          image->format->Bmask,
+                                                          image->format->Amask);
+
+    SDL_Rect stretchRect;
+    stretchRect.x = 0;
+    stretchRect.y = 0;
+    stretchRect.w = width;
+    stretchRect.h = height;
+    SDL_BlitScaled(image, NULL, scaled_background, &stretchRect);
+
+    return scaled_background;
+}
+
 int WinMain(int argc, char *argv[]) {
     int TILE_SIZE = 15;
     int SCREEN_SIZE = 750;
-    SDL_Surface *background = Load_img("images/dababy.jpg");
-//    SDL_Surface *scaled_background = SDL_CreateRGBSurface(0,
-//                                                          SCREEN_SIZE, SCREEN_SIZE,
-//                                                          background->format->BitsPerPixel,
-//                                                          background->format->Rmask, background->format->Gmask,
-//                                                          background->format->Bmask,
-//                                                          background->format->Amask);
-//
-    SDL_Rect stretchRect;
-//    stretchRect.x = 0;
-//    stretchRect.y = 0;
-//    stretchRect.w = SCREEN_SIZE;
-//    stretchRect.h = SCREEN_SIZE;
-//    SDL_BlitScaled(background, NULL, scaled_background, &stretchRect);
+//    SDL_Surface *background = Load_img("images/dababy.jpg");
+//    SDL_Surface *scaled_background = ScaleSurface(background,750,750);
+
 
     SDL_Surface *wall = Load_img("images/lil_wall.png");
-    SDL_Surface *scaled_wall = SDL_CreateRGBSurface(0,
-                                                    TILE_SIZE, TILE_SIZE,
-                                                    wall->format->BitsPerPixel,
-                                                    wall->format->Rmask, wall->format->Gmask, wall->format->Bmask,
-                                                    wall->format->Amask);
-
-    stretchRect.x = 0;
-    stretchRect.y = 0;
-    stretchRect.w = TILE_SIZE;
-    stretchRect.h = TILE_SIZE;
-    SDL_BlitScaled(wall, NULL, scaled_wall, &stretchRect);
+    SDL_Surface *scaled_wall = ScaleSurface(wall, TILE_SIZE, TILE_SIZE);
 
     game_status = GAME_RUNNING;
     int height = MAZE_SIZE;
