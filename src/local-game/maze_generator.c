@@ -228,37 +228,37 @@ int **generator(int **maze, int x1, int x2, int y1, int y2) {
 }
 
 
-char getCharByPattern(const int *pattern) {
-    if (!pattern[2]) return ' ';
-
-    int val = 0;
-    for (int i = 0; i < 5; ++i) {
-        val += (1 << (4 - i)) * pattern[i];
-    }
-
-    if (val == 31) return 206;
-    if (val == 30) return 202;
-    if (val == 29) return 185;
-    if (val == 28) return 188;
-
-    if (val == 23) return 204;
-    if (val == 22) return 200;
-    if (val == 21) return 186;
-    if (val == 20) return 186; // тупик сверху вниз
-
-    if (val == 15) return 203;
-    if (val == 14) return 205;
-    if (val == 13) return 187;
-    if (val == 12) return 205; // тупик слева направо
-    if (val == 11) return 203;
-
-    if (val == 7) return 201;
-    if (val == 6) return 205; // тупик справа налево
-    if (val == 5) return 186; // тупик снизу вверх
-    if (val == 4) return 254; // точка в центре
-
-    return ' ';
-}
+//char getCharByPattern(const int *pattern) {
+//    if (!pattern[2]) return ' ';
+//
+//    int val = 0;
+//    for (int i = 0; i < 5; ++i) {
+//        val += (1 << (4 - i)) * pattern[i];
+//    }
+//
+//    if (val == 31) return 206;
+//    if (val == 30) return 202;
+//    if (val == 29) return 185;
+//    if (val == 28) return 188;
+//
+//    if (val == 23) return 204;
+//    if (val == 22) return 200;
+//    if (val == 21) return 186;
+//    if (val == 20) return 186; // тупик сверху вниз
+//
+//    if (val == 15) return 203;
+//    if (val == 14) return 205;
+//    if (val == 13) return 187;
+//    if (val == 12) return 205; // тупик слева направо
+//    if (val == 11) return 203;
+//
+//    if (val == 7) return 201;
+//    if (val == 6) return 205; // тупик справа налево
+//    if (val == 5) return 186; // тупик снизу вверх
+//    if (val == 4) return 254; // точка в центре
+//
+//    return ' ';
+//}
 
 
 const int dx[4] = {1, 0, -1, 0};
@@ -282,7 +282,6 @@ void go(int **used, int size, int x, int y, int *flag) {
 
 
 void printMaze(int **maze, int height, int width) {
-    system("cls");
     int **used;
     used = initMaze(used, width, height);
 
@@ -295,33 +294,33 @@ void printMaze(int **maze, int height, int width) {
         }
     }
 
-    for (int i = 0; i < width; ++i) {
-        for (int j = 0; j < height; ++j) {
-            if (maze[i][j] == 2) {
-                printf(".");
-                continue;
-            }
-            if (maze[i][j] == 5) {
-                printf("#");
-                continue;
-            }
+//    for (int i = 0; i < width; ++i) {
+//        for (int j = 0; j < height; ++j) {
+//            if (maze[i][j] == 2) {
+//                printf(".");
+//                continue;
+//            }
+//            if (maze[i][j] == 5) {
+//                printf("#");
+//                continue;
+//            }
+//
+//
+//            //  0
+//            // 123
+//            //  4
+//            int pattern[5] = {0, 0, maze[i][j] == 1 ? 1 : 0, 0, 0};
+//
+//            if (i - 1 >= 0) pattern[0] = maze[i - 1][j] == 1 ? 1 : 0;
+//            if (j - 1 >= 0) pattern[1] = maze[i][j - 1] == 1 ? 1 : 0;
+//            if (j + 1 < height) pattern[3] = maze[i][j + 1] == 1 ? 1 : 0;
+//            if (i + 1 < width) pattern[4] = maze[i + 1][j] == 1 ? 1 : 0;
+//
+//            printf("%c", getCharByPattern(pattern));
+//        }
+//        printf("\n");
+//   }
 
-
-            //  0
-            // 123
-            //  4
-            int pattern[5] = {0, 0, maze[i][j] == 1 ? 1 : 0, 0, 0};
-
-            if (i - 1 >= 0) pattern[0] = maze[i - 1][j] == 1 ? 1 : 0;
-            if (j - 1 >= 0) pattern[1] = maze[i][j - 1] == 1 ? 1 : 0;
-            if (j + 1 < height) pattern[3] = maze[i][j + 1] == 1 ? 1 : 0;
-            if (i + 1 < width) pattern[4] = maze[i + 1][j] == 1 ? 1 : 0;
-
-            printf("%c", getCharByPattern(pattern));
-        }
-        printf("\n");
-
-    }
 
 
 #ifdef __DFS_DEBUG__
