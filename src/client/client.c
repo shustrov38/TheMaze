@@ -2,9 +2,8 @@
 #include <stdio.h>
 #include <time.h>
 #include <stdlib.h>
-#include <pthread.h>
-
-SOCKET client;
+#include <unistd.h>
+#define TRANSACTION_CAPACITY 1024
 
 typedef enum {
     //TAG:          // WHAT IT DOES:                     ARGS "<> ...":            DIR:
@@ -12,94 +11,104 @@ typedef enum {
     SYS_MSG,        // message STR from/to server       "<SYS_MSG> STR"            TO/FROM
     INVITE,         // invite NAME/invite from NAME     "<INVITE> NAME"            TO/FROM
     MOV_RIVAL,      // move enemy NAME to X Y           "<MOV_RIVAL> NAME X Y"     FROM
-    MOV_SELF        // move this player to X Y          "<MOV_SELF> X Y"           TO
+    MOV_SELF,        // move this player to X Y          "<MOV_SELF> X Y"           TO
+    EXIT,
+    MENU
 } INNER_INTERFACE;
 
 typedef struct {
     INNER_INTERFACE TAG;
-    char ARG_0[16];
-    char ARG_1[16];
-    char ARG_2[16];
-    char ARG_3[16];
-    char ARG_4[16];
+    char ARGS[16][16];
+    int VALID_ARG_CNT;
 } COMMAND_PROTOTYPE;
 
-void make_command(COMMAND_PROTOTYPE proto) {
-    char command[1024];
-    memset(command, 0, 1024);
+char *make_command(SOCKET client, COMMAND_PROTOTYPE proto) {
+    int f = 0;
+    char *command = malloc(sizeof(char) * TRANSACTION_CAPACITY);
+    memset(command, 0, TRANSACTION_CAPACITY);
     switch (proto.TAG) {
         case CONNECTION:
-            sprintf(command, "%s %s %s", "<CONNECTION>", proto.ARG_0, proto.ARG_1);
+            sprintf(command, "%s %s %s", "<CONNECTION>", proto.ARGS[0], proto.ARGS[1]);
             break;
         case SYS_MSG:
-            sprintf(command, "%s %s", "<SYS_MSG>", proto.ARG_0);
+            sprintf(command, "%s %s", "<SYS_MSG>", proto.ARGS[0]);
             break;
         case MOV_SELF:
-            sprintf(command, "%s %s %s", "<MOV_SELF>", proto.ARG_0, proto.ARG_1);
+            sprintf(command, "%s %s %s", "<MOV_SELF>", proto.ARGS[0], proto.ARGS[1]);
+            break;
+        case INVITE:
+            sprintf(command, "%s %s", "<INVITE>", proto.ARGS[0]);
+            break;
+        case EXIT:
+            sprintf(command, "%s", "<EXIT>");
+            break;
+        case MENU:
+            // flag - > parse+sort
+            f = 1;
+            sprintf(command, "%s", "<MENU>");
             break;
     }
-    printf("%s\n", command);
-    send(client, command, 1024, 0);
+    if(!f) printf(">>%s\n", command);
+    send(client, command, TRANSACTION_CAPACITY, 0);
+    recv(client, command, TRANSACTION_CAPACITY, 0);
+
+    if(f) {
+        int z = 0;
+        char tmp[32];
+        memset(tmp, 0, 32);
+        for (int i = 0; i < strlen(command); i++) {
+            if (command[i] == '#') {
+                printf("%s\n", tmp);
+                z = 0;
+                memset(tmp, 0, 32);
+                continue;
+            }
+            tmp[z++] = command[i];
+        }
+    }
+    if(!f) printf("<<%s\n", command);
+
+    return command;
 }
 
 COMMAND_PROTOTYPE C;
 
-#define LOGIN(NAME, PASS)    C.TAG = CONNECTION;\
-                            strcpy(C.ARG_0,NAME);\
-                            strcpy(C.ARG_1,PASS);\
-                            make_command(C)\
+#define LOGIN(NAME, PASS)       C.TAG = CONNECTION; \
+                                C.VALID_ARG_CNT = 2;\
+                                strcpy(C.ARGS[0],NAME);\
+                                strcpy(C.ARGS[1],PASS);\
+                                while(strcmp(make_command(client,C),"LOGIN_SUCCESS")!=0){ \
+                                    printf("Wrong password! Try again:\n");\
+                                    printf("Nickname:");\
+                                    scanf("%s", NAME);\
+                                    printf("Password:");\
+                                    scanf("%s", PASS);\
+                                    strcpy(C.ARGS[0],NAME);\
+                                    strcpy(C.ARGS[1],PASS);\
+                                }
 
-#define SAY(MSG)            C.TAG = SYS_MSG ;\
-                            strcpy(C.ARG_0,MSG);\
-                            make_command(C)\
+#define LEAVE()                 C.TAG = EXIT; \
+                                C.VALID_ARG_CNT = 0;\
+                                make_command(client,C); \
+                                closesocket(client)
 
-#define GO(X, Y)             C.TAG = MOV_SELF;\
-                            strcpy(C.ARG_0,itoa(X,C.ARG_0,10));\
-                            strcpy(C.ARG_1,itoa(Y,C.ARG_1,10));\
-                            make_command(C)\
+#define SAY(MSG)                C.TAG = SYS_MSG ;\
+                                C.VALID_ARG_CNT = 1;\
+                                strcpy(C.ARGS[0],MSG);\
+                                make_command(client,C)
 
+#define GO(X, Y)                C.TAG = MOV_SELF; \
+                                C.VALID_ARG_CNT = 2;\
+                                strcpy(C.ARGS[0],itoa(X,C.ARGS[0],10));\
+                                strcpy(C.ARGS[1],itoa(Y,C.ARGS[1],10));\
+                                make_command(client,C)
 
-//int stopIssued = 1;
-//pthread_mutex_t stopMutex;
-//
-//int getStopIssued() {
-//    int ret = 0;
-//    pthread_mutex_lock(&stopMutex);
-//    ret = stopIssued;
-//    pthread_mutex_unlock(&stopMutex);
-//    return ret;
-//}
-//
-//void setStopIssued(int val) {
-//    pthread_mutex_lock(&stopMutex);
-//    stopIssued = val;
-//    pthread_mutex_unlock(&stopMutex);
-//}
-//
-//void *command_callback(void *param) {
-//    SOCKET server = (SOCKET) param;
-//    int status;
-//
-//    while (getStopIssued()) {
-//
-//
-//        if(strlen(command)==0){
-//            continue;
-//        }
-//
-//        status = send(server, command, 128, 0);
-//        memset(command,0,128);
-//
-//        if(status==SOCKET_ERROR){
-//            printf("[CLIENT ERROR] An error occurred after trying to send command");
-//            setStopIssued(0);
-//        }
-//
-//    }
-//    return (void *) 0;
-//}
+#define GET_MENU()              C.TAG = MENU; \
+                                C.VALID_ARG_CNT = 0; \
+                                make_command(client,C)
 
 void startSession() {
+    SOCKET client;
     client = socket(AF_INET, SOCK_STREAM, IPPROTO_IP);
     if (client == INVALID_SOCKET) {
         printf("Error create socket\n");
@@ -126,51 +135,14 @@ void startSession() {
     printf("Password:");
     scanf("%s", pass);
 
-//    setStopIssued(1);
-//
-//    int com_status;
-//    pthread_t command_thread;
-//    com_status = pthread_create(&command_thread, NULL, command_callback, (void *) client);
-//    com_status = pthread_detach(command_thread);
-
-//    int rec_status;
-//    pthread_t rec_thread;
-//    rec_status = pthread_create(&command_thread, NULL, command_callback, (void *) client);
-//    rec_status = pthread_detach(command_thread);
-
     LOGIN(name, pass);
-    //    for (int i = 0; i < 10000; ++i) {
-//        char message[1024];
-//        sprintf(message, "%s %d", "test", i);
-//        int ret = send(client, message, (int) strlen(message), 0);
-//        if (ret == SOCKET_ERROR) {
-//            printf("Can't send message\n");
-//            closesocket(client);
-//            return;
-//        }
-//
-//        printf("Sent: %s\nbytes: %d\n\n", message, ret);
-//        ret = SOCKET_ERROR;
-//        while (ret == SOCKET_ERROR) {
-//            //полчение ответа
-//            ret = recv(client, message, 1024, 0);
-//            //обработка ошибок
-//            if (ret == 0 || ret == WSAECONNRESET) {
-//                printf("Connection closed\n");
-//                break;
-//            }
-//            if (ret < 0) {
-//                printf("Can't receive message\n");
-//                closesocket(client);
-//                return;
-//            }
-//            //вывод на экран количества полученных байт и сообщение
-//            system("cls");
-//            printf("Receive: \n%s\n bytes: %d\n", message, ret);
-//        }
-//    }
+    while(1){
+        system("cls");
+        GET_MENU();
+        sleep(1);
+    }
+    GO(10,10);
 
-    closesocket(client);
 }
 
 int main() {
@@ -186,6 +158,6 @@ int main() {
     sprintf(name, "%d", number + 1488);
     startSession();
     printf("Session is closed\n");
-    Sleep(1000);
+    system("pause");
     return 0;
 }
