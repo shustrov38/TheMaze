@@ -12,6 +12,8 @@
 
 #define SQL_ERROR 10
 
+#define _SERVER_DEBUG
+
 char *get_current_time() {
     time_t r_time;
     time(&r_time);
@@ -20,14 +22,21 @@ char *get_current_time() {
     return buffer;
 }
 
-int hash(char *s1, char *s2) {
-    int base = 23;
-    int res = 0;
-    for (int i = 0; i < min(strlen(s1), strlen(s2)); i++) {
-        res += (s1[i] + s2[i]) * base % (int) 1e6;
-        base = base * base % (int) 1e6;
+int hash(char *s, int base) {
+    int pow = 1;
+    int length = (int) strlen(s);
+    int value = 0;
+    for (int i = 0; i < length; ++i) {
+        value += (s[i] - 'a' + 1) * pow;
+        pow *= base;
     }
-    return res % (int) 1e6;
+    return value;
+}
+
+int hash_combine(char *s1, char *s2) {
+    int h1 = hash(s1, 31);
+    int h2 = hash(s2, 31);
+    return (h1 << 1) ^ h2;
 }
 
 sqlite3 *db;
@@ -45,14 +54,7 @@ void pthread_fprintf(char *format, ...) {
     va_end(arg);
 }
 
-void printf_server_error_prefix() {
-    pthread_fprintf("[SERVER ERROR][%s] ", get_current_time());
-}
-
-void printf_server_prefix() {
-    pthread_fprintf("[SERVER][%s] ", get_current_time());
-}
-
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 int stopIssued = 1;
 pthread_mutex_t stopMutex;
 
@@ -69,7 +71,10 @@ void setStopIssued(int val) {
     stopIssued = val;
     pthread_mutex_unlock(&stopMutex);
 }
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// DB things
 int db_execute(char *sql, int (*callback)(void *, int, char **, char **), void *param, char *err) {
     while (sqlite3_mutex_try(db_mutex) == SQLITE_BUSY);
     int rc = sqlite3_exec(db, sql, callback, param, &err);
@@ -85,34 +90,56 @@ int db_execute(char *sql, int (*callback)(void *, int, char **, char **), void *
     return SUCCESS;
 }
 
-
 // sql thread safe execution
 #define SQL_THREAD_EXEC(sql, callback, arg, err) if (db_execute(sql, callback, arg, err) != SUCCESS) return (void *) SQL_ERROR
 
+// callbacks
+
 int callback_check_if_exists(void *param, int argc, char **argv, char **col_name) {
     int *exists = (int *) param;
-    for (int i = 0; i < argc; i++) {
-        *exists = atoi(argv[i]);
-    }
+    *exists = atoi(argv[0]);
     return 0;
 }
 
 int callback_select_all_online_users(void *param, int argc, char **argv, char **col_name) {
     char *online_users = (char *) param;
-    for (int i = 0; i < argc; ++i) {
-        strcat(online_users, argv[i]);
-        strcat(online_users, "\n");
-    }
+    strcat(online_users, argv[0]);
+    strcat(online_users, "\n");
     return 0;
 }
 
 int callback_get_one_string(void *param, int argc, char **argv, char **col_name) {
     char *result = (char *) param;
-    for (int i = 0; i < argc; ++i) {
-        sprintf(result, "%s", argv[i]);
-    }
+    sprintf(result, "%s", argv[0]);
     return 0;
 }
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void printf_server_error_prefix() {
+    pthread_fprintf("[SERVER ERROR][%s] ", get_current_time());
+}
+
+void printf_server_prefix() {
+    pthread_fprintf("[SERVER][%s] ", get_current_time());
+}
+
+typedef struct client_data_t {
+    char login[64], password[64];
+    char string_id[10];
+} ClientData;
+
+void printf_client_data(ClientData *client, int show_password) {
+    pthread_fprintf("Client {login: \"%s\"", client->login);
+    if (show_password) {
+        pthread_fprintf(", password: \"%s\"} ", client->password);
+    } else {
+        pthread_fprintf("} ");
+    }
+}
+
+#define SERVER_AND_CLIENT_PREFIX(show_pass) \
+printf_server_prefix();                     \
+printf_client_data(&data, show_pass)
 
 void *client_callback(void *param) {
     SOCKET client = (SOCKET) param;
@@ -121,13 +148,12 @@ void *client_callback(void *param) {
     int first_time = 1;
 
     char tag[64];
-    char login[64], password[64];
+    ClientData data;
 
-    char string_id[10] = "";
     char sql_update_online_0[128];
     char sql_update_online_1[128];
     char sql_if_exists_name[128];
-    char sql_select_all_online_users[128] = "SELECT Login FROM Data WHERE Online = 1;";
+    char sql_select_all_online_users[128];
     char sql_get_password_by_name[128];
 
     while (1) {
@@ -137,52 +163,47 @@ void *client_callback(void *param) {
         ret = recv(client, receive, 1024, 0);
         if (!ret || ret == SOCKET_ERROR) {
             printf_server_error_prefix();
-            pthread_fprintf("Can't receive data from the client {login: \"%s\"}.\n", login);
+            pthread_fprintf("Can't receive data from the client {login: \"%s\"}.\n", data.login);
             SQL_THREAD_EXEC(sql_update_online_0, 0, 0, err);
-            printf_server_prefix();
-            pthread_fprintf("Client {login: \"%s\"} disconnected.\n", login);
+            SERVER_AND_CLIENT_PREFIX(0);
+            pthread_fprintf("disconnected.\n");
             return (void *) RECEIVE_ERROR;
         }
 
         receive[ret] = '\0';
         sscanf(receive, "%s", tag);
 
-        if (!strcmp(tag, "<EXIT>")) {
-            SQL_THREAD_EXEC(sql_update_online_0, 0, 0, err);
-            printf_server_prefix();
-            pthread_fprintf("Client {login: \"%s\"} disconnected.\n", login);
-            break;
-        }
-
         if (!strcmp(tag, "<CONNECTION>") && first_time) {
             first_time = 0;
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-            sscanf(receive, "%s %s %s", tag, login, password);
+            sscanf(receive, "%s %s %s", tag, data.login, data.password);
 
-            printf_server_prefix();
-            pthread_fprintf("Client {login: \"%s\", password: \"%s\"} connected.\n", login, password);
+            SERVER_AND_CLIENT_PREFIX(1);
+            pthread_fprintf("connected.\n");
 
-            itoa(hash(login, password), string_id, 10);
+            itoa(hash_combine(data.login, data.password), data.string_id, 10);
 
-            sprintf(sql_update_online_0, "UPDATE Data SET Online = 0 WHERE Id = %s", string_id);
-            sprintf(sql_update_online_1, "UPDATE Data SET Online = 1 WHERE Id = %s", string_id);
-            sprintf(sql_if_exists_name, "SELECT EXISTS(SELECT Id FROM Data WHERE Login = \'%s\' LIMIT 1) AS exist;", login);
-            sprintf(sql_get_password_by_name, "SELECT Password FROM Data WHERE Login = \'%s\';", login);
+            sprintf(sql_update_online_0, "UPDATE Data SET Online = 0 WHERE Id = %s", data.string_id);
+            sprintf(sql_update_online_1, "UPDATE Data SET Online = 1 WHERE Id = %s", data.string_id);
+            sprintf(sql_if_exists_name, "SELECT EXISTS(SELECT Id FROM Data WHERE Login = \'%s\' LIMIT 1) AS exist;",
+                    data.login);
+            sprintf(sql_select_all_online_users, "SELECT Login FROM Data WHERE Online = 1;");
+            sprintf(sql_get_password_by_name, "SELECT Password FROM Data WHERE Login = \'%s\';", data.login);
 
             int exists = 0;
             SQL_THREAD_EXEC(sql_if_exists_name, callback_check_if_exists, (void *) &exists, err);
 
             if (!exists) {
                 char sql_add_client[128];
-                sprintf(sql_add_client, "INSERT INTO Data VALUES(%s, \'%s\', \'%s\', 1);", string_id, login, password);
-
+                sprintf(sql_add_client, "INSERT INTO Data VALUES(%s, \'%s\', \'%s\', 1);", data.string_id, data.login,
+                        data.password);
                 SQL_THREAD_EXEC(sql_add_client, 0, 0, err);
             } else {
                 char stored_password[64];
                 SQL_THREAD_EXEC(sql_get_password_by_name, callback_get_one_string, (void *) stored_password, err);
-                if (strcmp(stored_password, password) != 0) {
-                    printf_server_prefix();
-                    pthread_fprintf("Client {login: \"%s\", password: \"%s\"} <- in danger.\n", login, stored_password);
+                if (strcmp(stored_password, data.password) != 0) {
+                    SERVER_AND_CLIENT_PREFIX(1);
+                    pthread_fprintf("<- in danger.\n");
                     return (void *) 1;
                 }
                 SQL_THREAD_EXEC(sql_update_online_1, 0, 0, err);
@@ -190,8 +211,17 @@ void *client_callback(void *param) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         }
 
-        printf_server_prefix();
-        pthread_fprintf("Client {login: \"%s\", password: \"%s\"}: %s.\n", login, password, (strlen(receive) ? receive : "EMPTY MESSAGE"));
+        if (!strcmp(tag, "<EXIT>")) {
+            SQL_THREAD_EXEC(sql_update_online_0, 0, 0, err);
+            SERVER_AND_CLIENT_PREFIX(0);
+            pthread_fprintf("disconnected.\n");
+            break;
+        }
+
+#ifdef _SERVER_DEBUG
+        SERVER_AND_CLIENT_PREFIX(0);
+        pthread_fprintf(" : %s.\n", (strlen(receive) ? receive : "EMPTY MESSAGE"));
+#endif
 
         memset(transmit, 0, 1024);
         SQL_THREAD_EXEC(sql_select_all_online_users, callback_check_if_exists, (void *) transmit, err);
@@ -266,6 +296,7 @@ void *server_listener(void *param) {
 int create_server() {
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // DB things
+
     char *err = 0;
 
     int rc = sqlite3_open("test.db", &db);
