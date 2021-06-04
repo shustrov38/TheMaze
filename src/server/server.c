@@ -76,7 +76,7 @@ void setStopIssued(int val) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // DB things
 int db_execute(char *sql, int (*callback)(void *, int, char **, char **), void *param, char *err) {
-    while (sqlite3_mutex_try(db_mutex) == SQLITE_BUSY);
+    sqlite3_mutex_enter(db_mutex); // may cause errors
     int rc = sqlite3_exec(db, sql, callback, param, &err);
     sqlite3_mutex_leave(db_mutex);
 
@@ -139,9 +139,32 @@ void printf_client_data(ClientData *client, int show_password) {
     }
 }
 
-#define SERVER_AND_CLIENT_PREFIX(show_pass) \
-printf_server_prefix();                     \
-printf_client_data(&data, show_pass)
+#define _MESSAGE_LENGTH 1024
+
+#define PRINTF_WITH_SERVER_AND_CLIENT_PREFIX(show_pass, ...) \
+printf_server_prefix(); \
+printf_client_data(&data, show_pass); \
+pthread_fprintf(__VA_ARGS__);
+
+#define _RECV() \
+ret = recv(client, receive, _MESSAGE_LENGTH, 0); \
+if (!ret || ret == SOCKET_ERROR) { \
+    printf_server_error_prefix(); \
+    pthread_fprintf("Can't receive data from the client {login: \"%s\"}.\n", data.login); \
+    SQL_THREAD_EXEC(sql_update_online_0, 0, 0, err); \
+    PRINTF_WITH_SERVER_AND_CLIENT_PREFIX(0, "disconnected.\n"); \
+    return (void *) RECEIVE_ERROR; \
+}
+
+#define _SEND() \
+ret = send(client, transmit, _MESSAGE_LENGTH, 0); \
+if (ret == SOCKET_ERROR) { \
+    printf_server_error_prefix(); \
+    pthread_fprintf("Can't send data to the client {login: \"%s\"}.\n", data.login); \
+    SQL_THREAD_EXEC(sql_update_online_0, 0, 0, err); \
+    PRINTF_WITH_SERVER_AND_CLIENT_PREFIX(0, "disconnected.\n"); \
+    return (void *) SEND_ERROR; \
+}
 
 void *client_callback(void *param) {
     SOCKET client = (SOCKET) param;
@@ -157,28 +180,20 @@ void *client_callback(void *param) {
     char sql_if_exists_name[128];
     char sql_select_all_online_users[128];
     char sql_get_password_by_name[128];
+    char sql_add_client[128];
 
     while (1) {
-        char receive[1024], transmit[1024];
+        char receive[_MESSAGE_LENGTH], transmit[_MESSAGE_LENGTH];
         int ret; // count of received bytes
 
-        ret = recv(client, receive, 1024, 0);
-        if (!ret || ret == SOCKET_ERROR) {
-            printf_server_error_prefix();
-            pthread_fprintf("Can't receive data from the client {login: \"%s\"}.\n", data.login);
-            SQL_THREAD_EXEC(sql_update_online_0, 0, 0, err);
-            SERVER_AND_CLIENT_PREFIX(0);
-            pthread_fprintf("disconnected.\n");
-            return (void *) RECEIVE_ERROR;
-        }
+        _RECV()
 
         receive[ret] = '\0';
         sscanf(receive, "%s", tag);
 
-        Sleep(500);
+//        Sleep(500);
 
         if (!strcmp(tag, "<CONNECTION>") && first_time) {
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
             memset(tag, 0, 64);
             memset(data.login, 0, 64);
             memset(data.password, 0, 64);
@@ -186,44 +201,34 @@ void *client_callback(void *param) {
 
             sscanf(receive, "%s %s %s", tag, data.login, data.password);
 
-            SERVER_AND_CLIENT_PREFIX(1);
-            pthread_fprintf("connected.\n");
+            PRINTF_WITH_SERVER_AND_CLIENT_PREFIX(1, "connected.\n");
 
             itoa(hash_combine(data.login, data.password), data.string_id, 10);
 
             sprintf(sql_update_online_0, "UPDATE Data SET Online = 0 WHERE Id = %s", data.string_id);
             sprintf(sql_update_online_1, "UPDATE Data SET Online = 1 WHERE Id = %s", data.string_id);
-            sprintf(sql_if_exists_name, "SELECT EXISTS(SELECT Id FROM Data WHERE Login = \'%s\' LIMIT 1) AS exist;", data.login);
+            sprintf(sql_if_exists_name, "SELECT EXISTS(SELECT Id FROM Data WHERE Login = \'%s\' LIMIT 1) AS exist;",
+                    data.login);
             sprintf(sql_select_all_online_users, "SELECT Login FROM Data WHERE Online = 1 ORDER BY Login;");
             sprintf(sql_get_password_by_name, "SELECT Password FROM Data WHERE Login = \'%s\';", data.login);
+            sprintf(sql_add_client, "INSERT INTO Data VALUES(%s, \'%s\', \'%s\', 1);", data.string_id, data.login,
+                    data.password);
 
             int exists = 0;
             SQL_THREAD_EXEC(sql_if_exists_name, callback_check_if_exists, (void *) &exists, err);
 
             if (!exists) {
-                char sql_add_client[128];
-                sprintf(sql_add_client, "INSERT INTO Data VALUES(%s, \'%s\', \'%s\', 1);", data.string_id, data.login,
-                        data.password);
                 SQL_THREAD_EXEC(sql_add_client, 0, 0, err);
             } else {
                 char stored_password[64];
                 SQL_THREAD_EXEC(sql_get_password_by_name, callback_get_one_string, (void *) stored_password, err);
                 if (strcmp(stored_password, data.password) != 0) {
-                    SERVER_AND_CLIENT_PREFIX(1);
-                    pthread_fprintf("<- in danger.\n");
+                    PRINTF_WITH_SERVER_AND_CLIENT_PREFIX(0, "<- in danger.\n");
 
                     memset(transmit, 0, 1024);
                     sprintf(transmit, "LOGIN_FAILURE");
 
-                    ret = send(client, transmit, sizeof(transmit), 0);
-                    if (ret == SOCKET_ERROR) {
-                        printf_server_error_prefix();
-                        pthread_fprintf("Can't send data to the client {login: \"%s\"}.\n", data.login);
-                        SQL_THREAD_EXEC(sql_update_online_0, 0, 0, err);
-                        printf_server_prefix();
-                        pthread_fprintf("Client {login: \"%s\"} disconnected.\n", data.login);
-                        return (void *) SEND_ERROR;
-                    }
+                    _SEND()
 
                     continue;
                 }
@@ -233,94 +238,51 @@ void *client_callback(void *param) {
             memset(transmit, 0, 1024);
             sprintf(transmit, "LOGIN_SUCCESS");
 
-            ret = send(client, transmit, sizeof(transmit), 0);
-            if (ret == SOCKET_ERROR) {
-                printf_server_error_prefix();
-                pthread_fprintf("Can't send data to the client {login: \"%s\"}.\n", data.login);
-                SQL_THREAD_EXEC(sql_update_online_0, 0, 0, err);
-                printf_server_prefix();
-                pthread_fprintf("Client {login: \"%s\"} disconnected.\n", data.login);
-                return (void *) SEND_ERROR;
-            }
+            _SEND()
 
             first_time = 0;
 
             continue;
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         }
 
         if (!strcmp(tag, "<MENU>") && !first_time) {
             memset(transmit, 0, 1024);
             SQL_THREAD_EXEC(sql_select_all_online_users, callback_select_all_online_users, (void *) &transmit, err);
 
-            ret = send(client, transmit, sizeof(transmit), 0);
-            if (ret == SOCKET_ERROR) {
-                printf_server_error_prefix();
-                pthread_fprintf("Can't send data to the client {login: \"%s\"}.\n", data.login);
-                SQL_THREAD_EXEC(sql_update_online_0, 0, 0, err);
-                printf_server_prefix();
-                pthread_fprintf("Client {login: \"%s\"} disconnected.\n", data.login);
-                return (void *) SEND_ERROR;
-            }
+            _SEND()
 
             continue;
         }
 
         if (!strcmp(tag, "<EXIT>") && !first_time) {
             SQL_THREAD_EXEC(sql_update_online_0, 0, 0, err);
-            SERVER_AND_CLIENT_PREFIX(0);
-            pthread_fprintf("disconnected.\n");
+            PRINTF_WITH_SERVER_AND_CLIENT_PREFIX(0, "disconnected.\n");
 
             memset(transmit, 0, 1024);
             sprintf(transmit, "disconnected!");
 
-            ret = send(client, transmit, sizeof(transmit), 0);
-            if (ret == SOCKET_ERROR) {
-                printf_server_error_prefix();
-                pthread_fprintf("Can't send data to the client {login: \"%s\"}.\n", data.login);
-                SQL_THREAD_EXEC(sql_update_online_0, 0, 0, err);
-                printf_server_prefix();
-                pthread_fprintf("Client {login: \"%s\"} disconnected.\n", data.login);
-                return (void *) SEND_ERROR;
-            }
+            _SEND()
 
             break;
         }
 
         if (first_time == 1) {
             memset(transmit, 0, 1024);
-            sprintf(transmit, "gay website 8===o");
+            sprintf(transmit, "gay website 8===o"); // todo change reply.
 
-            ret = send(client, transmit, sizeof(transmit), 0);
-            if (ret == SOCKET_ERROR) {
-                printf_server_error_prefix();
-                pthread_fprintf("Can't send data to the client {login: \"%s\"}.\n", data.login);
-                SQL_THREAD_EXEC(sql_update_online_0, 0, 0, err);
-                printf_server_prefix();
-                pthread_fprintf("Client {login: \"%s\"} disconnected.\n", data.login);
-                return (void *) SEND_ERROR;
-            }
+            _SEND()
 
             continue;
         }
 
 #ifdef _SERVER_DEBUG
-        SERVER_AND_CLIENT_PREFIX(0);
-        pthread_fprintf(": %s.\n", (strlen(receive) ? receive : "EMPTY MESSAGE"));
+        PRINTF_WITH_SERVER_AND_CLIENT_PREFIX(0, ": %s.\n", (strlen(receive) ? receive : "EMPTY MESSAGE"));
 #endif
 
         memset(transmit, 0, 1024);
         sprintf(transmit, "I have nothing to say to you.");
 
-        ret = send(client, transmit, sizeof(transmit), 0);
-        if (ret == SOCKET_ERROR) {
-            printf_server_error_prefix();
-            pthread_fprintf("Can't send data to the client {login: \"%s\"}.\n", data.login);
-            SQL_THREAD_EXEC(sql_update_online_0, 0, 0, err);
-            printf_server_prefix();
-            pthread_fprintf("Client {login: \"%s\"} disconnected.\n", data.login);
-            return (void *) SEND_ERROR;
-        }
+        _SEND()
     }
 
     return (void *) SUCCESS;
