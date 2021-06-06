@@ -5,6 +5,7 @@
 #define SDL_MAIN_HANDLED
 #include "SDL2/SDL.h"
 #include "SDL2/SDL_image.h"
+#include "SDL2/SDL_ttf.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -44,7 +45,7 @@ enum {
 
 
 enum {
-    GAME_STOPPING,
+    GAME_MENU,
     GAME_RUNNING,
     GAME_OVER
 };
@@ -62,6 +63,7 @@ SDL_Surface *ScaleSurface(SDL_Surface *image, size_t width, size_t height);
 static SDL_Surface *ScaledCopy(SDL_Surface *src, SDL_Rect *dstSize);
 int Draw_image(SDL_Surface *dest_surface, SDL_Surface *src_surface, size_t x, size_t y);
 int Draw_rectangle(SDL_Surface* dest_surface, size_t block_type, size_t x, size_t y, size_t w, size_t h);
+void WriteText(int x, int y, char text[100], int sz, int r, int g, int b);
 
 
 #endif //THEMAZE_UTILITIES_H

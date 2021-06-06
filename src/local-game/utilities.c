@@ -157,3 +157,19 @@ int Draw_image(SDL_Surface *dest_surface, SDL_Surface *src_surface, size_t x, si
 
     return 0;
 }
+
+void WriteText(int x, int y, char text[100], int sz, int r, int g, int b)
+{
+    SDL_Color clr; // Тип для цвета. 4 числа — R, G, B и A, соответственно.
+    clr.r = r;
+    clr.g = g;  // Зададим параметры цвета
+    clr.b = b;
+    TTF_Font * fnt = TTF_OpenFont("../../../src/local-game/Fonts/impact.ttf", sz); // Загружаем шрифт по заданному адресу размером sz
+    SDL_Rect dest;
+    dest.x = x;
+    dest.y = y;
+    SDL_Surface * TextSurface = TTF_RenderText_Blended(fnt, text, clr); // Переносим на поверхность текст с заданным шрифтом и цветом
+    SDL_BlitSurface(TextSurface, NULL, screen, &dest);
+    SDL_FreeSurface(TextSurface); // Освобождаем память уже ненужной поверхности
+    TTF_CloseFont(fnt); // Закрываем шрифт
+}
