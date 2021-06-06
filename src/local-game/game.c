@@ -71,11 +71,11 @@ static void Process_exit_game() {
 
 #define KEY_CASE(letter,upper_sym, lower_sym) \
 case letter:                                  \
-    if(login_size==15) break;\
+    if(temp_size==15) break;\
     if(SDL_GetModState() & KMOD_SHIFT ) {\
-        login[login_size++]=upper_sym;\
+        temp[temp_size++]=upper_sym;\
     } else {\
-        login[login_size++]=lower_sym;\
+        temp[temp_size++]=lower_sym;\
     }\
     break
 
@@ -90,9 +90,14 @@ static void Process_menu() {
     SDL_Surface *scaled_login_password = ScaleSurface(login_password, SCREEN_SIZE, SCREEN_SIZE);
     Draw_image(screen,login_password,300,50);
     int done=0;
+    char temp[128];
     char login[128];
+    char password[128];
+    int entercnt=0;
+    memset(temp,0,128);
     memset(login,0,128);
-    int login_size = 0;
+    memset(password,0,128);
+    int temp_size = 0;
     while(!done) {
         while (SDL_PollEvent(&event)) {
             if(event.type==SDL_KEYDOWN) {
@@ -136,56 +141,69 @@ static void Process_menu() {
                     KEY_CASE(SDLK_9,'9','9');
 
                     case SDLK_BACKSPACE:
-                        if(login_size!=0) {
-                            login[--login_size]=0;
+                        if(temp_size!=0) {
+                            temp[--temp_size]=0;
                         }
                         break;
                     case SDLK_KP_ENTER:
-                        done=1;
+                        if(temp_size==0) {
+                            break;
+                        }
+                        entercnt++;
+                        if(entercnt==1) {
+                            strcpy(login, temp);
+                            memset(temp,0,128);
+                            temp_size=0;
+                        }
+                        else if(entercnt==2) {
+                            strcpy(password, temp);
+                            done=1;
+                            game_status = GAME_RUNNING;
+                        }
                         break;
                 }
                 if(done) {
                     break;
                 }
             }
+
             Draw_image(screen,main_background,0,0);
             Draw_image(screen,login_password,0,0);
-            WriteText(314,337,login,28,0,0,0);
+            if(entercnt==0) {
+                WriteText(314,337,temp,28,0,0,0);
+            }
+            else if (entercnt==1) {
+                WriteText(314,337,login,28,0,0,0);
+                WriteText(314,380,temp,28,0,0,0);
+            }
             Update_window_rect(0, 0, SCREEN_SIZE, SCREEN_SIZE);
         }
+
+
+
         if (event.type == SDL_QUIT) {
             SDL_Quit();
             exit(0);
         }
-    }
-    if(!strcmp(login, "nigger")) {
-        SDL_Surface *dababy = Load_img("../../../src/local-game/Textures/dababy.jpg");
-        SDL_Surface *scaled_dababy = ScaleSurface(dababy, SCREEN_SIZE, SCREEN_SIZE);
-        Draw_image(screen,dababy,-150,-150);
-        WriteText(SCREEN_SIZE/2-150,SCREEN_SIZE/2,"LESS GOOOOOO",50,255,0,0);
-    }
-    else{
-        WriteText(SCREEN_SIZE/2-150,SCREEN_SIZE/2,"press space to play",30,255,0,0);
-    }
-    Update_window_rect(0, 0, SCREEN_SIZE, SCREEN_SIZE);
 
 
-    done=0;
-    while (!done)
-    {
-        while (SDL_PollEvent(&event)) // Пока есть хоть одно необработанное событие
-        {
-            if(event.key.keysym.sym == SDLK_SPACE) {
-                done = 1;
-                game_status = GAME_RUNNING;
-
-            }
-            else if (event.type == SDL_QUIT) {
-                SDL_Quit();
-                exit(0);
-            }
-        }
     }
+
+
+
+//    if(!strcmp(login, "nigger")) {
+//        SDL_Surface *dababy = Load_img("../../../src/local-game/Textures/dababy.jpg");
+//        SDL_Surface *scaled_dababy = ScaleSurface(dababy, SCREEN_SIZE, SCREEN_SIZE);
+//        Draw_image(screen,dababy,-150,-150);
+//        WriteText(SCREEN_SIZE/2-150,SCREEN_SIZE/2,"LESS GOOOOOO",50,255,0,0);
+//    }
+//    else{
+//        WriteText(SCREEN_SIZE/2-150,SCREEN_SIZE/2,"press space to play",30,255,0,0);
+//    }
+    //Update_window_rect(0, 0, SCREEN_SIZE, SCREEN_SIZE);
+
+    printf("login: %s\npassword: %s", login, password);
+
 }
 
 int checkFinishPoint(playerPos player, int **maze) {
@@ -206,6 +224,7 @@ int WinMain(int argc, char *argv[]) {
 
     Init_window("Maze", SCREEN_SIZE, SCREEN_SIZE);
     Process_menu();
+
     //menu
 
 
