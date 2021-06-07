@@ -3,7 +3,10 @@
 #include <time.h>
 #include <stdlib.h>
 #include <unistd.h>
+
 #define TRANSACTION_CAPACITY 1024
+#define PL_PARAM_SIZE   16
+#define PL_CNT 50
 
 typedef enum {
     //TAG:          // WHAT IT DOES:                     ARGS "<> ...":            DIR:
@@ -11,7 +14,7 @@ typedef enum {
     SYS_MSG,        // message STR from/to server       "<SYS_MSG> STR"            TO/FROM
     INVITE,         // invite NAME/invite from NAME     "<INVITE> NAME"            TO/FROM
     MOV_RIVAL,      // move enemy NAME to X Y           "<MOV_RIVAL> NAME X Y"     FROM
-    MOV_SELF,        // move this player to X Y          "<MOV_SELF> X Y"           TO
+    MOV_SELF,       // move this player to X Y          "<MOV_SELF> X Y"           TO
     EXIT,
     MENU
 } INNER_INTERFACE;
@@ -21,6 +24,13 @@ typedef struct {
     char ARGS[16][16];
     int VALID_ARG_CNT;
 } COMMAND_PROTOTYPE;
+
+typedef struct {
+    char NAME[PL_PARAM_SIZE];
+    int score;
+} PLAYER;
+
+PLAYER scoreboard[PL_CNT];
 
 char *make_command(SOCKET client, COMMAND_PROTOTYPE proto) {
     int f = 0;
@@ -48,64 +58,87 @@ char *make_command(SOCKET client, COMMAND_PROTOTYPE proto) {
             sprintf(command, "%s", "<MENU>");
             break;
     }
-    if(!f) printf(">>%s\n", command);
+    if (!f) printf(">>%s", command);
     send(client, command, TRANSACTION_CAPACITY, 0);
     recv(client, command, TRANSACTION_CAPACITY, 0);
 
-    if(f) {
+    if (f) {
         int z = 0;
+        int j = 0;
         char tmp[32];
         memset(tmp, 0, 32);
-        for (int i = 0; i < strlen(command); i++) {
+        for (int i = 0; i < strlen(command) && j < PL_CNT; i++) {
             if (command[i] == '#') {
-                printf("%s\n", tmp);
+                printf("%s->", tmp);
                 z = 0;
+                sscanf(tmp,"%s %d",scoreboard[j].NAME,&scoreboard[j].score);
+                j++;
                 memset(tmp, 0, 32);
                 continue;
             }
             tmp[z++] = command[i];
         }
+        for(int i = 0; i < PL_CNT; i++){
+            printf("%d %s %d\n",i, scoreboard[i].NAME,scoreboard[i].score);
+        }
     }
-    if(!f) printf("<<%s\n", command);
+    if (f) printf("<<%s\n", command);
 
     return command;
 }
 
+
+void try_login(SOCKET client, COMMAND_PROTOTYPE C, char *name, char *password) {
+    C.TAG = CONNECTION;
+    C.VALID_ARG_CNT = 2;
+    strcpy(C.ARGS[0], name);
+    strcpy(C.ARGS[1], password);
+    while (strcmp(make_command(client, C), "LOGIN_SUCCESS") != 0) {
+        printf("Wrong password! Try again:\n");
+        printf("Nickname:");
+        scanf("%s", name);
+        printf("Password:");
+        scanf("%s", password);
+        strcpy(C.ARGS[0], name);
+        strcpy(C.ARGS[1], password);
+    }
+}
+
+void cli_exit(SOCKET client, COMMAND_PROTOTYPE C) {
+    C.TAG = EXIT;
+    C.VALID_ARG_CNT = 0;
+    make_command(client, C);
+    closesocket(client);
+}
+
+void move_self(SOCKET client, COMMAND_PROTOTYPE C, int x, int y) {
+    C.TAG = MOV_SELF;
+    C.VALID_ARG_CNT = 2;
+    strcpy(C.ARGS[0], itoa(x, C.ARGS[0], 10));
+    strcpy(C.ARGS[1], itoa(y, C.ARGS[1], 10));
+    make_command(client, C);
+}
+
+void cli_send(SOCKET client, COMMAND_PROTOTYPE C, char *str) {
+    C.TAG = SYS_MSG;
+    C.VALID_ARG_CNT = 1;
+    strcpy(C.ARGS[0], str);
+    make_command(client, C);
+}
+
+void upd_menu(SOCKET client, COMMAND_PROTOTYPE C) {
+    C.TAG = MENU;
+    C.VALID_ARG_CNT = 0;
+    make_command(client, C);
+}
+
 COMMAND_PROTOTYPE C;
 
-#define LOGIN(NAME, PASS)       C.TAG = CONNECTION; \
-                                C.VALID_ARG_CNT = 2;\
-                                strcpy(C.ARGS[0],NAME);\
-                                strcpy(C.ARGS[1],PASS);\
-                                while(strcmp(make_command(client,C),"LOGIN_SUCCESS")!=0){ \
-                                    printf("Wrong password! Try again:\n");\
-                                    printf("Nickname:");\
-                                    scanf("%s", NAME);\
-                                    printf("Password:");\
-                                    scanf("%s", PASS);\
-                                    strcpy(C.ARGS[0],NAME);\
-                                    strcpy(C.ARGS[1],PASS);\
-                                }
-
-#define LEAVE()                 C.TAG = EXIT; \
-                                C.VALID_ARG_CNT = 0;\
-                                make_command(client,C); \
-                                closesocket(client)
-
-#define SAY(MSG)                C.TAG = SYS_MSG ;\
-                                C.VALID_ARG_CNT = 1;\
-                                strcpy(C.ARGS[0],MSG);\
-                                make_command(client,C)
-
-#define GO(X, Y)                C.TAG = MOV_SELF; \
-                                C.VALID_ARG_CNT = 2;\
-                                strcpy(C.ARGS[0],itoa(X,C.ARGS[0],10));\
-                                strcpy(C.ARGS[1],itoa(Y,C.ARGS[1],10));\
-                                make_command(client,C)
-
-#define GET_MENU()              C.TAG = MENU; \
-                                C.VALID_ARG_CNT = 0; \
-                                make_command(client,C)
+#define LOGIN(NAME, PASS) try_login(client, C, NAME,PASS)
+#define GET_MENU() upd_menu(client, C)
+#define GO(X, Y) move_self(client, C, X, Y)
+#define SAY(MSG) cli_send(client, C, MSG)
+#define LEAVE() cli_exit(client, C)
 
 void startSession() {
     SOCKET client;
@@ -126,8 +159,8 @@ void startSession() {
     }
 
 
-    char name[32];
-    char pass[32];
+    char name[PL_PARAM_SIZE];
+    char pass[PL_PARAM_SIZE];
 
     printf("Welcome to the Maze!\n");
     printf("Nickname:");
@@ -136,13 +169,13 @@ void startSession() {
     scanf("%s", pass);
 
     LOGIN(name, pass);
-    while(1){
+    while (1) {
         system("cls");
         GET_MENU();
         sleep(1);
     }
-    GO(10,10);
-
+    GO(10, 10);
+    LEAVE();
 }
 
 int main() {

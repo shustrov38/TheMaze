@@ -103,9 +103,12 @@ int callback_check_if_exists(void *param, int argc, char **argv, char **col_name
 
 int callback_select_all_online_users(void *param, int argc, char **argv, char **col_name) {
     char *online_users = (char *) param;
-    for (int i = 0; i < argc; ++i) {
-        strcat(online_users, argv[i]);
-        strcat(online_users, "#");
+    for (int i = 0; i < argc; i += 2) {
+        strcat(online_users, "# ");
+        strcat(online_users, argv[i + 0]);
+        strcat(online_users, " ");
+        strcat(online_users, argv[i + 1]);
+        strcat(online_users, " ");
     }
     return 0;
 }
@@ -184,6 +187,8 @@ void *client_callback(void *param) {
 
     while (1) {
         char receive[_MESSAGE_LENGTH], transmit[_MESSAGE_LENGTH];
+        memset(receive, 0, _MESSAGE_LENGTH);
+        memset(transmit, 0, _MESSAGE_LENGTH);
         int ret; // count of received bytes
 
         _RECV()
@@ -205,14 +210,16 @@ void *client_callback(void *param) {
 
             itoa(hash_combine(data.login, data.password), data.string_id, 10);
 
-            sprintf(sql_update_online_0, "UPDATE Data SET Online = 0 WHERE Id = %s", data.string_id);
+            sprintf(sql_update_online_0,
+                    "UPDATE Data SET Online = 0, InvitationFrom = \'\', Room = 0, RoomMessage = \'\' WHERE Id = %s",
+                    data.string_id);
             sprintf(sql_update_online_1, "UPDATE Data SET Online = 1 WHERE Id = %s", data.string_id);
             sprintf(sql_if_exists_name, "SELECT EXISTS(SELECT Id FROM Data WHERE Login = \'%s\' LIMIT 1) AS exist;",
                     data.login);
-            sprintf(sql_select_all_online_users, "SELECT Login FROM Data WHERE Online = 1 ORDER BY Login;");
+            sprintf(sql_select_all_online_users, "SELECT Login, Rating FROM Data WHERE Online = 1 ORDER BY Rating, Login;");
             sprintf(sql_get_password_by_name, "SELECT Password FROM Data WHERE Login = \'%s\';", data.login);
-            sprintf(sql_add_client, "INSERT INTO Data VALUES(%s, \'%s\', \'%s\', 1);", data.string_id, data.login,
-                    data.password);
+            sprintf(sql_add_client, "INSERT INTO Data VALUES(%s, \'%s\', \'%s\', 1000, 1, \'\', 0, \'\');",
+                    data.string_id, data.login, data.password);
 
             int exists = 0;
             SQL_THREAD_EXEC(sql_if_exists_name, callback_check_if_exists, (void *) &exists, err);
@@ -225,32 +232,25 @@ void *client_callback(void *param) {
                 if (strcmp(stored_password, data.password) != 0) {
                     PRINTF_WITH_SERVER_AND_CLIENT_PREFIX(0, "<- in danger.\n");
 
-                    memset(transmit, 0, 1024);
                     sprintf(transmit, "LOGIN_FAILURE");
-
                     _SEND()
-
                     continue;
                 }
                 SQL_THREAD_EXEC(sql_update_online_1, 0, 0, err);
             }
 
-            memset(transmit, 0, 1024);
-            sprintf(transmit, "LOGIN_SUCCESS");
-
-            _SEND()
-
             first_time = 0;
 
+            sprintf(transmit, "LOGIN_SUCCESS");
+            _SEND()
             continue;
         }
 
         if (!strcmp(tag, "<MENU>") && !first_time) {
-            memset(transmit, 0, 1024);
             SQL_THREAD_EXEC(sql_select_all_online_users, callback_select_all_online_users, (void *) &transmit, err);
+            strcat(transmit, "#"); // end symbol for online table list
 
             _SEND()
-
             continue;
         }
 
@@ -258,20 +258,14 @@ void *client_callback(void *param) {
             SQL_THREAD_EXEC(sql_update_online_0, 0, 0, err);
             PRINTF_WITH_SERVER_AND_CLIENT_PREFIX(0, "disconnected.\n");
 
-            memset(transmit, 0, 1024);
-            sprintf(transmit, "disconnected!");
-
+            sprintf(transmit, "DISCONNECTED");
             _SEND()
-
             break;
         }
 
         if (first_time == 1) {
-            memset(transmit, 0, 1024);
-            sprintf(transmit, "gay website 8===o"); // todo change reply.
-
+            sprintf(transmit, "LOGIN_FAILURE");
             _SEND()
-
             continue;
         }
 
@@ -279,9 +273,7 @@ void *client_callback(void *param) {
         PRINTF_WITH_SERVER_AND_CLIENT_PREFIX(0, ": %s.\n", (strlen(receive) ? receive : "EMPTY MESSAGE"));
 #endif
 
-        memset(transmit, 0, 1024);
         sprintf(transmit, "I have nothing to say to you.");
-
         _SEND()
     }
 
@@ -357,7 +349,11 @@ int create_server() {
                                    "Id INT, "
                                    "Login TEXT, "
                                    "Password TEXT, "
-                                   "Online INT);";
+                                   "Rating INT, "
+                                   "Online INT, "
+                                   "InvitationFrom TEXT, "
+                                   "Room INT, "
+                                   "RoomMessage TEXT);";
 
     rc = sqlite3_exec(db, sql_create_table, 0, 0, &err);
 
@@ -369,7 +365,7 @@ int create_server() {
         return EXIT_FAILURE;
     }
 
-    rc = sqlite3_exec(db, "UPDATE Data SET Online = 0", 0, 0, &err);
+    rc = sqlite3_exec(db, "UPDATE Data SET Online = 0, InvitationFrom = \'\', Room = 0, RoomMessage = \'\'", 0, 0, &err);
 
     if (rc != SQLITE_OK) {
         printf("[SQL ERROR] %s\n", err);
@@ -450,10 +446,6 @@ int create_server() {
     return 0;
 }
 
-typedef struct {
-
-} ServerThreadData;
-
 int main() {
     WSADATA wsd;
 
@@ -466,4 +458,3 @@ int main() {
 
     return create_server();
 }
-
