@@ -46,11 +46,11 @@ enum {
 
 #define KEY_CASE(letter, upper_sym, lower_sym) \
 case letter:                                  \
-    if(temp_size==15) break;\
+    if(temp_size == 15) break;\
     if(SDL_GetModState() & KMOD_SHIFT ) {\
-        temp[temp_size++]=upper_sym;\
+        temp[temp_size++] = upper_sym;\
     } else {\
-        temp[temp_size++]=lower_sym;\
+        temp[temp_size++] = lower_sym;\
     }\
     break
 

@@ -57,18 +57,17 @@ playerPos *initAllPlayers(int playersCnt, SDL_Surface **icons, int iconsCnt) {
     return players;
 }
 
-
 static void Process_login() {
     TTF_Init();
     SDL_Event event;
     game_status = GAME_LOGIN;
 
-    SDL_Surface *login_background = Load_img("../../../src/local-game/Textures/login_var1.jpg");
+    SDL_Surface *login_background = Load_img("../../../src/local-game/Textures/login/login_var1.jpg");
     //SDL_Surface *scaled_main_background = ScaleSurface(main_background, SCREEN_WIDTH, SCREEN_HEIGHT);
     Draw_image(screen, login_background, 0, 0);
 
-    SDL_Surface *field1 = Load_img("../../../src/local-game/Textures/login_field1.png");
-    SDL_Surface *field2 = Load_img("../../../src/local-game/Textures/login_field2.png");
+    SDL_Surface *field1 = Load_img("../../../src/local-game/Textures/login/login_field1.png");
+    SDL_Surface *field2 = Load_img("../../../src/local-game/Textures/login/login_field2.png");
     //SDL_Surface *login_password = Load_img("../../../src/local-game/Textures/login&password.png");
     //SDL_Surface *scaled_login_password = ScaleSurface(login_password, SCREEN_WIDTH, SCREEN_HEIGHT);
     //Draw_image(screen, login_password, 0, 0);
@@ -179,20 +178,159 @@ static void Process_login() {
 
 }
 
-static void Process_menu(){
+static void Process_menu(PLAYERS *users){
+    SDL_Event event;
+    TTF_Init();
+
     game_status = GAME_MENU;
-    SDL_Surface *menu_backgroud = Load_img("../../../src/local-game/Textures/var1.jpg");
+    SDL_Surface *menu_background = Load_img("../../../src/local-game/Textures/menu/menu_back.jpg");
+    Draw_image(screen, menu_background, 0, 0);
+    Update_window_rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+
+    SDL_Surface *pointer = Load_img("../../../src/local-game/Textures/menu/pointer.png");
+    SDL_Surface *menu_pointer = ScaleSurface(pointer, 30, 30);
+
+    int done = 0;
+    int selectionPos = 0;
+    int drawFlag = 1;
+
+    int begin = 0, end = 7;
+    int loginPos_Y = 365;
+    char textMMR[5], textInGameStatus[1];
+
+    WriteText(315, 310, "PLAYERS", 28, 255, 0, 0);
+    WriteText(475, 310, "MMR", 28, 255, 0, 0);
+    WriteText(555, 310, "Status", 28, 255, 0 ,0);
+    Update_window_rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+
+    Draw_image(screen, menu_pointer, 275, 365);
+    for (int i = begin; i <= end; ++i) {
+        WriteText(315, loginPos_Y, users[i].login, 24, 255, 255, 255);
+
+        itoa(users[i].MMR, textMMR, 10);
+        WriteText(475, loginPos_Y, textMMR, 24, 255, 0 ,0);
+
+        //itoa(users[i].inGame, textInGameStatus, 10);
+        //WriteText(590, loginPos_Y, textInGameStatus, 24, 27, 235, 16);
+
+        loginPos_Y += 30;
+    }
+    loginPos_Y = 365;
+    Update_window_rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+
+    while (!done) {
+        while (SDL_PollEvent(&event)) {
+            if (event.type == SDL_KEYDOWN) {
+                switch (event.key.keysym.sym) {
+                    case SDLK_w:
+                        if (selectionPos != 0) {
+                            selectionPos--;
+                        } else {
+                            drawFlag = 0;
+                        }
+
+                        if (drawFlag) {
+                            Draw_image(screen, menu_background, 0, 0);
+                            WriteText(315, 310, "PLAYERS", 28, 255, 0, 0);
+                            WriteText(475, 310, "MMR", 28, 255, 0, 0);
+                            WriteText(555, 310, "Status", 28, 255, 0 ,0);
+                            Update_window_rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+                            Update_window_rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+
+
+                            if (selectionPos <= 4) {
+                                begin = 0;
+                                end = 7;
+                                Draw_image(screen, menu_pointer, 275, 365 + 30 * (selectionPos));
+                            } else if (selectionPos >= 25) {
+                                begin = 21;
+                                end = 29;
+                                Draw_image(screen, menu_pointer, 275, 365 + 30 * (selectionPos - begin));
+                            } else {
+                                begin = selectionPos - 4;
+                                end = selectionPos + 4;
+                                Draw_image(screen, menu_pointer, 275, 365 + 30 * (end - selectionPos));
+                            }
+
+                            for (int i = begin; i <= end; ++i) {
+                                WriteText(315, loginPos_Y, users[i].login, 24, 255, 255, 255);
+
+                                itoa(users[i].MMR, textMMR, 10);
+                                WriteText(475, loginPos_Y, textMMR, 24, 255, 0, 0);
+
+
+                                loginPos_Y += 30;
+                            }
+
+                            loginPos_Y = 365;
+                            Update_window_rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+                        }
+                        drawFlag = 1;
+                        break;
+
+                    case SDLK_s:
+                        if (selectionPos != 29) {
+                            selectionPos++;
+                        } else {
+                            drawFlag = 0;
+                        }
+
+                        if (drawFlag) {
+                            Draw_image(screen, menu_background, 0, 0);
+                            WriteText(315, 310, "PLAYERS", 28, 255, 0, 0);
+                            WriteText(475, 310, "MMR", 28, 255, 0, 0);
+                            WriteText(555, 310, "Status", 28, 255, 0 ,0);
+                            Update_window_rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+                            Update_window_rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+
+                            if (selectionPos <= 4) {
+                                begin = 0;
+                                end = 7;
+                                Draw_image(screen, menu_pointer, 275, 365 + 30 * (selectionPos));
+                            } else if (selectionPos >= 25) {
+                                begin = 21;
+                                end = 29;
+                                Draw_image(screen, menu_pointer, 275, 365 + 30 * (selectionPos - begin));
+                            } else {
+                                begin = selectionPos - 4;
+                                end = selectionPos + 4;
+                                Draw_image(screen, menu_pointer, 275, 365 + 30 * (end - selectionPos));
+                            }
+
+                            for (int i = begin; i <= end; ++i) {
+                                WriteText(315, loginPos_Y, users[i].login, 24, 255, 255, 255);
+
+                                itoa(users[i].MMR, textMMR, 10);
+                                WriteText(475, loginPos_Y, textMMR, 24, 255, 0, 0);
+
+
+                                loginPos_Y += 30;
+                            }
+
+                            loginPos_Y = 365;
+                            Update_window_rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+                        }
+                        drawFlag = 1;
+                        break;
+
+                    case SDLK_SPACE:
+                        done = 1;
+                        break;
+
+                    SDL_Delay(125);
+                }
 
 
 
+                if (done) {
+                    game_status = GAME_RUNNING;
+                    break;
+                }
+            }
 
 
-
-
-
-
-
-
+        }
+    }
 }
 
 static void Process_exit_game() {
@@ -224,13 +362,24 @@ int WinMain(int argc, char *argv[]) {
     printf("Enter players count: ");
     scanf("%d", &playersCnt);
 
+    PLAYERS *users = (PLAYERS*) malloc (30 * sizeof(PLAYERS));
+    for (int i = 0; i < 30; ++i){
+        users[i].login = (char*) malloc(16 * sizeof(char));
+        scanf("%s %d", users[i].login, &users[i].MMR);
+        users[i].invite = 0;
+    }
+
+//    for (int i = 0; i < 30; ++i){
+//        printf("\n%s - %d - %d", users[i].login, users[i].MMR, users[i].inGame);
+//    }
+
 //login
     Init_window("Maze", SCREEN_WIDTH, SCREEN_HEIGHT);
     Process_login();
 //login
 
 //menu
-    Process_menu();
+    Process_menu(users);
 
 
 //menu
@@ -240,14 +389,14 @@ int WinMain(int argc, char *argv[]) {
     //SDL_Surface *background = Load_img("D:\\AllCodes\\TheMaze\\src\\local-game\\Textures\\wall2.jpg");
     //SDL_Surface *scaled_background = ScaleSurface(background,750,750);
 
-    SDL_Surface *wall = Load_img("../../../src/local-game/Textures/maze_wall3.bmp");
+    SDL_Surface *wall = Load_img("../../../src/local-game/Textures/maze/maze_wall3.bmp");
     SDL_Surface *scaled_wall = ScaleSurface(wall, TILE_SIZE, TILE_SIZE);
 
-    SDL_Surface *floor = Load_img("../../../src/local-game/Textures/maze_floor.bmp");
+    SDL_Surface *floor = Load_img("../../../src/local-game/Textures/maze/maze_floor.bmp");
     SDL_Surface *scaled_floor = ScaleSurface(floor, TILE_SIZE + 6, TILE_SIZE + 6);
 
     SDL_Surface *exitPoint = Load_img(
-            "../../../src/local-game/Textures/maze_final-point.png");
+            "../../../src/local-game/Textures/maze/maze_final-point.png");
     SDL_Surface *scaled_exitPoint = ScaleSurface(exitPoint, TILE_SIZE + 5, TILE_SIZE + 5);
 //textures
 

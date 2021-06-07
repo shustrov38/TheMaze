@@ -76,59 +76,59 @@ int Update_window_rect(int x, int y, unsigned int w, unsigned int h) {
 }
 
 
+
 SDL_Surface **initICONS() {
     SDL_Surface **ICONS = (SDL_Surface **) malloc(15 * sizeof(SDL_Surface *));
 
     const int ICON_SIZE = 21;
 
     ICONS[0] = ScaleSurface(Load_img(
-            "../../../src/local-game/Textures/hero_anti-mage.png"), ICON_SIZE, ICON_SIZE);
+            "../../../src/local-game/Textures/heroes/hero_anti-mage.png"), ICON_SIZE, ICON_SIZE);
 
     ICONS[1] = ScaleSurface(Load_img(
-            "../../../src/local-game/Textures/hero_bristleback.png"), ICON_SIZE, ICON_SIZE);
+            "../../../src/local-game/Textures/heroes/hero_bristleback.png"), ICON_SIZE, ICON_SIZE);
 
     ICONS[2] = ScaleSurface(Load_img(
-            "../../../src/local-game/Textures/hero_invoker.png"), ICON_SIZE, ICON_SIZE);
+            "../../../src/local-game/Textures/heroes/hero_invoker.png"), ICON_SIZE, ICON_SIZE);
 
     ICONS[3] = ScaleSurface(Load_img(
-            "../../../src/local-game/Textures/hero_juggernaut.png"), ICON_SIZE, ICON_SIZE);
+            "../../../src/local-game/Textures/heroes/hero_juggernaut.png"), ICON_SIZE, ICON_SIZE);
 
     ICONS[4] = ScaleSurface(Load_img(
-            "../../../src/local-game/Textures/hero_mk.png"), ICON_SIZE, ICON_SIZE);
+            "../../../src/local-game/Textures/heroes/hero_mk.png"), ICON_SIZE, ICON_SIZE);
 
     ICONS[5] = ScaleSurface(Load_img(
-            "../../../src/local-game/Textures/hero_morph.png"), ICON_SIZE, ICON_SIZE);
+            "../../../src/local-game/Textures/heroes/hero_morph.png"), ICON_SIZE, ICON_SIZE);
 
     ICONS[6] = ScaleSurface(Load_img(
-            "../../../src/local-game/Textures/hero_phantom-assasin.png"), ICON_SIZE, ICON_SIZE);
+            "../../../src/local-game/Textures/heroes/hero_phantom-assasin.png"), ICON_SIZE, ICON_SIZE);
 
     ICONS[7] = ScaleSurface(Load_img(
-            "../../../src/local-game/Textures/hero_pidor.png"), ICON_SIZE, ICON_SIZE);
+            "../../../src/local-game/Textures/heroes/hero_pidor.png"), ICON_SIZE, ICON_SIZE);
 
     ICONS[8] = ScaleSurface(Load_img(
-            "../../../src/local-game/Textures/hero_queen-of-pain.png"), ICON_SIZE, ICON_SIZE);
+            "../../../src/local-game/Textures/heroes/hero_queen-of-pain.png"), ICON_SIZE, ICON_SIZE);
 
     ICONS[9] = ScaleSurface(Load_img(
-            "../../../src/local-game/Textures/hero_rudge.png"), ICON_SIZE, ICON_SIZE);
+            "../../../src/local-game/Textures/heroes/hero_rudge.png"), ICON_SIZE, ICON_SIZE);
 
     ICONS[10] = ScaleSurface(Load_img(
-            "../../../src/local-game/Textures/hero_shadow-fiend.png"), ICON_SIZE, ICON_SIZE);
+            "../../../src/local-game/Textures/heroes/hero_shadow-fiend.png"), ICON_SIZE, ICON_SIZE);
 
     ICONS[11] = ScaleSurface(Load_img(
-            "../../../src/local-game/Textures/hero_templar_assassin.png"), ICON_SIZE, ICON_SIZE);
+            "../../../src/local-game/Textures/heroes/hero_templar_assassin.png"), ICON_SIZE, ICON_SIZE);
 
     ICONS[12] = ScaleSurface(Load_img(
-            "../../../src/local-game/Textures/hero_void-spirit.png"), ICON_SIZE, ICON_SIZE);
+            "../../../src/local-game/Textures/heroes/hero_void-spirit.png"), ICON_SIZE, ICON_SIZE);
 
     ICONS[13] = ScaleSurface(Load_img(
-            "../../../src/local-game/Textures/hero_zeus.png"), ICON_SIZE, ICON_SIZE);
+            "../../../src/local-game/Textures/heroes/hero_zeus.png"), ICON_SIZE, ICON_SIZE);
 
     ICONS[14] = ScaleSurface(Load_img(
-            "../../../src/local-game/Textures/hero_windranger.png"), ICON_SIZE, ICON_SIZE);
+            "../../../src/local-game/Textures/heroes/hero_windranger.png"), ICON_SIZE, ICON_SIZE);
 
     return ICONS;
 }
-
 
 SDL_Surface *Load_img(const char *filename) {
     /*The img that's loaded*/

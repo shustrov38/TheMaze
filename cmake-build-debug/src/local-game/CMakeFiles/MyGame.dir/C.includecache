@@ -18,25 +18,11 @@ D:/AllCodes/TheMaze/src/local-game/playerInfo.h
 
 D:/AllCodes/TheMaze/src/local-game/game.h
 
-D:/AllCodes/TheMaze/src/local-game/maze_generator.c
-utilities.h
-D:/AllCodes/TheMaze/src/local-game/utilities.h
-maze_generator.h
-D:/AllCodes/TheMaze/src/local-game/maze_generator.h
-
 D:/AllCodes/TheMaze/src/local-game/maze_generator.h
 utilities.h
 D:/AllCodes/TheMaze/src/local-game/utilities.h
 
-D:/AllCodes/TheMaze/src/local-game/playerInfo.c
-playerInfo.h
 D:/AllCodes/TheMaze/src/local-game/playerInfo.h
-
-D:/AllCodes/TheMaze/src/local-game/playerInfo.h
-utilities.h
-D:/AllCodes/TheMaze/src/local-game/utilities.h
-
-D:/AllCodes/TheMaze/src/local-game/utilities.c
 utilities.h
 D:/AllCodes/TheMaze/src/local-game/utilities.h
 

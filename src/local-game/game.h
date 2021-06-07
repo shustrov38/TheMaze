@@ -4,6 +4,13 @@
 static void Process_events();
 static void Process_menu();
 
+typedef struct{
+    char *login;
+    int MMR;
+    int invite;
+} PLAYERS;
+
+
 enum {
     GAME_LOGIN,
     GAME_MENU,
