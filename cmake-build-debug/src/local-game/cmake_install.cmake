@@ -1,4 +1,4 @@
-# Install script for directory: D:/TheMaze/src/local-game
+# Install script for directory: D:/AllCodes/TheMaze/src/local-game
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)

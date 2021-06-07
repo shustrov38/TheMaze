@@ -22,6 +22,7 @@ enum {
     BLACK_BLOCK
 };
 
+
 #define GOLD_COLOR_R 255
 #define GOLD_COLOR_G 204
 #define GOLD_COLOR_B 51
@@ -43,12 +44,17 @@ enum {
 #define BORDER_COLOR_B 0
 
 
+#define KEY_CASE(letter, upper_sym, lower_sym) \
+case letter:                                  \
+    if(temp_size==15) break;\
+    if(SDL_GetModState() & KMOD_SHIFT ) {\
+        temp[temp_size++]=upper_sym;\
+    } else {\
+        temp[temp_size++]=lower_sym;\
+    }\
+    break
 
-enum {
-    GAME_MENU,
-    GAME_RUNNING,
-    GAME_OVER
-};
+
 
 int Init_window(const char *title, int width, int height);
 SDL_Surface *Get_screen(void);
@@ -65,5 +71,6 @@ int Draw_image(SDL_Surface *dest_surface, SDL_Surface *src_surface, size_t x, si
 int Draw_rectangle(SDL_Surface* dest_surface, size_t block_type, size_t x, size_t y, size_t w, size_t h);
 void WriteText(int x, int y, char text[100], int sz, int r, int g, int b);
 
+SDL_Surface **initICONS();
 
 #endif //THEMAZE_UTILITIES_H

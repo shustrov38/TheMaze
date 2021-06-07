@@ -4,8 +4,8 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_C
-  "D:/TheMaze/src/server/MazeGenerator.c" "D:/TheMaze/cmake-build-debug/src/server/CMakeFiles/Server.dir/MazeGenerator.c.obj"
-  "D:/TheMaze/src/server/server.c" "D:/TheMaze/cmake-build-debug/src/server/CMakeFiles/Server.dir/server.c.obj"
+  "D:/AllCodes/TheMaze/src/server/MazeGenerator.c" "D:/AllCodes/TheMaze/cmake-build-debug/src/server/CMakeFiles/Server.dir/MazeGenerator.c.obj"
+  "D:/AllCodes/TheMaze/src/server/server.c" "D:/AllCodes/TheMaze/cmake-build-debug/src/server/CMakeFiles/Server.dir/server.c.obj"
   )
 set(CMAKE_C_COMPILER_ID "GNU")
 

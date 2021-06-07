@@ -54,19 +54,19 @@ cmake_force:
 SHELL = cmd.exe
 
 # The CMake executable.
-CMAKE_COMMAND = "C:\Program Files\JetBrains\CLion 2020.3\bin\cmake\win\bin\cmake.exe"
+CMAKE_COMMAND = "D:\For apps\CLion 2020.2.1\bin\cmake\win\bin\cmake.exe"
 
 # The command to remove a file.
-RM = "C:\Program Files\JetBrains\CLion 2020.3\bin\cmake\win\bin\cmake.exe" -E rm -f
+RM = "D:\For apps\CLion 2020.2.1\bin\cmake\win\bin\cmake.exe" -E rm -f
 
 # Escaping for special characters.
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = D:\TheMaze
+CMAKE_SOURCE_DIR = D:\AllCodes\TheMaze
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = D:\TheMaze\cmake-build-debug
+CMAKE_BINARY_DIR = D:\AllCodes\TheMaze\cmake-build-debug
 
 #=============================================================================
 # Directory level rules for the build root directory
@@ -155,14 +155,14 @@ src/server/clean: src/server/CMakeFiles/Server.dir/clean
 src/server/CMakeFiles/Server.dir/all:
 	$(MAKE) $(MAKESILENT) -f src\server\CMakeFiles\Server.dir\build.make src/server/CMakeFiles/Server.dir/depend
 	$(MAKE) $(MAKESILENT) -f src\server\CMakeFiles\Server.dir\build.make src/server/CMakeFiles/Server.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=D:\TheMaze\cmake-build-debug\CMakeFiles --progress-num=11,12,13 "Built target Server"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=D:\AllCodes\TheMaze\cmake-build-debug\CMakeFiles --progress-num=11,12,13 "Built target Server"
 .PHONY : src/server/CMakeFiles/Server.dir/all
 
 # Build rule for subdir invocation for target.
 src/server/CMakeFiles/Server.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start D:\TheMaze\cmake-build-debug\CMakeFiles 3
+	$(CMAKE_COMMAND) -E cmake_progress_start D:\AllCodes\TheMaze\cmake-build-debug\CMakeFiles 3
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\Makefile2 src/server/CMakeFiles/Server.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start D:\TheMaze\cmake-build-debug\CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start D:\AllCodes\TheMaze\cmake-build-debug\CMakeFiles 0
 .PHONY : src/server/CMakeFiles/Server.dir/rule
 
 # Convenience name for target.
@@ -182,14 +182,14 @@ src/server/CMakeFiles/Server.dir/clean:
 src/client/CMakeFiles/Client.dir/all:
 	$(MAKE) $(MAKESILENT) -f src\client\CMakeFiles\Client.dir\build.make src/client/CMakeFiles/Client.dir/depend
 	$(MAKE) $(MAKESILENT) -f src\client\CMakeFiles\Client.dir\build.make src/client/CMakeFiles/Client.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=D:\TheMaze\cmake-build-debug\CMakeFiles --progress-num=1,2 "Built target Client"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=D:\AllCodes\TheMaze\cmake-build-debug\CMakeFiles --progress-num=1,2 "Built target Client"
 .PHONY : src/client/CMakeFiles/Client.dir/all
 
 # Build rule for subdir invocation for target.
 src/client/CMakeFiles/Client.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start D:\TheMaze\cmake-build-debug\CMakeFiles 2
+	$(CMAKE_COMMAND) -E cmake_progress_start D:\AllCodes\TheMaze\cmake-build-debug\CMakeFiles 2
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\Makefile2 src/client/CMakeFiles/Client.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start D:\TheMaze\cmake-build-debug\CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start D:\AllCodes\TheMaze\cmake-build-debug\CMakeFiles 0
 .PHONY : src/client/CMakeFiles/Client.dir/rule
 
 # Convenience name for target.
@@ -209,14 +209,14 @@ src/client/CMakeFiles/Client.dir/clean:
 src/local-game/CMakeFiles/Local_game.dir/all:
 	$(MAKE) $(MAKESILENT) -f src\local-game\CMakeFiles\Local_game.dir\build.make src/local-game/CMakeFiles/Local_game.dir/depend
 	$(MAKE) $(MAKESILENT) -f src\local-game\CMakeFiles\Local_game.dir\build.make src/local-game/CMakeFiles/Local_game.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=D:\TheMaze\cmake-build-debug\CMakeFiles --progress-num=3,4,5 "Built target Local_game"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=D:\AllCodes\TheMaze\cmake-build-debug\CMakeFiles --progress-num=3,4,5 "Built target Local_game"
 .PHONY : src/local-game/CMakeFiles/Local_game.dir/all
 
 # Build rule for subdir invocation for target.
 src/local-game/CMakeFiles/Local_game.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start D:\TheMaze\cmake-build-debug\CMakeFiles 3
+	$(CMAKE_COMMAND) -E cmake_progress_start D:\AllCodes\TheMaze\cmake-build-debug\CMakeFiles 3
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\Makefile2 src/local-game/CMakeFiles/Local_game.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start D:\TheMaze\cmake-build-debug\CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start D:\AllCodes\TheMaze\cmake-build-debug\CMakeFiles 0
 .PHONY : src/local-game/CMakeFiles/Local_game.dir/rule
 
 # Convenience name for target.
@@ -236,14 +236,14 @@ src/local-game/CMakeFiles/Local_game.dir/clean:
 src/local-game/CMakeFiles/MyGame.dir/all:
 	$(MAKE) $(MAKESILENT) -f src\local-game\CMakeFiles\MyGame.dir\build.make src/local-game/CMakeFiles/MyGame.dir/depend
 	$(MAKE) $(MAKESILENT) -f src\local-game\CMakeFiles\MyGame.dir\build.make src/local-game/CMakeFiles/MyGame.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=D:\TheMaze\cmake-build-debug\CMakeFiles --progress-num=6,7,8,9,10 "Built target MyGame"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=D:\AllCodes\TheMaze\cmake-build-debug\CMakeFiles --progress-num=6,7,8,9,10 "Built target MyGame"
 .PHONY : src/local-game/CMakeFiles/MyGame.dir/all
 
 # Build rule for subdir invocation for target.
 src/local-game/CMakeFiles/MyGame.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start D:\TheMaze\cmake-build-debug\CMakeFiles 5
+	$(CMAKE_COMMAND) -E cmake_progress_start D:\AllCodes\TheMaze\cmake-build-debug\CMakeFiles 5
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\Makefile2 src/local-game/CMakeFiles/MyGame.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start D:\TheMaze\cmake-build-debug\CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start D:\AllCodes\TheMaze\cmake-build-debug\CMakeFiles 0
 .PHONY : src/local-game/CMakeFiles/MyGame.dir/rule
 
 # Convenience name for target.
