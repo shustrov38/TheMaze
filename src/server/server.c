@@ -192,13 +192,16 @@ void *client_callback(void *param) {
     char tag[64];
     ClientData data;
 
-    char sql_update_online_0[128];
-    char sql_update_online_1[128];
-    char sql_if_exists_name[128];
-    char sql_select_leaderboard[128];
-    char sql_get_password_by_name[128];
-    char sql_add_client[128];
-    char sql_select_rooms[128];
+    const int sql_request_buffer_length = 256;
+
+    char sql_update_online_0[sql_request_buffer_length];
+    char sql_update_online_1[sql_request_buffer_length];
+    char sql_if_exists_name[sql_request_buffer_length];
+    char sql_select_leaderboard[sql_request_buffer_length];
+    char sql_get_password_by_name[sql_request_buffer_length];
+    char sql_add_client[sql_request_buffer_length];
+    char sql_select_rooms[sql_request_buffer_length];
+    char sql_change_room[sql_request_buffer_length];
 
     while (1) {
         char receive[_MESSAGE_LENGTH], transmit[_MESSAGE_LENGTH];
@@ -226,16 +229,66 @@ void *client_callback(void *param) {
             itoa(hash_combine(data.login, data.password), data.string_id, 10);
 
             sprintf(sql_update_online_0,
-                    "UPDATE Data SET Online = 0, Room = 0, RoomMessage = \'\' WHERE Id = %s",
-                    data.string_id);
-            sprintf(sql_update_online_1, "UPDATE Data SET Online = 1 WHERE Id = %s", data.string_id);
-            sprintf(sql_if_exists_name, "SELECT EXISTS(SELECT Id FROM Data WHERE Login = \'%s\' LIMIT 1) AS exist;",
-                    data.login);
-            sprintf(sql_select_leaderboard, "SELECT Login, Rating, Online FROM Data ORDER BY Rating, Online, Login;");
-            sprintf(sql_get_password_by_name, "SELECT Password FROM Data WHERE Login = \'%s\';", data.login);
-            sprintf(sql_add_client, "INSERT INTO Data VALUES(%s, \'%s\', \'%s\', 1000, 1, 0, \'\');",
-                    data.string_id, data.login, data.password);
-            sprintf(sql_select_rooms, "SELECT Room , count(Room) AS total FROM Data WHERE Room <> \'\' ORDER BY total");
+                    "UPDATE Data "
+                    "SET Online = 0, Room = \'\', RoomMessage = \'\' "
+                    "WHERE Id = %s",
+                    data.string_id
+            );
+
+            sprintf(sql_update_online_1,
+                    "UPDATE Data "
+                    "SET Online = 1 "
+                    "WHERE Id = %s",
+                    data.string_id
+            );
+
+            sprintf(sql_if_exists_name,
+                    "SELECT EXISTS("
+                    "   SELECT Id "
+                    "   FROM Data "
+                    "   WHERE Login = \'%s\' "
+                    "   LIMIT 1"
+                    ") AS exist;",
+                    data.login
+            );
+
+            sprintf(sql_select_leaderboard,
+                    "SELECT Login, Rating, Online "
+                    "FROM Data "
+                    "ORDER BY Rating, Online, Login;"
+            );
+
+            sprintf(sql_get_password_by_name,
+                    "SELECT Password "
+                    "FROM Data "
+                    "WHERE Login = \'%s\' "
+                    "LIMIT 1;",
+                    data.login
+            );
+
+            sprintf(sql_add_client,
+                    "INSERT INTO Data "
+                    "VALUES(%s, \'%s\', \'%s\', 1000, 1, \'\', \'\');",
+                    data.string_id, data.login, data.password
+            );
+
+            sprintf(sql_select_rooms,
+                    "SELECT * FROM ("
+                    "   SELECT Room, count(Room) AS Total "
+                    "   FROM Data "
+                    "   WHERE Room <> \'\' "
+                    "   GROUP BY Room"
+                    ") "
+                    "WHERE Total <> 4 "
+                    "ORDER BY Total DESC;"
+            );
+
+            sprintf(sql_change_room,
+                    "UPDATE Data "
+                    "SET Room = \'%s\' "
+                    "WHERE Login = \'%s\';",
+                    data.login, data.login
+            );
 
             int exists = 0;
             SQL_THREAD_EXEC(sql_if_exists_name, callback_check_if_exists, (void *) &exists, err);
@@ -280,10 +333,7 @@ void *client_callback(void *param) {
 
         if (!strcmp(tag, "<CREATE_ROOM>") && !first_time) {
             strcat(transmit, "ROOM_CREATED ");
-            strcat(transmit, data.string_id);
-
-            char sql_change_room[128];
-            sprintf(sql_change_room, "UPDATE Data SET Room = %s WHERE Login = %s LIMIT 1;", data.string_id, data.login);
+            strcat(transmit, data.login);
 
             SQL_THREAD_EXEC(sql_change_room, 0, 0, err);
 
@@ -388,7 +438,7 @@ int create_server() {
                                    "Password TEXT, "
                                    "Rating INT, "
                                    "Online INT, "
-                                   "Room INT, "
+                                   "Room TEXT, "
                                    "RoomMessage TEXT);";
 
     rc = sqlite3_exec(db, sql_create_table, 0, 0, &err);
@@ -401,7 +451,7 @@ int create_server() {
         return EXIT_FAILURE;
     }
 
-    rc = sqlite3_exec(db, "UPDATE Data SET Online = 0, Room = 0, RoomMessage = \'\'", 0, 0, &err);
+    rc = sqlite3_exec(db, "UPDATE Data SET Online = 0, Room = \'\', RoomMessage = \'\'", 0, 0, &err);
 
     if (rc != SQLITE_OK) {
         printf("[SQL ERROR] %s\n", err);
