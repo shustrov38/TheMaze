@@ -41,7 +41,7 @@ char *make_command(SOCKET client, COMMAND_PROTOTYPE proto) {
             sprintf(command, "%s %s %s", "<CONNECTION>", proto.ARGS[0], proto.ARGS[1]);
             break;
         case SYS_MSG:
-            sprintf(command, "%s %s", "<SYS_MSG>", proto.ARGS[0]);
+            sprintf(command, "%s", proto.ARGS[0]);
             break;
         case MOV_SELF:
             sprintf(command, "%s %s %s", "<MOV_SELF>", proto.ARGS[0], proto.ARGS[1]);
@@ -82,7 +82,7 @@ char *make_command(SOCKET client, COMMAND_PROTOTYPE proto) {
             printf("%d %s %d\n",i, scoreboard[i].NAME,scoreboard[i].score);
         }
     }
-    if (f) printf("<<%s\n", command);
+    printf("<<%s\n", command);
 
     return command;
 }
@@ -150,9 +150,9 @@ void startSession() {
     struct sockaddr_in server;
     server.sin_family = AF_INET;
     server.sin_port = htons(5510); //the same as in server
-//  server.sin_addr.S_un.S_addr = inet_addr("127.0.0.1"); //special look-up address
-    server.sin_addr.S_un.S_addr = inet_addr("26.173.251.89");
-    if (connect(client, (struct sockaddr *) &server, sizeof(server)) == SOCKET_ERROR) {
+  server.sin_addr.S_un.S_addr = inet_addr("127.0.0.1"); //special look-up address
+//    server.sin_addr.S_un.S_addr = inet_addr("26.173.251.89");
+    if (connect(client, (struct sockaddr *) &server, sizeof(server) ) == SOCKET_ERROR) {
         printf("Can't connect to server\n");
         closesocket(client);
         return;
@@ -170,11 +170,10 @@ void startSession() {
 
     LOGIN(name, pass);
     while (1) {
-        system("cls");
-        GET_MENU();
-        sleep(1);
+        char buffer[128];
+        scanf("%s", buffer);
+        SAY(buffer);
     }
-    GO(10, 10);
     LEAVE();
 }
 

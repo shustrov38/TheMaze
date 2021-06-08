@@ -101,14 +101,28 @@ int callback_check_if_exists(void *param, int argc, char **argv, char **col_name
     return 0;
 }
 
-int callback_select_all_online_users(void *param, int argc, char **argv, char **col_name) {
-    char *online_users = (char *) param;
+int callback_select_leaderboard(void *param, int argc, char **argv, char **col_name) {
+    char *users = (char *) param;
+    for (int i = 0; i < argc; i += 3) {
+        strcat(users, "# ");
+        strcat(users, argv[i + 0]); // login
+        strcat(users, " ");
+        strcat(users, argv[i + 1]); // rating
+        strcat(users, " ");
+        strcat(users, argv[i + 2]); // online
+        strcat(users, " ");
+    }
+    return 0;
+}
+
+int callback_select_rooms(void *param, int argc, char **argv, char **col_name) {
+    char *rooms = (char *) param;
     for (int i = 0; i < argc; i += 2) {
-        strcat(online_users, "# ");
-        strcat(online_users, argv[i + 0]);
-        strcat(online_users, " ");
-        strcat(online_users, argv[i + 1]);
-        strcat(online_users, " ");
+        strcat(rooms, "# ");
+        strcat(rooms, argv[i + 0]); // room
+        strcat(rooms, " ");
+        strcat(rooms, argv[i + 1]); // count
+        strcat(rooms, " ");
     }
     return 0;
 }
@@ -147,7 +161,7 @@ void printf_client_data(ClientData *client, int show_password) {
 #define PRINTF_WITH_SERVER_AND_CLIENT_PREFIX(show_pass, ...) \
 printf_server_prefix(); \
 printf_client_data(&data, show_pass); \
-pthread_fprintf(__VA_ARGS__);
+pthread_fprintf(__VA_ARGS__)
 
 #define _RECV() \
 ret = recv(client, receive, _MESSAGE_LENGTH, 0); \
@@ -181,9 +195,10 @@ void *client_callback(void *param) {
     char sql_update_online_0[128];
     char sql_update_online_1[128];
     char sql_if_exists_name[128];
-    char sql_select_all_online_users[128];
+    char sql_select_leaderboard[128];
     char sql_get_password_by_name[128];
     char sql_add_client[128];
+    char sql_select_rooms[128];
 
     while (1) {
         char receive[_MESSAGE_LENGTH], transmit[_MESSAGE_LENGTH];
@@ -211,15 +226,16 @@ void *client_callback(void *param) {
             itoa(hash_combine(data.login, data.password), data.string_id, 10);
 
             sprintf(sql_update_online_0,
-                    "UPDATE Data SET Online = 0, InvitationFrom = \'\', Room = 0, RoomMessage = \'\' WHERE Id = %s",
+                    "UPDATE Data SET Online = 0, Room = 0, RoomMessage = \'\' WHERE Id = %s",
                     data.string_id);
             sprintf(sql_update_online_1, "UPDATE Data SET Online = 1 WHERE Id = %s", data.string_id);
             sprintf(sql_if_exists_name, "SELECT EXISTS(SELECT Id FROM Data WHERE Login = \'%s\' LIMIT 1) AS exist;",
                     data.login);
-            sprintf(sql_select_all_online_users, "SELECT Login, Rating FROM Data WHERE Online = 1 ORDER BY Rating, Login;");
+            sprintf(sql_select_leaderboard, "SELECT Login, Rating, Online FROM Data ORDER BY Rating, Online, Login;");
             sprintf(sql_get_password_by_name, "SELECT Password FROM Data WHERE Login = \'%s\';", data.login);
-            sprintf(sql_add_client, "INSERT INTO Data VALUES(%s, \'%s\', \'%s\', 1000, 1, \'\', 0, \'\');",
+            sprintf(sql_add_client, "INSERT INTO Data VALUES(%s, \'%s\', \'%s\', 1000, 1, 0, \'\');",
                     data.string_id, data.login, data.password);
+            sprintf(sql_select_rooms, "SELECT Room , count(Room) AS total FROM Data WHERE Room <> \'\' ORDER BY total");
 
             int exists = 0;
             SQL_THREAD_EXEC(sql_if_exists_name, callback_check_if_exists, (void *) &exists, err);
@@ -246,9 +262,30 @@ void *client_callback(void *param) {
             continue;
         }
 
-        if (!strcmp(tag, "<MENU>") && !first_time) {
-            SQL_THREAD_EXEC(sql_select_all_online_users, callback_select_all_online_users, (void *) &transmit, err);
-            strcat(transmit, "#"); // end symbol for online table list
+        if (!strcmp(tag, "<LEADERBOARD>") && !first_time) {
+            SQL_THREAD_EXEC(sql_select_leaderboard, callback_select_leaderboard, (void *) &transmit, err);
+            strcat(transmit, "#"); // end symbol for leaderboard table list
+
+            _SEND()
+            continue;
+        }
+
+        if (!strcmp(tag, "<ROOMS>") && !first_time) {
+            SQL_THREAD_EXEC(sql_select_rooms, callback_select_rooms, (void *) &transmit, err);
+            strcat(transmit, "#"); // end symbol for rooms table list
+
+            _SEND()
+            continue;
+        }
+
+        if (!strcmp(tag, "<CREATE_ROOM>") && !first_time) {
+            strcat(transmit, "ROOM_CREATED ");
+            strcat(transmit, data.string_id);
+
+            char sql_change_room[128];
+            sprintf(sql_change_room, "UPDATE Data SET Room = %s WHERE Login = %s LIMIT 1;", data.string_id, data.login);
+
+            SQL_THREAD_EXEC(sql_change_room, 0, 0, err);
 
             _SEND()
             continue;
@@ -351,7 +388,6 @@ int create_server() {
                                    "Password TEXT, "
                                    "Rating INT, "
                                    "Online INT, "
-                                   "InvitationFrom TEXT, "
                                    "Room INT, "
                                    "RoomMessage TEXT);";
 
@@ -365,7 +401,7 @@ int create_server() {
         return EXIT_FAILURE;
     }
 
-    rc = sqlite3_exec(db, "UPDATE Data SET Online = 0, InvitationFrom = \'\', Room = 0, RoomMessage = \'\'", 0, 0, &err);
+    rc = sqlite3_exec(db, "UPDATE Data SET Online = 0, Room = 0, RoomMessage = \'\'", 0, 0, &err);
 
     if (rc != SQLITE_OK) {
         printf("[SQL ERROR] %s\n", err);
