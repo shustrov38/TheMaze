@@ -27,7 +27,8 @@ typedef enum {
     ENTER_ROOM,
     LEAVE_ROOM,
     DESTROY_ROOM,
-    ASK_STATE
+    GET_STATE,
+    ROOM_NEIGHBOURS
 } INNER_INTERFACE;
 
 typedef enum{
@@ -91,5 +92,6 @@ void upd_st(SOCKET client, COMMAND_PROTOTYPE C);
 #define CREATE_ROOM() create_room(client, C)
 #define ENTER(NAME) enter_room(client, C, NAME)
 #define LEAVE() leave_room(client, C)
+#define GET_NEIGHBORS() nei(client, C)
 
 #endif //THEMAZE_INTERFACE_H

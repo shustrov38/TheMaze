@@ -466,7 +466,7 @@ void *client_callback(void *param) {
             continue;
         }
 
-        if (!strcmp(tag, "<ASK_STATE>") && !first_time) {
+        if (!strcmp(tag, "<GET_STATE>") && !first_time) {
             SQL_THREAD_EXEC(sql_get_state, callback_get_one_string, (void *) transmit, err);
 
             _SEND()
