@@ -65,6 +65,7 @@ int Update_window_rect(int x, int y, unsigned int w, unsigned int h);
 void CleanUp_window(void);
 void CleanUp_screen(void);
 
+void startSession();
 SDL_Surface *Load_img(const char *filename);
 SDL_Surface *ScaleSurface(SDL_Surface *image, size_t width, size_t height);
 static SDL_Surface *ScaledCopy(SDL_Surface *src, SDL_Rect *dstSize);

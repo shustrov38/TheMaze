@@ -123,6 +123,7 @@ char *make_command(SOCKET client, COMMAND_PROTOTYPE proto) {
         }
     }
     printf("<<%s\n", command);
+    fflush(stdout);
 
     return command;
 }

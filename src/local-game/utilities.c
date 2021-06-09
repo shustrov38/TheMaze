@@ -39,6 +39,25 @@ int Init_window(const char *title, int width, int height) {
     return 0;
 }
 
+void startSession() {
+    client = socket(AF_INET, SOCK_STREAM, IPPROTO_IP);
+    if (client == INVALID_SOCKET) {
+        printf("Error create socket\n");
+        return;
+    }
+    struct sockaddr_in server;
+    server.sin_family = AF_INET;
+    server.sin_port = htons(5510); //the same as in server
+//  server.sin_addr.S_un.S_addr = inet_addr("127.0.0.1"); //special look-up address
+    server.sin_addr.S_un.S_addr = inet_addr("26.173.251.89");
+    if (connect(client, (struct sockaddr *) &server, sizeof(server)) == SOCKET_ERROR) {
+        printf("Can't connect to server\n");
+        closesocket(client);
+        return;
+    }
+}
+
+
 SDL_Surface *Get_screen(void) {
     return screen;
 }

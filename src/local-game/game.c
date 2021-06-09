@@ -57,23 +57,6 @@ playerPos *initAllPlayers(int playersCnt, SDL_Surface **icons, int iconsCnt) {
     return players;
 }
 
-void startSession() {
-    client = socket(AF_INET, SOCK_STREAM, IPPROTO_IP);
-    if (client == INVALID_SOCKET) {
-        printf("Error create socket\n");
-        return;
-    }
-    struct sockaddr_in server;
-    server.sin_family = AF_INET;
-    server.sin_port = htons(5510); //the same as in server
-//  server.sin_addr.S_un.S_addr = inet_addr("127.0.0.1"); //special look-up address
-    server.sin_addr.S_un.S_addr = inet_addr("26.173.251.89");
-    if (connect(client, (struct sockaddr *) &server, sizeof(server)) == SOCKET_ERROR) {
-        printf("Can't connect to server\n");
-        closesocket(client);
-        return;
-    }
-}
 
 static void Process_login() {
     TTF_Init();
@@ -263,19 +246,19 @@ static void Process_leaderboard(/*PLAYERS_STRUCT *users*/) {
                             Update_window_rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 
 
-                            if (selectionPos <= 4) {
-                                begin = 0;
-                                end = 7;
-                                Draw_image(screen, menu_pointer, 275, 365 + 30 * (selectionPos));
-                            } else if (selectionPos >= 25) {
-                                begin = 21;
-                                end = 29;
-                                Draw_image(screen, menu_pointer, 275, 365 + 30 * (selectionPos - begin));
-                            } else {
-                                begin = selectionPos - 4;
-                                end = selectionPos + 4;
-                                Draw_image(screen, menu_pointer, 275, 365 + 30 * (end - selectionPos));
-                            }
+//                            if (selectionPos <= 4) {
+//                                begin = 0;
+//                                end = 7;
+//                                Draw_image(screen, menu_pointer, 275, 365 + 30 * (selectionPos));
+//                            } else if (selectionPos >= 25) {
+//                                begin = 21;
+//                                end = 29;
+//                                Draw_image(screen, menu_pointer, 275, 365 + 30 * (selectionPos - begin));
+//                            } else {
+//                                begin = selectionPos - 4;
+//                                end = selectionPos + 4;
+//                                Draw_image(screen, menu_pointer, 275, 365 + 30 * (end - selectionPos));
+//                            }
 
                             for (int i = begin; i <= end; ++i) {
                                 WriteText(315, loginPos_Y, scoreboard[i].NAME, 24, 255, 255, 255);
@@ -307,19 +290,19 @@ static void Process_leaderboard(/*PLAYERS_STRUCT *users*/) {
                             Update_window_rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
                             Update_window_rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 
-                            if (selectionPos <= 4) {
-                                begin = 0;
-                                end = 7;
-                                Draw_image(screen, menu_pointer, 275, 365 + 30 * (selectionPos));
-                            } else if (selectionPos >= 25) {
-                                begin = 21;
-                                end = 29;
-                                Draw_image(screen, menu_pointer, 275, 365 + 30 * (selectionPos - begin));
-                            } else {
-                                begin = selectionPos - 4;
-                                end = selectionPos + 4;
-                                Draw_image(screen, menu_pointer, 275, 365 + 30 * (end - selectionPos));
-                            }
+//                            if (selectionPos <= 4) {
+//                                begin = 0;
+//                                end = 7;
+//                                Draw_image(screen, menu_pointer, 275, 365 + 30 * (selectionPos));
+//                            } else if (selectionPos >= 25) {
+//                                begin = 21;
+//                                end = 29;
+//                                Draw_image(screen, menu_pointer, 275, 365 + 30 * (selectionPos - begin));
+//                            } else {
+//                                begin = selectionPos - 4;
+//                                end = selectionPos + 4;
+//                                Draw_image(screen, menu_pointer, 275, 365 + 30 * (end - selectionPos));
+//                            }
 
                             for (int i = begin; i <= end; ++i) {
                                 WriteText(315, loginPos_Y, scoreboard[i].NAME, 24, 255, 255, 255);
@@ -364,15 +347,54 @@ static void Process_leaderboard(/*PLAYERS_STRUCT *users*/) {
     }
 }
 
-static void Process_rooms(ROOMS_STRUCT *rooms, int roomsCnt) {
+static void Process_waiting() {
     SDL_Event event;
     TTF_Init();
 
+    SDL_Surface *menu_background = Load_img("../../../src/local-game/Textures/menu/menu_back.jpg");
+    Draw_image(screen, menu_background, 0, 0);
+
+
+    SDL_Surface *waiting = Load_img("../../../src/local-game/Textures/menu/room_waiting.bmp");
+    Draw_image(screen, waiting, 248, 227);
+    Update_window_rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+
+    int done = 0;
+
+    while (!done) {
+        while (SDL_PollEvent(&event)) {
+            if (event.type == SDL_KEYDOWN) {
+                switch (event.key.keysym.sym) {
+
+                    case SDLK_SPACE:
+                        game_status = GAME_ROOMS;
+                        return;
+                        break;
+
+                }
+            }
+
+            if (event.type == SDL_QUIT) {
+                SDL_Quit();
+                DISCONNECT();
+                exit(0);
+            }
+        }
+    }
+}
+
+static void Process_rooms(/*ROOMS_STRUCT *rooms, int roomsCnt*/) {
+    SDL_Event event;
+    TTF_Init();
+
+    LOBBY();
 
     game_status = GAME_ROOMS;
     SDL_Surface *menu_background = Load_img("../../../src/local-game/Textures/menu/menu_back.jpg");
 
-    SDL_Surface *room = Load_img("../../../src/local-game/Textures/menu/room.bmp");
+    SDL_Surface *room_join = Load_img("../../../src/local-game/Textures/menu/room_1.bmp");
+    SDL_Surface *room_create = Load_img("../../../src/local-game/Textures/menu/room_2.bmp");
+    SDL_Surface *room_create_button = Load_img("../../../src/local-game/Textures/menu/create_room.bmp");
 
     SDL_Surface *pointer = Load_img("../../../src/local-game/Textures/menu/pointer.png");
     SDL_Surface *menu_pointer = ScaleSurface(pointer, 30, 30);
@@ -380,19 +402,24 @@ static void Process_rooms(ROOMS_STRUCT *rooms, int roomsCnt) {
 
     int done = 0;
     int currentRoom = 0;
+    int currentPos = 0;
     char text[15];
+    int roomCreatingFlag = -1;
 
-    if (lobbies[currentRoom].pcnt != 0) {
+    if (getLobbySize()) {
         Draw_image(screen, menu_background, 0, 0);
-        Draw_image(screen, room, 285, 235);
+        Draw_image(screen, room_join, 285, 235);
         WriteText(342, 356, lobbies[currentRoom].NAME, 30, 255, 255, 255);
 
         itoa(lobbies[currentRoom].pcnt, text, 10);
         WriteText(527, 430, text, 30, 255, 255, 255);
         Update_window_rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+        roomCreatingFlag = 1;
     } else {
         Draw_image(screen, menu_background, 0, 0);
+        Draw_image(screen, room_create_button, 293, 327);
         Update_window_rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+        roomCreatingFlag = 0;
     }
 
     while (!done) {
@@ -402,39 +429,113 @@ static void Process_rooms(ROOMS_STRUCT *rooms, int roomsCnt) {
         while (SDL_PollEvent(&event)) {
             if (event.type == SDL_KEYDOWN) {
                 switch (event.key.keysym.sym) {
-                    case SDLK_f:
-                        CREATE_ROOM();
-                        break;
 
-                    case SDLK_e:
-                        if (lobbies[currentRoom + 1].pcnt != 0) {
-                            currentRoom++;
-                            Draw_image(screen, menu_background, 0, 0);
-                            Draw_image(screen, room, 285, 235);
-                            WriteText(342, 356, lobbies[currentRoom].NAME, 30, 255, 255, 255);
+                    case SDLK_d:
+                        if (roomCreatingFlag != 0) {
+                            if (lobbies[currentRoom + 1].pcnt != 0) {
+                                currentRoom++;
+                                if (currentPos == 0) {
+                                    Draw_image(screen, menu_background, 0, 0);
+                                    Draw_image(screen, room_join, 285, 235);
+                                    WriteText(342, 356, lobbies[currentRoom].NAME, 30, 255, 255, 255);
 
-                            char textRoom[15];
-                            itoa(lobbies[currentRoom].pcnt, text, 10);
-                            WriteText(527, 430, text, 30, 255, 255, 255);
-                            Update_window_rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+                                    char textRoom[15];
+                                    itoa(lobbies[currentRoom].pcnt, text, 10);
+                                    WriteText(527, 430, text, 30, 255, 255, 255);
+                                    Update_window_rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+                                } else if (currentPos == 1) {
+                                    Draw_image(screen, menu_background, 0, 0);
+                                    Draw_image(screen, room_create, 285, 235);
+                                    WriteText(342, 356, lobbies[currentRoom].NAME, 30, 255, 255, 255);
+
+                                    char textRoom[15];
+                                    itoa(lobbies[currentRoom].pcnt, text, 10);
+                                    WriteText(527, 430, text, 30, 255, 255, 255);
+                                    Update_window_rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+                                }
+                            }
                         }
                         break;
 
-                    case SDLK_q:
-                        if (currentRoom != 0) {
-                            currentRoom--;
-                            Draw_image(screen, menu_background, 0, 0);
-                            Draw_image(screen, room, 285, 235);
-                            WriteText(342, 356, lobbies[currentRoom].NAME, 30, 255, 255, 255);
+                    case SDLK_a:
+                        if (roomCreatingFlag != 0) {
+                            if (currentRoom != 0) {
+                                currentRoom--;
+                                if (currentPos == 0) {
+                                    Draw_image(screen, menu_background, 0, 0);
+                                    Draw_image(screen, room_join, 285, 235);
+                                    WriteText(342, 356, lobbies[currentRoom].NAME, 30, 255, 255, 255);
 
-                            char textRoom[15];
-                            itoa(lobbies[currentRoom].pcnt, text, 10);
-                            WriteText(527, 430, text, 30, 255, 255, 255);
-                            Update_window_rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+                                    char textRoom[15];
+                                    itoa(lobbies[currentRoom].pcnt, text, 10);
+                                    WriteText(527, 430, text, 30, 255, 255, 255);
+                                    Update_window_rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+                                } else if (currentPos == 1) {
+                                    Draw_image(screen, menu_background, 0, 0);
+                                    Draw_image(screen, room_create, 285, 235);
+                                    WriteText(342, 356, lobbies[currentRoom].NAME, 30, 255, 255, 255);
+
+                                    char textRoom[15];
+                                    itoa(lobbies[currentRoom].pcnt, text, 10);
+                                    WriteText(527, 430, text, 30, 255, 255, 255);
+                                    Update_window_rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+                                }
+                            }
+                        }
+                        break;
+
+                    case SDLK_s:
+                        if (roomCreatingFlag != 0) {
+                            if (currentPos != 1) {
+                                currentPos++;
+                                Draw_image(screen, menu_background, 0, 0);
+                                Draw_image(screen, room_create, 285, 235);
+                                WriteText(342, 356, lobbies[currentRoom].NAME, 30, 255, 255, 255);
+
+                                char textRoom[15];
+                                itoa(lobbies[currentRoom].pcnt, text, 10);
+                                WriteText(527, 430, text, 30, 255, 255, 255);
+                                Update_window_rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+                            }
+                        }
+                        break;
+
+                    case SDLK_w:
+                        if (roomCreatingFlag != 0) {
+                            if (currentPos != 0) {
+                                currentPos--;
+                                Draw_image(screen, menu_background, 0, 0);
+                                Draw_image(screen, room_join, 285, 235);
+                                WriteText(342, 356, lobbies[currentRoom].NAME, 30, 255, 255, 255);
+
+                                char textRoom[15];
+                                itoa(lobbies[currentRoom].pcnt, text, 10);
+                                WriteText(527, 430, text, 30, 255, 255, 255);
+                                Update_window_rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+                            }
                         }
                         break;
 
                     case SDLK_SPACE:
+                        if (roomCreatingFlag == 0) {
+                            CREATE_ROOM();
+                            roomCreatingFlag = 1;
+                            game_status = GAME_WAITING;
+                            return;
+                        }
+                        if (roomCreatingFlag == 1 && currentPos == 0) {
+                            ENTER(lobbies[currentPos].NAME);
+                            game_status = GAME_WAITING;
+                            return;
+                        }
+                        if (roomCreatingFlag == 1 && currentPos == 1) {
+                            CREATE_ROOM();
+                            game_status = GAME_WAITING;
+                            return;
+                        }
+                        break;
+
+                    case SDLK_f:
                         done = 2;
                         break;
 
@@ -593,30 +694,29 @@ int main(int argc, char *argv[]) {
 
 //init of rooms and players
     int playersCnt;
-    printf("Enter players count: ");
-    scanf("%d", &playersCnt);
-
-    int roomsCnt;
-    printf("Enter rooms count: ");
-    scanf("%d", &roomsCnt);
-
-
-    PLAYERS_STRUCT *users = (PLAYERS_STRUCT *) malloc(30 * sizeof(PLAYERS_STRUCT));
-    for (int i = 0; i < 30; ++i) {
-        users[i].login = (char *) malloc(16 * sizeof(char));
-        scanf("%s %d", users[i].login, &users[i].MMR);
-    }
-
-    ROOMS_STRUCT *rooms = (ROOMS_STRUCT *) malloc(5 * sizeof(ROOMS_STRUCT));
-    for (int i = 0; i < roomsCnt; ++i){
-        rooms[i].roomName = (char *) malloc(30 * sizeof(char));
-        scanf("%s %d", rooms[i].roomName, &rooms[i].playersCnt);
-    }
-
+//    printf("Enter players count: ");
+//    scanf("%d", &playersCnt);
+//
+//    int roomsCnt;
+//    printf("Enter rooms count: ");
+//    scanf("%d", &roomsCnt);
+//
+//
+//    PLAYERS_STRUCT *users = (PLAYERS_STRUCT *) malloc(30 * sizeof(PLAYERS_STRUCT));
+//    for (int i = 0; i < 30; ++i) {
+//        users[i].login = (char *) malloc(16 * sizeof(char));
+//        scanf("%s %d", users[i].login, &users[i].MMR);
+//    }
+//
+//    ROOMS_STRUCT *rooms = (ROOMS_STRUCT *) malloc(5 * sizeof(ROOMS_STRUCT));
+//    for (int i = 0; i < roomsCnt; ++i) {
+//        rooms[i].roomName = (char *) malloc(30 * sizeof(char));
+//        scanf("%s %d", rooms[i].roomName, &rooms[i].playersCnt);
+//    }
+//
 //    for (int i = 0; i < 30; ++i){
 //        printf("\n%s - %d - %d", users[i].login, users[i].MMR, users[i].inGame);
 //    }
-
 //init of rooms and players
 
 //login
@@ -633,7 +733,10 @@ int main(int argc, char *argv[]) {
             Process_leaderboard(/*users*/);
         }
         if (game_status == GAME_ROOMS) {
-            Process_rooms(rooms, roomsCnt);
+            Process_rooms(/*rooms, roomsCnt*/);
+        }
+        if (game_status == GAME_WAITING){
+            Process_waiting();
         }
     }
 //menu
