@@ -103,7 +103,12 @@ char *make_command(SOCKET client, COMMAND_PROTOTYPE proto) {
 //              printf("%s->", tmp);
                 z = 0;
                 sscanf(tmp, "%s %d %d", scoreboard[j].NAME, &scoreboard[j].score, &scoreboard[j].is_online);
-                j++;
+                if(strlen(lobbies[i].NAME)>0) j++;
+                else {
+                    memset(scoreboard[j].NAME,0,PL_PARAM_SIZE);
+                    scoreboard[j].score = 0;
+                    scoreboard[j].is_online = 0;
+                }
                 memset(tmp, 0, 32);
                 continue;
             }
@@ -123,7 +128,11 @@ char *make_command(SOCKET client, COMMAND_PROTOTYPE proto) {
 //              printf("%s->", tmp);
                 z = 0;
                 sscanf(tmp, "%s %d", lobbies[j].NAME, &lobbies[j].pcnt);
-                j++;
+                if(strlen(lobbies[i].NAME)>0) j++;
+                else {
+                    memset(lobbies[j].NAME,0,PL_PARAM_SIZE);
+                    lobbies[j].pcnt = 0;
+                }
                 memset(tmp, 0, 32);
                 continue;
             }
