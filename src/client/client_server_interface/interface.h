@@ -77,6 +77,8 @@ void create_room(SOCKET client, COMMAND_PROTOTYPE C);
 void enter_room(SOCKET client, COMMAND_PROTOTYPE C, char *name);
 void leave_room(SOCKET client, COMMAND_PROTOTYPE C);
 void upd_st(SOCKET client, COMMAND_PROTOTYPE C);
+void nei(SOCKET client, COMMAND_PROTOTYPE C);
+void cords(SOCKET client, COMMAND_PROTOTYPE C);
 
 #define LOGIN(NAME, PASS) try_login(client, C, NAME,PASS)
 #define GET_LDB() upd_ld_board(client, C)
@@ -88,5 +90,6 @@ void upd_st(SOCKET client, COMMAND_PROTOTYPE C);
 #define ENTER(NAME) enter_room(client, C, NAME)
 #define LEAVE() leave_room(client, C)
 #define GET_NEIGHBORS() nei(client, C)
+#define UPD_RENDER_INFO() cord(client,C)
 
 #endif //THEMAZE_INTERFACE_H

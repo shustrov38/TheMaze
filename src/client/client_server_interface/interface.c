@@ -270,3 +270,9 @@ void nei(SOCKET client, COMMAND_PROTOTYPE C) {
     C.VALID_ARG_CNT = 0;
     make_command(client, C);
 }
+
+void cords(SOCKET client, COMMAND_PROTOTYPE C) {
+    C.TAG = GET_RENDER_CORD;
+    C.VALID_ARG_CNT = 0;
+    make_command(client, C);
+}
