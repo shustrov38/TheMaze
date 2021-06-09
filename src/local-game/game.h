@@ -7,8 +7,13 @@ static void Process_menu();
 typedef struct{
     char *login;
     int MMR;
-    int invite;
+    int inGameStatus;
 } PLAYERS;
+
+typedef struct{
+    char *roomName;
+    int playersCnt;
+} ROOMS;
 
 
 enum {

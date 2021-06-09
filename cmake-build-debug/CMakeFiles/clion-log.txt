@@ -1,11 +1,4 @@
-"D:\For apps\CLion 2020.2.1\bin\cmake\win\bin\cmake.exe" -DCMAKE_BUILD_TYPE=Debug -G "CodeBlocks - MinGW Makefiles" D:\AllCodes\TheMaze
--- The C compiler identification is GNU 8.1.0
--- Check for working C compiler: D:/For apps/mingw64/bin/gcc.exe
--- Check for working C compiler: D:/For apps/mingw64/bin/gcc.exe - works
--- Detecting C compiler ABI info
--- Detecting C compiler ABI info - done
--- Detecting C compile features
--- Detecting C compile features - done
+C:\Users\anros\AppData\Local\JetBrains\Toolbox\apps\CLion\ch-0\203.7148.70\bin\cmake\win\bin\cmake.exe -DCMAKE_BUILD_TYPE=Debug -G "CodeBlocks - MinGW Makefiles" D:\AllCodes\TheMaze
 -- Configuring done
 -- Generating done
 -- Build files have been written to: D:/AllCodes/TheMaze/cmake-build-debug
