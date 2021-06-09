@@ -80,6 +80,8 @@ static void Process_login() {
     int done = 0;
     char temp[128];
     int temp_size = 0;
+    int login_size = 0;
+    int password_size = 0;
 
 
 
@@ -138,25 +140,39 @@ static void Process_login() {
                         break;
 
                     case SDLK_SPACE:
-                        if (temp_size == 0) {
-                            break;
-                        }
-                        enterCnt++;
-                        if (enterCnt == 1) {
-                            strcpy(login, temp);
-                            memset(temp, 0, 128);
-                            temp_size = 0;
-                        } else if (enterCnt == 2) {
+                        if((login_size != 0 && password_size != 0) || (enterCnt==1 && temp_size!=0)) {
                             strcpy(password, temp);
                             if (LOGIN(login, password) == 1) {
                                 done = 1;
                                 game_status = GAME_MENU;
                             } else {
                                 enterCnt = 1;
+                                temp_size=0;
                                 memset(password, 0, 128);
                                 memset(temp, 0, 128);
                             }
                         }
+                        break;
+
+                    case SDLK_DOWN:
+                        if(enterCnt==0) {
+                            login_size = temp_size;
+                            strcpy(login, temp);
+                            memset(temp, 0, 128);
+                            strcpy(temp, password);
+                            temp_size = password_size;
+                        }
+                        enterCnt=1;
+                        break;
+                    case SDLK_UP:
+                        if(enterCnt==1) {
+                            password_size = temp_size;
+                            strcpy(password, temp);
+                            memset(temp, 0, 128);
+                            strcpy(temp, login);
+                            temp_size = login_size;
+                        }
+                        enterCnt=0;
                         break;
                 }
                 if (done) {
@@ -169,7 +185,8 @@ static void Process_login() {
             if (enterCnt == 0) {
                 Draw_image(screen, field1, 496, 172);
                 WriteText(512, 172, temp, 28, 0, 0, 0);
-            } else if (enterCnt == 1) {
+                WriteText(512, 221, password, 28, 0, 0, 0);
+            } else {
                 Draw_image(screen, field2, 496, 221);
                 WriteText(512, 172, login, 28, 0, 0, 0);
                 WriteText(512, 221, temp, 28, 0, 0, 0);

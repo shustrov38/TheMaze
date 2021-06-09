@@ -53,19 +53,19 @@ cmake_force:
 SHELL = cmd.exe
 
 # The CMake executable.
-CMAKE_COMMAND = C:\Users\anros\AppData\Local\JetBrains\Toolbox\apps\CLion\ch-0\203.7148.70\bin\cmake\win\bin\cmake.exe
+CMAKE_COMMAND = "C:\Program Files\JetBrains\CLion 2020.3\bin\cmake\win\bin\cmake.exe"
 
 # The command to remove a file.
-RM = C:\Users\anros\AppData\Local\JetBrains\Toolbox\apps\CLion\ch-0\203.7148.70\bin\cmake\win\bin\cmake.exe -E rm -f
+RM = "C:\Program Files\JetBrains\CLion 2020.3\bin\cmake\win\bin\cmake.exe" -E rm -f
 
 # Escaping for special characters.
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = D:\AllCodes\TheMaze
+CMAKE_SOURCE_DIR = D:\TheMaze
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = D:\AllCodes\TheMaze\cmake-build-debug
+CMAKE_BINARY_DIR = D:\TheMaze\cmake-build-debug
 
 # Include any dependencies generated for this target.
 include src/client/CMakeFiles/Client.dir/depend.make
@@ -78,29 +78,29 @@ include src/client/CMakeFiles/Client.dir/flags.make
 
 src/client/CMakeFiles/Client.dir/client.c.obj: src/client/CMakeFiles/Client.dir/flags.make
 src/client/CMakeFiles/Client.dir/client.c.obj: ../src/client/client.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=D:\AllCodes\TheMaze\cmake-build-debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building C object src/client/CMakeFiles/Client.dir/client.c.obj"
-	cd /d D:\AllCodes\TheMaze\cmake-build-debug\src\client && "D:\For apps\mingw64\bin\gcc.exe" $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles\Client.dir\client.c.obj   -c D:\AllCodes\TheMaze\src\client\client.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=D:\TheMaze\cmake-build-debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building C object src/client/CMakeFiles/Client.dir/client.c.obj"
+	cd /d D:\TheMaze\cmake-build-debug\src\client && C:\PROGRA~1\MINGW-~1\X86_64~1.0-P\mingw64\bin\gcc.exe $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles\Client.dir\client.c.obj   -c D:\TheMaze\src\client\client.c
 
 src/client/CMakeFiles/Client.dir/client.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/Client.dir/client.c.i"
-	cd /d D:\AllCodes\TheMaze\cmake-build-debug\src\client && "D:\For apps\mingw64\bin\gcc.exe" $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E D:\AllCodes\TheMaze\src\client\client.c > CMakeFiles\Client.dir\client.c.i
+	cd /d D:\TheMaze\cmake-build-debug\src\client && C:\PROGRA~1\MINGW-~1\X86_64~1.0-P\mingw64\bin\gcc.exe $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E D:\TheMaze\src\client\client.c > CMakeFiles\Client.dir\client.c.i
 
 src/client/CMakeFiles/Client.dir/client.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/Client.dir/client.c.s"
-	cd /d D:\AllCodes\TheMaze\cmake-build-debug\src\client && "D:\For apps\mingw64\bin\gcc.exe" $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S D:\AllCodes\TheMaze\src\client\client.c -o CMakeFiles\Client.dir\client.c.s
+	cd /d D:\TheMaze\cmake-build-debug\src\client && C:\PROGRA~1\MINGW-~1\X86_64~1.0-P\mingw64\bin\gcc.exe $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S D:\TheMaze\src\client\client.c -o CMakeFiles\Client.dir\client.c.s
 
 src/client/CMakeFiles/Client.dir/client_server_interface/interface.c.obj: src/client/CMakeFiles/Client.dir/flags.make
 src/client/CMakeFiles/Client.dir/client_server_interface/interface.c.obj: ../src/client/client_server_interface/interface.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=D:\AllCodes\TheMaze\cmake-build-debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building C object src/client/CMakeFiles/Client.dir/client_server_interface/interface.c.obj"
-	cd /d D:\AllCodes\TheMaze\cmake-build-debug\src\client && "D:\For apps\mingw64\bin\gcc.exe" $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles\Client.dir\client_server_interface\interface.c.obj   -c D:\AllCodes\TheMaze\src\client\client_server_interface\interface.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=D:\TheMaze\cmake-build-debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building C object src/client/CMakeFiles/Client.dir/client_server_interface/interface.c.obj"
+	cd /d D:\TheMaze\cmake-build-debug\src\client && C:\PROGRA~1\MINGW-~1\X86_64~1.0-P\mingw64\bin\gcc.exe $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles\Client.dir\client_server_interface\interface.c.obj   -c D:\TheMaze\src\client\client_server_interface\interface.c
 
 src/client/CMakeFiles/Client.dir/client_server_interface/interface.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/Client.dir/client_server_interface/interface.c.i"
-	cd /d D:\AllCodes\TheMaze\cmake-build-debug\src\client && "D:\For apps\mingw64\bin\gcc.exe" $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E D:\AllCodes\TheMaze\src\client\client_server_interface\interface.c > CMakeFiles\Client.dir\client_server_interface\interface.c.i
+	cd /d D:\TheMaze\cmake-build-debug\src\client && C:\PROGRA~1\MINGW-~1\X86_64~1.0-P\mingw64\bin\gcc.exe $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E D:\TheMaze\src\client\client_server_interface\interface.c > CMakeFiles\Client.dir\client_server_interface\interface.c.i
 
 src/client/CMakeFiles/Client.dir/client_server_interface/interface.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/Client.dir/client_server_interface/interface.c.s"
-	cd /d D:\AllCodes\TheMaze\cmake-build-debug\src\client && "D:\For apps\mingw64\bin\gcc.exe" $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S D:\AllCodes\TheMaze\src\client\client_server_interface\interface.c -o CMakeFiles\Client.dir\client_server_interface\interface.c.s
+	cd /d D:\TheMaze\cmake-build-debug\src\client && C:\PROGRA~1\MINGW-~1\X86_64~1.0-P\mingw64\bin\gcc.exe $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S D:\TheMaze\src\client\client_server_interface\interface.c -o CMakeFiles\Client.dir\client_server_interface\interface.c.s
 
 # Object files for target Client
 Client_OBJECTS = \
@@ -116,8 +116,8 @@ src/client/Client.exe: src/client/CMakeFiles/Client.dir/build.make
 src/client/Client.exe: src/client/CMakeFiles/Client.dir/linklibs.rsp
 src/client/Client.exe: src/client/CMakeFiles/Client.dir/objects1.rsp
 src/client/Client.exe: src/client/CMakeFiles/Client.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=D:\AllCodes\TheMaze\cmake-build-debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Linking C executable Client.exe"
-	cd /d D:\AllCodes\TheMaze\cmake-build-debug\src\client && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles\Client.dir\link.txt --verbose=$(VERBOSE)
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=D:\TheMaze\cmake-build-debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Linking C executable Client.exe"
+	cd /d D:\TheMaze\cmake-build-debug\src\client && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles\Client.dir\link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
 src/client/CMakeFiles/Client.dir/build: src/client/Client.exe
@@ -125,10 +125,10 @@ src/client/CMakeFiles/Client.dir/build: src/client/Client.exe
 .PHONY : src/client/CMakeFiles/Client.dir/build
 
 src/client/CMakeFiles/Client.dir/clean:
-	cd /d D:\AllCodes\TheMaze\cmake-build-debug\src\client && $(CMAKE_COMMAND) -P CMakeFiles\Client.dir\cmake_clean.cmake
+	cd /d D:\TheMaze\cmake-build-debug\src\client && $(CMAKE_COMMAND) -P CMakeFiles\Client.dir\cmake_clean.cmake
 .PHONY : src/client/CMakeFiles/Client.dir/clean
 
 src/client/CMakeFiles/Client.dir/depend:
-	$(CMAKE_COMMAND) -E cmake_depends "MinGW Makefiles" D:\AllCodes\TheMaze D:\AllCodes\TheMaze\src\client D:\AllCodes\TheMaze\cmake-build-debug D:\AllCodes\TheMaze\cmake-build-debug\src\client D:\AllCodes\TheMaze\cmake-build-debug\src\client\CMakeFiles\Client.dir\DependInfo.cmake --color=$(COLOR)
+	$(CMAKE_COMMAND) -E cmake_depends "MinGW Makefiles" D:\TheMaze D:\TheMaze\src\client D:\TheMaze\cmake-build-debug D:\TheMaze\cmake-build-debug\src\client D:\TheMaze\cmake-build-debug\src\client\CMakeFiles\Client.dir\DependInfo.cmake --color=$(COLOR)
 .PHONY : src/client/CMakeFiles/Client.dir/depend
 

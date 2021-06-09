@@ -58,19 +58,19 @@ cmake_force:
 SHELL = cmd.exe
 
 # The CMake executable.
-CMAKE_COMMAND = C:\Users\anros\AppData\Local\JetBrains\Toolbox\apps\CLion\ch-0\203.7148.70\bin\cmake\win\bin\cmake.exe
+CMAKE_COMMAND = "C:\Program Files\JetBrains\CLion 2020.3\bin\cmake\win\bin\cmake.exe"
 
 # The command to remove a file.
-RM = C:\Users\anros\AppData\Local\JetBrains\Toolbox\apps\CLion\ch-0\203.7148.70\bin\cmake\win\bin\cmake.exe -E rm -f
+RM = "C:\Program Files\JetBrains\CLion 2020.3\bin\cmake\win\bin\cmake.exe" -E rm -f
 
 # Escaping for special characters.
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = D:\AllCodes\TheMaze
+CMAKE_SOURCE_DIR = D:\TheMaze
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = D:\AllCodes\TheMaze\cmake-build-debug
+CMAKE_BINARY_DIR = D:\TheMaze\cmake-build-debug
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -78,7 +78,7 @@ CMAKE_BINARY_DIR = D:\AllCodes\TheMaze\cmake-build-debug
 # Special rule for the target edit_cache
 edit_cache:
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "No interactive CMake dialog available..."
-	C:\Users\anros\AppData\Local\JetBrains\Toolbox\apps\CLion\ch-0\203.7148.70\bin\cmake\win\bin\cmake.exe -E echo "No interactive CMake dialog available."
+	"C:\Program Files\JetBrains\CLion 2020.3\bin\cmake\win\bin\cmake.exe" -E echo "No interactive CMake dialog available."
 .PHONY : edit_cache
 
 # Special rule for the target edit_cache
@@ -89,7 +89,7 @@ edit_cache/fast: edit_cache
 # Special rule for the target rebuild_cache
 rebuild_cache:
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running CMake to regenerate build system..."
-	C:\Users\anros\AppData\Local\JetBrains\Toolbox\apps\CLion\ch-0\203.7148.70\bin\cmake\win\bin\cmake.exe --regenerate-during-build -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
+	"C:\Program Files\JetBrains\CLion 2020.3\bin\cmake\win\bin\cmake.exe" --regenerate-during-build -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
 .PHONY : rebuild_cache
 
 # Special rule for the target rebuild_cache
@@ -99,14 +99,14 @@ rebuild_cache/fast: rebuild_cache
 
 # The main all target
 all: cmake_check_build_system
-	cd /d D:\AllCodes\TheMaze\cmake-build-debug && $(CMAKE_COMMAND) -E cmake_progress_start D:\AllCodes\TheMaze\cmake-build-debug\CMakeFiles D:\AllCodes\TheMaze\cmake-build-debug\src\local-game\CMakeFiles\progress.marks
-	cd /d D:\AllCodes\TheMaze\cmake-build-debug && $(MAKE) $(MAKESILENT) -f CMakeFiles\Makefile2 src/local-game/all
-	$(CMAKE_COMMAND) -E cmake_progress_start D:\AllCodes\TheMaze\cmake-build-debug\CMakeFiles 0
+	cd /d D:\TheMaze\cmake-build-debug && $(CMAKE_COMMAND) -E cmake_progress_start D:\TheMaze\cmake-build-debug\CMakeFiles D:\TheMaze\cmake-build-debug\src\local-game\CMakeFiles\progress.marks
+	cd /d D:\TheMaze\cmake-build-debug && $(MAKE) $(MAKESILENT) -f CMakeFiles\Makefile2 src/local-game/all
+	$(CMAKE_COMMAND) -E cmake_progress_start D:\TheMaze\cmake-build-debug\CMakeFiles 0
 .PHONY : all
 
 # The main clean target
 clean:
-	cd /d D:\AllCodes\TheMaze\cmake-build-debug && $(MAKE) $(MAKESILENT) -f CMakeFiles\Makefile2 src/local-game/clean
+	cd /d D:\TheMaze\cmake-build-debug && $(MAKE) $(MAKESILENT) -f CMakeFiles\Makefile2 src/local-game/clean
 .PHONY : clean
 
 # The main clean target
@@ -116,22 +116,22 @@ clean/fast: clean
 
 # Prepare targets for installation.
 preinstall: all
-	cd /d D:\AllCodes\TheMaze\cmake-build-debug && $(MAKE) $(MAKESILENT) -f CMakeFiles\Makefile2 src/local-game/preinstall
+	cd /d D:\TheMaze\cmake-build-debug && $(MAKE) $(MAKESILENT) -f CMakeFiles\Makefile2 src/local-game/preinstall
 .PHONY : preinstall
 
 # Prepare targets for installation.
 preinstall/fast:
-	cd /d D:\AllCodes\TheMaze\cmake-build-debug && $(MAKE) $(MAKESILENT) -f CMakeFiles\Makefile2 src/local-game/preinstall
+	cd /d D:\TheMaze\cmake-build-debug && $(MAKE) $(MAKESILENT) -f CMakeFiles\Makefile2 src/local-game/preinstall
 .PHONY : preinstall/fast
 
 # clear depends
 depend:
-	cd /d D:\AllCodes\TheMaze\cmake-build-debug && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles\Makefile.cmake 1
+	cd /d D:\TheMaze\cmake-build-debug && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles\Makefile.cmake 1
 .PHONY : depend
 
 # Convenience name for target.
 src/local-game/CMakeFiles/Local_game.dir/rule:
-	cd /d D:\AllCodes\TheMaze\cmake-build-debug && $(MAKE) $(MAKESILENT) -f CMakeFiles\Makefile2 src/local-game/CMakeFiles/Local_game.dir/rule
+	cd /d D:\TheMaze\cmake-build-debug && $(MAKE) $(MAKESILENT) -f CMakeFiles\Makefile2 src/local-game/CMakeFiles/Local_game.dir/rule
 .PHONY : src/local-game/CMakeFiles/Local_game.dir/rule
 
 # Convenience name for target.
@@ -141,12 +141,12 @@ Local_game: src/local-game/CMakeFiles/Local_game.dir/rule
 
 # fast build rule for target.
 Local_game/fast:
-	cd /d D:\AllCodes\TheMaze\cmake-build-debug && $(MAKE) $(MAKESILENT) -f src\local-game\CMakeFiles\Local_game.dir\build.make src/local-game/CMakeFiles/Local_game.dir/build
+	cd /d D:\TheMaze\cmake-build-debug && $(MAKE) $(MAKESILENT) -f src\local-game\CMakeFiles\Local_game.dir\build.make src/local-game/CMakeFiles/Local_game.dir/build
 .PHONY : Local_game/fast
 
 # Convenience name for target.
 src/local-game/CMakeFiles/MyGame.dir/rule:
-	cd /d D:\AllCodes\TheMaze\cmake-build-debug && $(MAKE) $(MAKESILENT) -f CMakeFiles\Makefile2 src/local-game/CMakeFiles/MyGame.dir/rule
+	cd /d D:\TheMaze\cmake-build-debug && $(MAKE) $(MAKESILENT) -f CMakeFiles\Makefile2 src/local-game/CMakeFiles/MyGame.dir/rule
 .PHONY : src/local-game/CMakeFiles/MyGame.dir/rule
 
 # Convenience name for target.
@@ -156,7 +156,7 @@ MyGame: src/local-game/CMakeFiles/MyGame.dir/rule
 
 # fast build rule for target.
 MyGame/fast:
-	cd /d D:\AllCodes\TheMaze\cmake-build-debug && $(MAKE) $(MAKESILENT) -f src\local-game\CMakeFiles\MyGame.dir\build.make src/local-game/CMakeFiles/MyGame.dir/build
+	cd /d D:\TheMaze\cmake-build-debug && $(MAKE) $(MAKESILENT) -f src\local-game\CMakeFiles\MyGame.dir\build.make src/local-game/CMakeFiles/MyGame.dir/build
 .PHONY : MyGame/fast
 
 __/client/client_server_interface/interface.obj: __/client/client_server_interface/interface.c.obj
@@ -165,7 +165,7 @@ __/client/client_server_interface/interface.obj: __/client/client_server_interfa
 
 # target to build an object file
 __/client/client_server_interface/interface.c.obj:
-	cd /d D:\AllCodes\TheMaze\cmake-build-debug && $(MAKE) $(MAKESILENT) -f src\local-game\CMakeFiles\MyGame.dir\build.make src/local-game/CMakeFiles/MyGame.dir/__/client/client_server_interface/interface.c.obj
+	cd /d D:\TheMaze\cmake-build-debug && $(MAKE) $(MAKESILENT) -f src\local-game\CMakeFiles\MyGame.dir\build.make src/local-game/CMakeFiles/MyGame.dir/__/client/client_server_interface/interface.c.obj
 .PHONY : __/client/client_server_interface/interface.c.obj
 
 __/client/client_server_interface/interface.i: __/client/client_server_interface/interface.c.i
@@ -174,7 +174,7 @@ __/client/client_server_interface/interface.i: __/client/client_server_interface
 
 # target to preprocess a source file
 __/client/client_server_interface/interface.c.i:
-	cd /d D:\AllCodes\TheMaze\cmake-build-debug && $(MAKE) $(MAKESILENT) -f src\local-game\CMakeFiles\MyGame.dir\build.make src/local-game/CMakeFiles/MyGame.dir/__/client/client_server_interface/interface.c.i
+	cd /d D:\TheMaze\cmake-build-debug && $(MAKE) $(MAKESILENT) -f src\local-game\CMakeFiles\MyGame.dir\build.make src/local-game/CMakeFiles/MyGame.dir/__/client/client_server_interface/interface.c.i
 .PHONY : __/client/client_server_interface/interface.c.i
 
 __/client/client_server_interface/interface.s: __/client/client_server_interface/interface.c.s
@@ -183,7 +183,7 @@ __/client/client_server_interface/interface.s: __/client/client_server_interface
 
 # target to generate assembly for a file
 __/client/client_server_interface/interface.c.s:
-	cd /d D:\AllCodes\TheMaze\cmake-build-debug && $(MAKE) $(MAKESILENT) -f src\local-game\CMakeFiles\MyGame.dir\build.make src/local-game/CMakeFiles/MyGame.dir/__/client/client_server_interface/interface.c.s
+	cd /d D:\TheMaze\cmake-build-debug && $(MAKE) $(MAKESILENT) -f src\local-game\CMakeFiles\MyGame.dir\build.make src/local-game/CMakeFiles/MyGame.dir/__/client/client_server_interface/interface.c.s
 .PHONY : __/client/client_server_interface/interface.c.s
 
 game.obj: game.c.obj
@@ -192,8 +192,8 @@ game.obj: game.c.obj
 
 # target to build an object file
 game.c.obj:
-	cd /d D:\AllCodes\TheMaze\cmake-build-debug && $(MAKE) $(MAKESILENT) -f src\local-game\CMakeFiles\Local_game.dir\build.make src/local-game/CMakeFiles/Local_game.dir/game.c.obj
-	cd /d D:\AllCodes\TheMaze\cmake-build-debug && $(MAKE) $(MAKESILENT) -f src\local-game\CMakeFiles\MyGame.dir\build.make src/local-game/CMakeFiles/MyGame.dir/game.c.obj
+	cd /d D:\TheMaze\cmake-build-debug && $(MAKE) $(MAKESILENT) -f src\local-game\CMakeFiles\Local_game.dir\build.make src/local-game/CMakeFiles/Local_game.dir/game.c.obj
+	cd /d D:\TheMaze\cmake-build-debug && $(MAKE) $(MAKESILENT) -f src\local-game\CMakeFiles\MyGame.dir\build.make src/local-game/CMakeFiles/MyGame.dir/game.c.obj
 .PHONY : game.c.obj
 
 game.i: game.c.i
@@ -202,8 +202,8 @@ game.i: game.c.i
 
 # target to preprocess a source file
 game.c.i:
-	cd /d D:\AllCodes\TheMaze\cmake-build-debug && $(MAKE) $(MAKESILENT) -f src\local-game\CMakeFiles\Local_game.dir\build.make src/local-game/CMakeFiles/Local_game.dir/game.c.i
-	cd /d D:\AllCodes\TheMaze\cmake-build-debug && $(MAKE) $(MAKESILENT) -f src\local-game\CMakeFiles\MyGame.dir\build.make src/local-game/CMakeFiles/MyGame.dir/game.c.i
+	cd /d D:\TheMaze\cmake-build-debug && $(MAKE) $(MAKESILENT) -f src\local-game\CMakeFiles\Local_game.dir\build.make src/local-game/CMakeFiles/Local_game.dir/game.c.i
+	cd /d D:\TheMaze\cmake-build-debug && $(MAKE) $(MAKESILENT) -f src\local-game\CMakeFiles\MyGame.dir\build.make src/local-game/CMakeFiles/MyGame.dir/game.c.i
 .PHONY : game.c.i
 
 game.s: game.c.s
@@ -212,8 +212,8 @@ game.s: game.c.s
 
 # target to generate assembly for a file
 game.c.s:
-	cd /d D:\AllCodes\TheMaze\cmake-build-debug && $(MAKE) $(MAKESILENT) -f src\local-game\CMakeFiles\Local_game.dir\build.make src/local-game/CMakeFiles/Local_game.dir/game.c.s
-	cd /d D:\AllCodes\TheMaze\cmake-build-debug && $(MAKE) $(MAKESILENT) -f src\local-game\CMakeFiles\MyGame.dir\build.make src/local-game/CMakeFiles/MyGame.dir/game.c.s
+	cd /d D:\TheMaze\cmake-build-debug && $(MAKE) $(MAKESILENT) -f src\local-game\CMakeFiles\Local_game.dir\build.make src/local-game/CMakeFiles/Local_game.dir/game.c.s
+	cd /d D:\TheMaze\cmake-build-debug && $(MAKE) $(MAKESILENT) -f src\local-game\CMakeFiles\MyGame.dir\build.make src/local-game/CMakeFiles/MyGame.dir/game.c.s
 .PHONY : game.c.s
 
 maze_generator.obj: maze_generator.c.obj
@@ -222,8 +222,8 @@ maze_generator.obj: maze_generator.c.obj
 
 # target to build an object file
 maze_generator.c.obj:
-	cd /d D:\AllCodes\TheMaze\cmake-build-debug && $(MAKE) $(MAKESILENT) -f src\local-game\CMakeFiles\Local_game.dir\build.make src/local-game/CMakeFiles/Local_game.dir/maze_generator.c.obj
-	cd /d D:\AllCodes\TheMaze\cmake-build-debug && $(MAKE) $(MAKESILENT) -f src\local-game\CMakeFiles\MyGame.dir\build.make src/local-game/CMakeFiles/MyGame.dir/maze_generator.c.obj
+	cd /d D:\TheMaze\cmake-build-debug && $(MAKE) $(MAKESILENT) -f src\local-game\CMakeFiles\Local_game.dir\build.make src/local-game/CMakeFiles/Local_game.dir/maze_generator.c.obj
+	cd /d D:\TheMaze\cmake-build-debug && $(MAKE) $(MAKESILENT) -f src\local-game\CMakeFiles\MyGame.dir\build.make src/local-game/CMakeFiles/MyGame.dir/maze_generator.c.obj
 .PHONY : maze_generator.c.obj
 
 maze_generator.i: maze_generator.c.i
@@ -232,8 +232,8 @@ maze_generator.i: maze_generator.c.i
 
 # target to preprocess a source file
 maze_generator.c.i:
-	cd /d D:\AllCodes\TheMaze\cmake-build-debug && $(MAKE) $(MAKESILENT) -f src\local-game\CMakeFiles\Local_game.dir\build.make src/local-game/CMakeFiles/Local_game.dir/maze_generator.c.i
-	cd /d D:\AllCodes\TheMaze\cmake-build-debug && $(MAKE) $(MAKESILENT) -f src\local-game\CMakeFiles\MyGame.dir\build.make src/local-game/CMakeFiles/MyGame.dir/maze_generator.c.i
+	cd /d D:\TheMaze\cmake-build-debug && $(MAKE) $(MAKESILENT) -f src\local-game\CMakeFiles\Local_game.dir\build.make src/local-game/CMakeFiles/Local_game.dir/maze_generator.c.i
+	cd /d D:\TheMaze\cmake-build-debug && $(MAKE) $(MAKESILENT) -f src\local-game\CMakeFiles\MyGame.dir\build.make src/local-game/CMakeFiles/MyGame.dir/maze_generator.c.i
 .PHONY : maze_generator.c.i
 
 maze_generator.s: maze_generator.c.s
@@ -242,8 +242,8 @@ maze_generator.s: maze_generator.c.s
 
 # target to generate assembly for a file
 maze_generator.c.s:
-	cd /d D:\AllCodes\TheMaze\cmake-build-debug && $(MAKE) $(MAKESILENT) -f src\local-game\CMakeFiles\Local_game.dir\build.make src/local-game/CMakeFiles/Local_game.dir/maze_generator.c.s
-	cd /d D:\AllCodes\TheMaze\cmake-build-debug && $(MAKE) $(MAKESILENT) -f src\local-game\CMakeFiles\MyGame.dir\build.make src/local-game/CMakeFiles/MyGame.dir/maze_generator.c.s
+	cd /d D:\TheMaze\cmake-build-debug && $(MAKE) $(MAKESILENT) -f src\local-game\CMakeFiles\Local_game.dir\build.make src/local-game/CMakeFiles/Local_game.dir/maze_generator.c.s
+	cd /d D:\TheMaze\cmake-build-debug && $(MAKE) $(MAKESILENT) -f src\local-game\CMakeFiles\MyGame.dir\build.make src/local-game/CMakeFiles/MyGame.dir/maze_generator.c.s
 .PHONY : maze_generator.c.s
 
 playerInfo.obj: playerInfo.c.obj
@@ -252,7 +252,7 @@ playerInfo.obj: playerInfo.c.obj
 
 # target to build an object file
 playerInfo.c.obj:
-	cd /d D:\AllCodes\TheMaze\cmake-build-debug && $(MAKE) $(MAKESILENT) -f src\local-game\CMakeFiles\MyGame.dir\build.make src/local-game/CMakeFiles/MyGame.dir/playerInfo.c.obj
+	cd /d D:\TheMaze\cmake-build-debug && $(MAKE) $(MAKESILENT) -f src\local-game\CMakeFiles\MyGame.dir\build.make src/local-game/CMakeFiles/MyGame.dir/playerInfo.c.obj
 .PHONY : playerInfo.c.obj
 
 playerInfo.i: playerInfo.c.i
@@ -261,7 +261,7 @@ playerInfo.i: playerInfo.c.i
 
 # target to preprocess a source file
 playerInfo.c.i:
-	cd /d D:\AllCodes\TheMaze\cmake-build-debug && $(MAKE) $(MAKESILENT) -f src\local-game\CMakeFiles\MyGame.dir\build.make src/local-game/CMakeFiles/MyGame.dir/playerInfo.c.i
+	cd /d D:\TheMaze\cmake-build-debug && $(MAKE) $(MAKESILENT) -f src\local-game\CMakeFiles\MyGame.dir\build.make src/local-game/CMakeFiles/MyGame.dir/playerInfo.c.i
 .PHONY : playerInfo.c.i
 
 playerInfo.s: playerInfo.c.s
@@ -270,7 +270,7 @@ playerInfo.s: playerInfo.c.s
 
 # target to generate assembly for a file
 playerInfo.c.s:
-	cd /d D:\AllCodes\TheMaze\cmake-build-debug && $(MAKE) $(MAKESILENT) -f src\local-game\CMakeFiles\MyGame.dir\build.make src/local-game/CMakeFiles/MyGame.dir/playerInfo.c.s
+	cd /d D:\TheMaze\cmake-build-debug && $(MAKE) $(MAKESILENT) -f src\local-game\CMakeFiles\MyGame.dir\build.make src/local-game/CMakeFiles/MyGame.dir/playerInfo.c.s
 .PHONY : playerInfo.c.s
 
 utilities.obj: utilities.c.obj
@@ -279,7 +279,7 @@ utilities.obj: utilities.c.obj
 
 # target to build an object file
 utilities.c.obj:
-	cd /d D:\AllCodes\TheMaze\cmake-build-debug && $(MAKE) $(MAKESILENT) -f src\local-game\CMakeFiles\MyGame.dir\build.make src/local-game/CMakeFiles/MyGame.dir/utilities.c.obj
+	cd /d D:\TheMaze\cmake-build-debug && $(MAKE) $(MAKESILENT) -f src\local-game\CMakeFiles\MyGame.dir\build.make src/local-game/CMakeFiles/MyGame.dir/utilities.c.obj
 .PHONY : utilities.c.obj
 
 utilities.i: utilities.c.i
@@ -288,7 +288,7 @@ utilities.i: utilities.c.i
 
 # target to preprocess a source file
 utilities.c.i:
-	cd /d D:\AllCodes\TheMaze\cmake-build-debug && $(MAKE) $(MAKESILENT) -f src\local-game\CMakeFiles\MyGame.dir\build.make src/local-game/CMakeFiles/MyGame.dir/utilities.c.i
+	cd /d D:\TheMaze\cmake-build-debug && $(MAKE) $(MAKESILENT) -f src\local-game\CMakeFiles\MyGame.dir\build.make src/local-game/CMakeFiles/MyGame.dir/utilities.c.i
 .PHONY : utilities.c.i
 
 utilities.s: utilities.c.s
@@ -297,7 +297,7 @@ utilities.s: utilities.c.s
 
 # target to generate assembly for a file
 utilities.c.s:
-	cd /d D:\AllCodes\TheMaze\cmake-build-debug && $(MAKE) $(MAKESILENT) -f src\local-game\CMakeFiles\MyGame.dir\build.make src/local-game/CMakeFiles/MyGame.dir/utilities.c.s
+	cd /d D:\TheMaze\cmake-build-debug && $(MAKE) $(MAKESILENT) -f src\local-game\CMakeFiles\MyGame.dir\build.make src/local-game/CMakeFiles/MyGame.dir/utilities.c.s
 .PHONY : utilities.c.s
 
 # Help Target
@@ -336,6 +336,6 @@ help:
 # No rule that depends on this can have commands that come from listfiles
 # because they might be regenerated.
 cmake_check_build_system:
-	cd /d D:\AllCodes\TheMaze\cmake-build-debug && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles\Makefile.cmake 0
+	cd /d D:\TheMaze\cmake-build-debug && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles\Makefile.cmake 0
 .PHONY : cmake_check_build_system
 

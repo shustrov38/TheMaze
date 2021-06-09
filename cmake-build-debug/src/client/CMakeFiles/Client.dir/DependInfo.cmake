@@ -4,8 +4,8 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_C
-  "D:/AllCodes/TheMaze/src/client/client.c" "D:/AllCodes/TheMaze/cmake-build-debug/src/client/CMakeFiles/Client.dir/client.c.obj"
-  "D:/AllCodes/TheMaze/src/client/client_server_interface/interface.c" "D:/AllCodes/TheMaze/cmake-build-debug/src/client/CMakeFiles/Client.dir/client_server_interface/interface.c.obj"
+  "D:/TheMaze/src/client/client.c" "D:/TheMaze/cmake-build-debug/src/client/CMakeFiles/Client.dir/client.c.obj"
+  "D:/TheMaze/src/client/client_server_interface/interface.c" "D:/TheMaze/cmake-build-debug/src/client/CMakeFiles/Client.dir/client_server_interface/interface.c.obj"
   )
 set(CMAKE_C_COMPILER_ID "GNU")
 

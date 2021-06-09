@@ -58,19 +58,19 @@ cmake_force:
 SHELL = cmd.exe
 
 # The CMake executable.
-CMAKE_COMMAND = C:\Users\anros\AppData\Local\JetBrains\Toolbox\apps\CLion\ch-0\203.7148.70\bin\cmake\win\bin\cmake.exe
+CMAKE_COMMAND = "C:\Program Files\JetBrains\CLion 2020.3\bin\cmake\win\bin\cmake.exe"
 
 # The command to remove a file.
-RM = C:\Users\anros\AppData\Local\JetBrains\Toolbox\apps\CLion\ch-0\203.7148.70\bin\cmake\win\bin\cmake.exe -E rm -f
+RM = "C:\Program Files\JetBrains\CLion 2020.3\bin\cmake\win\bin\cmake.exe" -E rm -f
 
 # Escaping for special characters.
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = D:\AllCodes\TheMaze
+CMAKE_SOURCE_DIR = D:\TheMaze
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = D:\AllCodes\TheMaze\cmake-build-debug
+CMAKE_BINARY_DIR = D:\TheMaze\cmake-build-debug
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -78,7 +78,7 @@ CMAKE_BINARY_DIR = D:\AllCodes\TheMaze\cmake-build-debug
 # Special rule for the target edit_cache
 edit_cache:
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "No interactive CMake dialog available..."
-	C:\Users\anros\AppData\Local\JetBrains\Toolbox\apps\CLion\ch-0\203.7148.70\bin\cmake\win\bin\cmake.exe -E echo "No interactive CMake dialog available."
+	"C:\Program Files\JetBrains\CLion 2020.3\bin\cmake\win\bin\cmake.exe" -E echo "No interactive CMake dialog available."
 .PHONY : edit_cache
 
 # Special rule for the target edit_cache
@@ -89,7 +89,7 @@ edit_cache/fast: edit_cache
 # Special rule for the target rebuild_cache
 rebuild_cache:
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running CMake to regenerate build system..."
-	C:\Users\anros\AppData\Local\JetBrains\Toolbox\apps\CLion\ch-0\203.7148.70\bin\cmake\win\bin\cmake.exe --regenerate-during-build -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
+	"C:\Program Files\JetBrains\CLion 2020.3\bin\cmake\win\bin\cmake.exe" --regenerate-during-build -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
 .PHONY : rebuild_cache
 
 # Special rule for the target rebuild_cache
@@ -99,14 +99,14 @@ rebuild_cache/fast: rebuild_cache
 
 # The main all target
 all: cmake_check_build_system
-	cd /d D:\AllCodes\TheMaze\cmake-build-debug && $(CMAKE_COMMAND) -E cmake_progress_start D:\AllCodes\TheMaze\cmake-build-debug\CMakeFiles D:\AllCodes\TheMaze\cmake-build-debug\src\client\CMakeFiles\progress.marks
-	cd /d D:\AllCodes\TheMaze\cmake-build-debug && $(MAKE) $(MAKESILENT) -f CMakeFiles\Makefile2 src/client/all
-	$(CMAKE_COMMAND) -E cmake_progress_start D:\AllCodes\TheMaze\cmake-build-debug\CMakeFiles 0
+	cd /d D:\TheMaze\cmake-build-debug && $(CMAKE_COMMAND) -E cmake_progress_start D:\TheMaze\cmake-build-debug\CMakeFiles D:\TheMaze\cmake-build-debug\src\client\CMakeFiles\progress.marks
+	cd /d D:\TheMaze\cmake-build-debug && $(MAKE) $(MAKESILENT) -f CMakeFiles\Makefile2 src/client/all
+	$(CMAKE_COMMAND) -E cmake_progress_start D:\TheMaze\cmake-build-debug\CMakeFiles 0
 .PHONY : all
 
 # The main clean target
 clean:
-	cd /d D:\AllCodes\TheMaze\cmake-build-debug && $(MAKE) $(MAKESILENT) -f CMakeFiles\Makefile2 src/client/clean
+	cd /d D:\TheMaze\cmake-build-debug && $(MAKE) $(MAKESILENT) -f CMakeFiles\Makefile2 src/client/clean
 .PHONY : clean
 
 # The main clean target
@@ -116,22 +116,22 @@ clean/fast: clean
 
 # Prepare targets for installation.
 preinstall: all
-	cd /d D:\AllCodes\TheMaze\cmake-build-debug && $(MAKE) $(MAKESILENT) -f CMakeFiles\Makefile2 src/client/preinstall
+	cd /d D:\TheMaze\cmake-build-debug && $(MAKE) $(MAKESILENT) -f CMakeFiles\Makefile2 src/client/preinstall
 .PHONY : preinstall
 
 # Prepare targets for installation.
 preinstall/fast:
-	cd /d D:\AllCodes\TheMaze\cmake-build-debug && $(MAKE) $(MAKESILENT) -f CMakeFiles\Makefile2 src/client/preinstall
+	cd /d D:\TheMaze\cmake-build-debug && $(MAKE) $(MAKESILENT) -f CMakeFiles\Makefile2 src/client/preinstall
 .PHONY : preinstall/fast
 
 # clear depends
 depend:
-	cd /d D:\AllCodes\TheMaze\cmake-build-debug && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles\Makefile.cmake 1
+	cd /d D:\TheMaze\cmake-build-debug && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles\Makefile.cmake 1
 .PHONY : depend
 
 # Convenience name for target.
 src/client/CMakeFiles/Client.dir/rule:
-	cd /d D:\AllCodes\TheMaze\cmake-build-debug && $(MAKE) $(MAKESILENT) -f CMakeFiles\Makefile2 src/client/CMakeFiles/Client.dir/rule
+	cd /d D:\TheMaze\cmake-build-debug && $(MAKE) $(MAKESILENT) -f CMakeFiles\Makefile2 src/client/CMakeFiles/Client.dir/rule
 .PHONY : src/client/CMakeFiles/Client.dir/rule
 
 # Convenience name for target.
@@ -141,7 +141,7 @@ Client: src/client/CMakeFiles/Client.dir/rule
 
 # fast build rule for target.
 Client/fast:
-	cd /d D:\AllCodes\TheMaze\cmake-build-debug && $(MAKE) $(MAKESILENT) -f src\client\CMakeFiles\Client.dir\build.make src/client/CMakeFiles/Client.dir/build
+	cd /d D:\TheMaze\cmake-build-debug && $(MAKE) $(MAKESILENT) -f src\client\CMakeFiles\Client.dir\build.make src/client/CMakeFiles/Client.dir/build
 .PHONY : Client/fast
 
 client.obj: client.c.obj
@@ -150,7 +150,7 @@ client.obj: client.c.obj
 
 # target to build an object file
 client.c.obj:
-	cd /d D:\AllCodes\TheMaze\cmake-build-debug && $(MAKE) $(MAKESILENT) -f src\client\CMakeFiles\Client.dir\build.make src/client/CMakeFiles/Client.dir/client.c.obj
+	cd /d D:\TheMaze\cmake-build-debug && $(MAKE) $(MAKESILENT) -f src\client\CMakeFiles\Client.dir\build.make src/client/CMakeFiles/Client.dir/client.c.obj
 .PHONY : client.c.obj
 
 client.i: client.c.i
@@ -159,7 +159,7 @@ client.i: client.c.i
 
 # target to preprocess a source file
 client.c.i:
-	cd /d D:\AllCodes\TheMaze\cmake-build-debug && $(MAKE) $(MAKESILENT) -f src\client\CMakeFiles\Client.dir\build.make src/client/CMakeFiles/Client.dir/client.c.i
+	cd /d D:\TheMaze\cmake-build-debug && $(MAKE) $(MAKESILENT) -f src\client\CMakeFiles\Client.dir\build.make src/client/CMakeFiles/Client.dir/client.c.i
 .PHONY : client.c.i
 
 client.s: client.c.s
@@ -168,7 +168,7 @@ client.s: client.c.s
 
 # target to generate assembly for a file
 client.c.s:
-	cd /d D:\AllCodes\TheMaze\cmake-build-debug && $(MAKE) $(MAKESILENT) -f src\client\CMakeFiles\Client.dir\build.make src/client/CMakeFiles/Client.dir/client.c.s
+	cd /d D:\TheMaze\cmake-build-debug && $(MAKE) $(MAKESILENT) -f src\client\CMakeFiles\Client.dir\build.make src/client/CMakeFiles/Client.dir/client.c.s
 .PHONY : client.c.s
 
 client_server_interface/interface.obj: client_server_interface/interface.c.obj
@@ -177,7 +177,7 @@ client_server_interface/interface.obj: client_server_interface/interface.c.obj
 
 # target to build an object file
 client_server_interface/interface.c.obj:
-	cd /d D:\AllCodes\TheMaze\cmake-build-debug && $(MAKE) $(MAKESILENT) -f src\client\CMakeFiles\Client.dir\build.make src/client/CMakeFiles/Client.dir/client_server_interface/interface.c.obj
+	cd /d D:\TheMaze\cmake-build-debug && $(MAKE) $(MAKESILENT) -f src\client\CMakeFiles\Client.dir\build.make src/client/CMakeFiles/Client.dir/client_server_interface/interface.c.obj
 .PHONY : client_server_interface/interface.c.obj
 
 client_server_interface/interface.i: client_server_interface/interface.c.i
@@ -186,7 +186,7 @@ client_server_interface/interface.i: client_server_interface/interface.c.i
 
 # target to preprocess a source file
 client_server_interface/interface.c.i:
-	cd /d D:\AllCodes\TheMaze\cmake-build-debug && $(MAKE) $(MAKESILENT) -f src\client\CMakeFiles\Client.dir\build.make src/client/CMakeFiles/Client.dir/client_server_interface/interface.c.i
+	cd /d D:\TheMaze\cmake-build-debug && $(MAKE) $(MAKESILENT) -f src\client\CMakeFiles\Client.dir\build.make src/client/CMakeFiles/Client.dir/client_server_interface/interface.c.i
 .PHONY : client_server_interface/interface.c.i
 
 client_server_interface/interface.s: client_server_interface/interface.c.s
@@ -195,7 +195,7 @@ client_server_interface/interface.s: client_server_interface/interface.c.s
 
 # target to generate assembly for a file
 client_server_interface/interface.c.s:
-	cd /d D:\AllCodes\TheMaze\cmake-build-debug && $(MAKE) $(MAKESILENT) -f src\client\CMakeFiles\Client.dir\build.make src/client/CMakeFiles/Client.dir/client_server_interface/interface.c.s
+	cd /d D:\TheMaze\cmake-build-debug && $(MAKE) $(MAKESILENT) -f src\client\CMakeFiles\Client.dir\build.make src/client/CMakeFiles/Client.dir/client_server_interface/interface.c.s
 .PHONY : client_server_interface/interface.c.s
 
 # Help Target
@@ -224,6 +224,6 @@ help:
 # No rule that depends on this can have commands that come from listfiles
 # because they might be regenerated.
 cmake_check_build_system:
-	cd /d D:\AllCodes\TheMaze\cmake-build-debug && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles\Makefile.cmake 0
+	cd /d D:\TheMaze\cmake-build-debug && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles\Makefile.cmake 0
 .PHONY : cmake_check_build_system
 
