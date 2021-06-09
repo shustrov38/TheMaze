@@ -252,9 +252,10 @@ void startSession() {
     LOGIN(name, pass);
         system("cls");
         char buffer[256];
-
+        memset(buffer,0,256);
         while(1) {
-            scanf("%s", buffer);
+            fgets(buffer, 256, stdin);
+            buffer[strlen(buffer)-1] = 0;
             SAY(buffer);
             memset(buffer,0,256);
         }
