@@ -2,9 +2,10 @@
 #include <stdio.h>
 #include <time.h>
 #include <stdlib.h>
+#include <unistd.h>
+#include"client_server_interface/interface.h"
 
-void SendData2Server(int count, int number) {
-    SOCKET client;
+void startSession() {
     client = socket(AF_INET, SOCK_STREAM, IPPROTO_IP);
     if (client == INVALID_SOCKET) {
         printf("Error create socket\n");
@@ -13,39 +14,36 @@ void SendData2Server(int count, int number) {
     struct sockaddr_in server;
     server.sin_family = AF_INET;
     server.sin_port = htons(5510); //the same as in server
-    server.sin_addr.S_un.S_addr = inet_addr("127.0.0.1"); //special look-up address
+//  server.sin_addr.S_un.S_addr = inet_addr("127.0.0.1"); //special look-up address
+    server.sin_addr.S_un.S_addr = inet_addr("26.173.251.89");
     if (connect(client, (struct sockaddr *) &server, sizeof(server)) == SOCKET_ERROR) {
         printf("Can't connect to server\n");
         closesocket(client);
         return;
     }
-    char message[1024];
-    sprintf(message, "<%d client> %s %d", number, "test", count);
-    int ret = send(client, message, strlen(message), 0);
-    if (ret == SOCKET_ERROR) {
-        printf("Can't send message\n");
-        closesocket(client);
-        return;
-    }
-    printf("Sent: %s\nbytes: %d\n\n", message, ret);
-    ret = SOCKET_ERROR;
-    while (ret == SOCKET_ERROR) {
-        //полчение ответа
-        ret = recv(client, message, 1024, 0);
-        //обработка ошибок
-        if (ret == 0 || ret == WSAECONNRESET) {
-            printf("Connection closed\n");
-            break;
+
+
+    char name[PL_PARAM_SIZE];
+    char pass[PL_PARAM_SIZE];
+
+    printf("Welcome to the Maze!\n");
+    printf("Nickname:");
+    scanf("%s", name);
+    printf("Password:");
+    scanf("%s", pass);
+
+    LOGIN(name, pass);
+        system("cls");
+        char buffer[256];
+        memset(buffer,0,256);
+        while(1) {
+            fgets(buffer, 256, stdin);
+            buffer[strlen(buffer)-1] = 0;
+            SAY(buffer);
+            memset(buffer,0,256);
         }
-        if (ret < 0) {
-            printf("Can't receive message\n");
-            closesocket(client);
-            return;
-        }
-        //вывод на экран количества полученных байт и сообщение
-        printf("Receive: %s\n bytes: %d\n", message, ret);
-    }
-    closesocket(client);
+        sleep(100);
+    DISCONNECT();
 }
 
 int main() {
@@ -54,16 +52,13 @@ int main() {
         printf("Can't connect to socket lib");
         return 1;
     }
-    int i = 0;
     srand(time(0));
     rand();
-    int number = rand();
-    while (i < 1000) {
-        SendData2Server(++i, number);
-        Sleep(rand() % 10);
-    }
+    int number = abs(rand()) % 1000;
+    char *name = malloc(sizeof(char) * 32);
+    sprintf(name, "%d", number + 1488);
+    startSession();
     printf("Session is closed\n");
-    Sleep(1000);
+    system("pause");
     return 0;
 }
-
