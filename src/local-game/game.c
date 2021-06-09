@@ -9,6 +9,10 @@ const int SCREEN_WIDTH = 900;
 
 static int game_status;
 
+char login[128];
+char password[128];
+char curPlayerRoom[50];
+
 playerPos *initAllPlayers(int playersCnt, SDL_Surface **icons, int iconsCnt) {
     playerPos *players = (playerPos *) malloc(playersCnt * sizeof(playerPos));
 
@@ -77,8 +81,7 @@ static void Process_login() {
     char temp[128];
     int temp_size = 0;
 
-    char login[128];
-    char password[128];
+
 
     int enterCnt = 0;
     memset(temp, 0, 128);
@@ -191,7 +194,7 @@ static void Process_leaderboard(/*PLAYERS_STRUCT *users*/) {
 
     GET_LDB();
 
-    SDL_Surface *menu_background = Load_img("../../../src/local-game/Textures/menu/menu_back.jpg");
+    SDL_Surface *menu_background = Load_img("../../../src/local-game/Textures/menu/menu_back.bmp");
     Draw_image(screen, menu_background, 0, 0);
     Update_window_rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 
@@ -351,13 +354,16 @@ static void Process_waiting() {
     SDL_Event event;
     TTF_Init();
 
-    SDL_Surface *menu_background = Load_img("../../../src/local-game/Textures/menu/menu_back.jpg");
+    SDL_Surface *menu_background = Load_img("../../../src/local-game/Textures/menu/menu_back.bmp");
     Draw_image(screen, menu_background, 0, 0);
 
 
     SDL_Surface *waiting = Load_img("../../../src/local-game/Textures/menu/room_waiting.bmp");
     Draw_image(screen, waiting, 248, 227);
+    WriteText(326, 334, curPlayerRoom, 30, 255, 255, 255);
+
     Update_window_rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+
 
     int done = 0;
 
@@ -367,7 +373,9 @@ static void Process_waiting() {
                 switch (event.key.keysym.sym) {
 
                     case SDLK_SPACE:
+                        LEAVE();
                         game_status = GAME_ROOMS;
+                        memset(curPlayerRoom, 0, 50);
                         return;
                         break;
 
@@ -389,8 +397,7 @@ static void Process_rooms(/*ROOMS_STRUCT *rooms, int roomsCnt*/) {
 
     LOBBY();
 
-    game_status = GAME_ROOMS;
-    SDL_Surface *menu_background = Load_img("../../../src/local-game/Textures/menu/menu_back.jpg");
+    SDL_Surface *menu_background = Load_img("../../../src/local-game/Textures/menu/menu_back.bmp");
 
     SDL_Surface *room_join = Load_img("../../../src/local-game/Textures/menu/room_1.bmp");
     SDL_Surface *room_create = Load_img("../../../src/local-game/Textures/menu/room_2.bmp");
@@ -399,6 +406,8 @@ static void Process_rooms(/*ROOMS_STRUCT *rooms, int roomsCnt*/) {
     SDL_Surface *pointer = Load_img("../../../src/local-game/Textures/menu/pointer.png");
     SDL_Surface *menu_pointer = ScaleSurface(pointer, 30, 30);
 
+    Draw_image(screen, menu_background, 0, 0);
+    Update_window_rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 
     int done = 0;
     int currentRoom = 0;
@@ -407,7 +416,7 @@ static void Process_rooms(/*ROOMS_STRUCT *rooms, int roomsCnt*/) {
     int roomCreatingFlag = -1;
 
     if (getLobbySize()) {
-        Draw_image(screen, menu_background, 0, 0);
+
         Draw_image(screen, room_join, 285, 235);
         WriteText(342, 356, lobbies[currentRoom].NAME, 30, 255, 255, 255);
 
@@ -416,7 +425,7 @@ static void Process_rooms(/*ROOMS_STRUCT *rooms, int roomsCnt*/) {
         Update_window_rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
         roomCreatingFlag = 1;
     } else {
-        Draw_image(screen, menu_background, 0, 0);
+
         Draw_image(screen, room_create_button, 293, 327);
         Update_window_rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
         roomCreatingFlag = 0;
@@ -519,17 +528,20 @@ static void Process_rooms(/*ROOMS_STRUCT *rooms, int roomsCnt*/) {
                     case SDLK_SPACE:
                         if (roomCreatingFlag == 0) {
                             CREATE_ROOM();
+                            strcpy(curPlayerRoom, login);
                             roomCreatingFlag = 1;
                             game_status = GAME_WAITING;
                             return;
                         }
                         if (roomCreatingFlag == 1 && currentPos == 0) {
                             ENTER(lobbies[currentPos].NAME);
+                            strcpy(curPlayerRoom, lobbies[currentRoom].NAME);
                             game_status = GAME_WAITING;
                             return;
                         }
                         if (roomCreatingFlag == 1 && currentPos == 1) {
                             CREATE_ROOM();
+                            strcpy(curPlayerRoom, login);
                             game_status = GAME_WAITING;
                             return;
                         }
