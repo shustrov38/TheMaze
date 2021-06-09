@@ -4,43 +4,51 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-#define TRANSACTION_CAPACITY 1024
-#define PL_PARAM_SIZE   16
-#define PL_CNT 50
+#define TRANSACTION_CAPACITY    1024
+#define PL_PARAM_SIZE           16
+#define PL_CNT                  50
 
 typedef enum {
     //TAG:          // WHAT IT DOES:                     ARGS "<> ...":            DIR:
     CONNECTION,     // connect this client to server    "<CONNECTION> NAME PASS"   TO
     SYS_MSG,        // message STR from/to server       "<SYS_MSG> STR"            TO/FROM
-    ENTER,         //
     MOV_RIVAL,      // move enemy NAME to X Y           "<MOV_RIVAL> NAME X Y"     FROM
     MOV_SELF,       // move this player to X Y          "<MOV_SELF> X Y"           TO
     EXIT,
-    LD_BOARD,
+    LEADERBOARD,
     ROOMS,
     CREATE_ROOM,
-
+    ENTER_ROOM,
+    LEAVE_ROOM,
+    DESTROY_ROOM
 } INNER_INTERFACE;
 
 typedef struct {
     INNER_INTERFACE TAG;
-    char ARGS[16][16];
-    int VALID_ARG_CNT;
+    char    ARGS[16][16];
+    int     VALID_ARG_CNT;
 } COMMAND_PROTOTYPE;
 
 typedef struct {
-    char NAME[PL_PARAM_SIZE];
-    int score;
-    int is_online;
+    char    NAME[PL_PARAM_SIZE];
+    int     score;
+    int     is_online;
 } PLAYER;
 
 typedef struct {
-    int id;
-    int pcnt;
+    char    NAME[PL_PARAM_SIZE];
+    int     pcnt;
 } ROOM;
 
+typedef struct{
+    char NAME[PL_PARAM_SIZE];
+    int X;
+    int Y;
+} RECV_PL_INFO;
+
 PLAYER scoreboard[PL_CNT];
-ROOM LOBBIES[PL_CNT];
+ROOM lobbies[PL_CNT];
+RECV_PL_INFO pl_render_info[3];
 
 char *make_command(SOCKET client, COMMAND_PROTOTYPE proto) {
     int parsable_ret_ld = 0;
@@ -52,27 +60,36 @@ char *make_command(SOCKET client, COMMAND_PROTOTYPE proto) {
             sprintf(command, "%s %s %s", "<CONNECTION>", proto.ARGS[0], proto.ARGS[1]);
             break;
         case SYS_MSG:
-            sprintf(command, "%s %s", "<SYS_MSG>", proto.ARGS[0]);
+            sprintf(command, "%s", proto.ARGS[0]);
             break;
         case MOV_SELF:
             sprintf(command, "%s %s %s", "<MOV_SELF>", proto.ARGS[0], proto.ARGS[1]);
             break;
-        case ENTER:
-            sprintf(command, "%s %s", "<ENTER>", proto.ARGS[0]);
-            break;
         case EXIT:
             sprintf(command, "%s", "<EXIT>");
             break;
-        case LD_BOARD:
+        case LEADERBOARD:
             parsable_ret_ld = 1;
-            sprintf(command, "%s", "<LD_BOARD>");
+            sprintf(command, "%s", "<LEADERBOARD>");
             break;
         case ROOMS:
             parsable_ret_menu = 1;
             sprintf(command, "%s", "<ROOMS>");
             break;
+        case CREATE_ROOM:
+            sprintf(command,"%s", "<CREATE_ROOM>");
+            break;
+        case ENTER_ROOM:
+            sprintf(command, "%s %s", "<ENTER_ROOM>", proto.ARGS[0]);
+            break;
+        case LEAVE_ROOM:
+            sprintf(command, "%s %s", "<LEAVE_ROOM>", proto.ARGS[0]);
+            break;
+        case DESTROY_ROOM:
+            sprintf(command,"%s", "<DESTROY_ROOM>");
+            break;
     }
-    if (!parsable_ret_ld) printf(">>%s", command);
+    if (!parsable_ret_ld) printf(">>%s\n", command);
     send(client, command, TRANSACTION_CAPACITY, 0);
     recv(client, command, TRANSACTION_CAPACITY, 0);
 
@@ -93,7 +110,7 @@ char *make_command(SOCKET client, COMMAND_PROTOTYPE proto) {
             tmp[z++] = command[i];
         }
         for (int i = 0; i < PL_CNT; i++) {
-            printf("%d %s %d %d\n", i + 1, scoreboard[i].NAME, scoreboard[i].score, scoreboard[i].is_online);
+            if(strlen(scoreboard[i].NAME)>0)printf("%d %s %d %d\n", i + 1, scoreboard[i].NAME, scoreboard[i].score, scoreboard[i].is_online);
         }
     }
     if (parsable_ret_menu) {
@@ -105,7 +122,7 @@ char *make_command(SOCKET client, COMMAND_PROTOTYPE proto) {
             if (command[i] == '#') {
 //              printf("%s->", tmp);
                 z = 0;
-                sscanf(tmp, "%s %d %d", scoreboard[j].NAME, &scoreboard[j].score, &scoreboard[j].is_online);
+                sscanf(tmp, "%s %d", lobbies[j].NAME, &lobbies[j].pcnt);
                 j++;
                 memset(tmp, 0, 32);
                 continue;
@@ -113,10 +130,10 @@ char *make_command(SOCKET client, COMMAND_PROTOTYPE proto) {
             tmp[z++] = command[i];
         }
         for (int i = 0; i < PL_CNT; i++) {
-            printf("%d %s %d %d\n", i + 1, scoreboard[i].NAME, scoreboard[i].score, scoreboard[i].is_online);
+            if(strlen(lobbies[i].NAME)>0)printf("%s's room %d/4\n", lobbies[i].NAME, lobbies[i].pcnt);
         }
     }
-    if (parsable_ret_ld) printf("<<%s\n", command);
+    printf("<<%s\n", command);
 
     return command;
 }
@@ -127,7 +144,7 @@ void try_login(SOCKET client, COMMAND_PROTOTYPE C, char *name, char *password) {
     C.VALID_ARG_CNT = 2;
     strcpy(C.ARGS[0], name);
     strcpy(C.ARGS[1], password);
-    while (strcmp(make_command(client, C), "LOGIN_SUCCESS") != 0) {
+    while (strcmp(make_command(client, C), "CONNECTION_SUCCESS") != 0) {
         printf("Wrong password! Try again:\n");
         printf("Nickname:");
         scanf("%s", name);
@@ -161,7 +178,7 @@ void cli_send(SOCKET client, COMMAND_PROTOTYPE C, char *str) {
 }
 
 void upd_ld_board(SOCKET client, COMMAND_PROTOTYPE C) {
-    C.TAG = LD_BOARD;
+    C.TAG = LEADERBOARD;
     C.VALID_ARG_CNT = 0;
     make_command(client, C);
 }
@@ -172,12 +189,24 @@ void get_rooms(SOCKET client, COMMAND_PROTOTYPE C) {
     make_command(client, C);
 }
 
-
-char *check_inv(SOCKET client, COMMAND_PROTOTYPE C) {
-    C.TAG = ENTER;
+void create_room(SOCKET client, COMMAND_PROTOTYPE C) {
+    C.TAG = CREATE_ROOM;
     C.VALID_ARG_CNT = 0;
     make_command(client, C);
+}
 
+void enter_room(SOCKET client, COMMAND_PROTOTYPE C, char *name) {
+    C.TAG = ENTER_ROOM;
+    C.VALID_ARG_CNT = 1;
+    strcpy(C.ARGS[0], name);
+    make_command(client, C);
+    //WARN
+}
+
+void leave_room(SOCKET client, COMMAND_PROTOTYPE C) {
+    C.TAG = LEAVE_ROOM;
+    C.VALID_ARG_CNT = 0;
+    make_command(client, C);
 }
 
 COMMAND_PROTOTYPE C;
@@ -186,8 +215,11 @@ COMMAND_PROTOTYPE C;
 #define GET_LDB() upd_ld_board(client, C)
 #define GO(X, Y) move_self(client, C, X, Y)
 #define SAY(MSG) cli_send(client, C, MSG)
-#define LEAVE() cli_exit(client, C)
+#define DISCONNECT() cli_exit(client, C)
 #define LOBBY() get_rooms(client, C)
+#define CREATE_ROOM() create_room(client, C)
+#define ENTER(NAME) enter_room(client, C, NAME)
+#define LEAVE() leave_room(client, C)
 
 void startSession() {
     SOCKET client;
@@ -218,14 +250,16 @@ void startSession() {
     scanf("%s", pass);
 
     LOGIN(name, pass);
-    while (1) {
         system("cls");
-        GET_LDB();
+        char buffer[256];
 
-        sleep(1);
-    }
-    GO(10, 10);
-    LEAVE();
+        while(1) {
+            scanf("%s", buffer);
+            SAY(buffer);
+            memset(buffer,0,256);
+        }
+        sleep(100);
+    DISCONNECT();
 }
 
 int main() {
