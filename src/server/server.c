@@ -203,6 +203,12 @@ void *client_callback(void *param) {
     char sql_select_rooms[sql_request_buffer_length];
     char sql_change_room[sql_request_buffer_length];
     char sql_leave_room[sql_request_buffer_length];
+    char sql_get_state[sql_request_buffer_length];
+    char sql_update_state_in_menu[sql_request_buffer_length];
+    char sql_update_state_in_game[sql_request_buffer_length];
+    char sql_update_state_winner[sql_request_buffer_length];
+    char sql_update_state_loser[sql_request_buffer_length];
+    char sql_update_state_in_room[sql_request_buffer_length];
 
     while (1) {
         char receive[_MESSAGE_LENGTH], transmit[_MESSAGE_LENGTH];
@@ -236,7 +242,7 @@ void *client_callback(void *param) {
 
             sprintf(sql_update_online_0,
                     "UPDATE Data "
-                    "SET Online = 0, Room = \'\', RoomMessage = \'\' "
+                    "SET Online = 0, Room = \'\', RoomMessage = \'\', Seed = 0, X = 0, Y = 0, State = \'IN_MENU\' "
                     "WHERE Id = %s",
                     data.string_id
             );
@@ -274,7 +280,7 @@ void *client_callback(void *param) {
 
             sprintf(sql_add_client,
                     "INSERT INTO Data "
-                    "VALUES(%s, \'%s\', \'%s\', 1000, 1, \'\', \'\');",
+                    "VALUES(%s, \'%s\', \'%s\', 1000, 1, \'\', \'\', 0, 0, 0, \'\');",
                     data.string_id, data.login, data.password
             );
 
@@ -299,6 +305,48 @@ void *client_callback(void *param) {
             sprintf(sql_leave_room,
                     "UPDATE Data "
                     "SET Room = \'\' "
+                    "WHERE Login = \'%s\';",
+                    data.login
+            );
+
+            sprintf(sql_get_state,
+                    "SELECT State"
+                    "FROM Data "
+                    "WHERE Login = \'%s\';",
+                    data.login
+            );
+
+            sprintf(sql_update_state_in_room,
+                    "UPDATE Data "
+                    "SET State = LOSER "
+                    "WHERE Login = \'%s\';",
+                    data.login
+            );
+
+            sprintf(sql_update_state_in_menu,
+                    "UPDATE Data "
+                    "SET State = IN_MENU "
+                    "WHERE Login = \'%s\';",
+                    data.login
+            );
+
+            sprintf(sql_update_state_in_game,
+                    "UPDATE Data "
+                    "SET State = IN_GAME "
+                    "WHERE Login = \'%s\';",
+                    data.login
+            );
+
+            sprintf(sql_update_state_winner,
+                    "UPDATE Data "
+                    "SET State = WINNER "
+                    "WHERE Login = \'%s\';",
+                    data.login
+            );
+
+            sprintf(sql_update_state_loser,
+                    "UPDATE Data "
+                    "SET State = LOSER "
                     "WHERE Login = \'%s\';",
                     data.login
             );
@@ -418,6 +466,13 @@ void *client_callback(void *param) {
             continue;
         }
 
+        if (!strcmp(tag, "<ASK_STATE>") && !first_time) {
+            SQL_THREAD_EXEC(sql_get_state, callback_get_one_string, (void *) transmit, err);
+
+            _SEND()
+            continue;
+        }
+
         if (!strcmp(tag, "<EXIT>") && !first_time) {
             SQL_THREAD_EXEC(sql_update_online_0, 0, 0, err);
             PRINTF_WITH_SERVER_AND_CLIENT_PREFIX(0, "disconnected.\n");
@@ -512,7 +567,11 @@ int create_server() {
                                    "Rating INT, "
                                    "Online INT, "
                                    "Room TEXT, "
-                                   "RoomMessage TEXT);";
+                                   "RoomMessage TEXT, "
+                                   "Seed INT, "
+                                   "X INT, "
+                                   "Y INT, "
+                                   "State TEXT);";
 
     rc = sqlite3_exec(db, sql_create_table, 0, 0, &err);
 
@@ -524,7 +583,11 @@ int create_server() {
         return EXIT_FAILURE;
     }
 
-    rc = sqlite3_exec(db, "UPDATE Data SET Online = 0, Room = \'\', RoomMessage = \'\'", 0, 0, &err);
+    rc = sqlite3_exec(db,
+                      "UPDATE Data "
+                      "SET Online = 0, Room = \'\', RoomMessage = \'\', Seed = 0, X = 0, Y = 0, State = \'IN_MENU\';",
+                      0, 0, &err
+    );
 
     if (rc != SQLITE_OK) {
         printf("[SQL ERROR] %s\n", err);
