@@ -4,6 +4,7 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_C
+  "D:/AllCodes/TheMaze/src/client/client_server_interface/interface.c" "D:/AllCodes/TheMaze/cmake-build-debug/src/local-game/CMakeFiles/MyGame.dir/__/client/client_server_interface/interface.c.obj"
   "D:/AllCodes/TheMaze/src/local-game/game.c" "D:/AllCodes/TheMaze/cmake-build-debug/src/local-game/CMakeFiles/MyGame.dir/game.c.obj"
   "D:/AllCodes/TheMaze/src/local-game/maze_generator.c" "D:/AllCodes/TheMaze/cmake-build-debug/src/local-game/CMakeFiles/MyGame.dir/maze_generator.c.obj"
   "D:/AllCodes/TheMaze/src/local-game/playerInfo.c" "D:/AllCodes/TheMaze/cmake-build-debug/src/local-game/CMakeFiles/MyGame.dir/playerInfo.c.obj"

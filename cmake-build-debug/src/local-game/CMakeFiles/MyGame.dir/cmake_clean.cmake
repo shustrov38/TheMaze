@@ -1,4 +1,5 @@
 file(REMOVE_RECURSE
+  "CMakeFiles/MyGame.dir/__/client/client_server_interface/interface.c.obj"
   "CMakeFiles/MyGame.dir/game.c.obj"
   "CMakeFiles/MyGame.dir/maze_generator.c.obj"
   "CMakeFiles/MyGame.dir/playerInfo.c.obj"

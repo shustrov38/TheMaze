@@ -1,7 +1,3 @@
-//
-// Created by IGOR on 09.06.2021.
-//
-
 #include "interface.h"
 PLAYER scoreboard[PL_CNT];
 ROOM lobbies[PL_CNT];
@@ -10,6 +6,22 @@ PL_STATE myState = DEFAULT;
 COMMAND_PROTOTYPE C;
 SOCKET client;
 int curSeed;
+
+int getLobbySize(){
+    int i = 0;
+    while (i < PL_CNT && lobbies[i].pcnt != 0){
+        i++;
+    }
+    return i;
+}
+
+int getScoreboardSize(){
+    int i = 0;
+    while (i < PL_CNT && strlen(scoreboard[i].NAME) != 0){
+        i++;
+    }
+    return i;
+}
 
 char *make_command(SOCKET client, COMMAND_PROTOTYPE proto) {
     int parsable_ret_ld = 0;
@@ -80,12 +92,7 @@ char *make_command(SOCKET client, COMMAND_PROTOTYPE proto) {
 //              printf("%s->", tmp);
                 z = 0;
                 sscanf(tmp, "%s %d %d", scoreboard[j].NAME, &scoreboard[j].score, &scoreboard[j].is_online);
-                if(strlen(lobbies[i].NAME)>0) j++;
-                else {
-                    memset(scoreboard[j].NAME,0,PL_PARAM_SIZE);
-                    scoreboard[j].score = 0;
-                    scoreboard[j].is_online = 0;
-                }
+                j++;
                 memset(tmp, 0, 32);
                 continue;
             }
@@ -105,11 +112,7 @@ char *make_command(SOCKET client, COMMAND_PROTOTYPE proto) {
 //              printf("%s->", tmp);
                 z = 0;
                 sscanf(tmp, "%s %d", lobbies[j].NAME, &lobbies[j].pcnt);
-                if(strlen(lobbies[i].NAME)>0) j++;
-                else {
-                    memset(lobbies[j].NAME,0,PL_PARAM_SIZE);
-                    lobbies[j].pcnt = 0;
-                }
+                j++;
                 memset(tmp, 0, 32);
                 continue;
             }
@@ -125,20 +128,12 @@ char *make_command(SOCKET client, COMMAND_PROTOTYPE proto) {
 }
 
 
-void try_login(SOCKET client, COMMAND_PROTOTYPE C, char *name, char *password) {
+int try_login(SOCKET client, COMMAND_PROTOTYPE C, char *name, char *password) {
     C.TAG = CONNECTION;
     C.VALID_ARG_CNT = 2;
     strcpy(C.ARGS[0], name);
     strcpy(C.ARGS[1], password);
-    while (strcmp(make_command(client, C), "CONNECTION_SUCCESS") != 0) {
-        printf("Wrong password! Try again:\n");
-        printf("Nickname:");
-        scanf("%s", name);
-        printf("Password:");
-        scanf("%s", password);
-        strcpy(C.ARGS[0], name);
-        strcpy(C.ARGS[1], password);
-    }
+    return  strcmp(make_command(client, C), "CONNECTION_SUCCESS") == 0;
 }
 
 void cli_exit(SOCKET client, COMMAND_PROTOTYPE C) {

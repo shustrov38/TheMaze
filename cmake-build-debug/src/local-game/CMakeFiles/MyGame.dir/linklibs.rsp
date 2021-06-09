@@ -1,1 +1,1 @@
- -lSDL2main -lSDL2_image -lSDL2_ttf -lSDL2 -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32 
+ -lSDL2main -lSDL2_image -lSDL2_ttf -lSDL2 -lgdi32 -lws2_32 -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32 

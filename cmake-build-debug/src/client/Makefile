@@ -171,6 +171,33 @@ client.c.s:
 	cd /d D:\AllCodes\TheMaze\cmake-build-debug && $(MAKE) $(MAKESILENT) -f src\client\CMakeFiles\Client.dir\build.make src/client/CMakeFiles/Client.dir/client.c.s
 .PHONY : client.c.s
 
+client_server_interface/interface.obj: client_server_interface/interface.c.obj
+
+.PHONY : client_server_interface/interface.obj
+
+# target to build an object file
+client_server_interface/interface.c.obj:
+	cd /d D:\AllCodes\TheMaze\cmake-build-debug && $(MAKE) $(MAKESILENT) -f src\client\CMakeFiles\Client.dir\build.make src/client/CMakeFiles/Client.dir/client_server_interface/interface.c.obj
+.PHONY : client_server_interface/interface.c.obj
+
+client_server_interface/interface.i: client_server_interface/interface.c.i
+
+.PHONY : client_server_interface/interface.i
+
+# target to preprocess a source file
+client_server_interface/interface.c.i:
+	cd /d D:\AllCodes\TheMaze\cmake-build-debug && $(MAKE) $(MAKESILENT) -f src\client\CMakeFiles\Client.dir\build.make src/client/CMakeFiles/Client.dir/client_server_interface/interface.c.i
+.PHONY : client_server_interface/interface.c.i
+
+client_server_interface/interface.s: client_server_interface/interface.c.s
+
+.PHONY : client_server_interface/interface.s
+
+# target to generate assembly for a file
+client_server_interface/interface.c.s:
+	cd /d D:\AllCodes\TheMaze\cmake-build-debug && $(MAKE) $(MAKESILENT) -f src\client\CMakeFiles\Client.dir\build.make src/client/CMakeFiles/Client.dir/client_server_interface/interface.c.s
+.PHONY : client_server_interface/interface.c.s
+
 # Help Target
 help:
 	@echo The following are some of the valid targets for this Makefile:
@@ -183,6 +210,9 @@ help:
 	@echo ... client.obj
 	@echo ... client.i
 	@echo ... client.s
+	@echo ... client_server_interface/interface.obj
+	@echo ... client_server_interface/interface.i
+	@echo ... client_server_interface/interface.s
 .PHONY : help
 
 

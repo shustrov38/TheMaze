@@ -11,6 +11,7 @@
 #include <time.h>
 #include <malloc.h>
 #include <conio.h>
+#include "../client/client_server_interface/interface.h"
 
 SDL_Window *window;
 SDL_Surface *screen;

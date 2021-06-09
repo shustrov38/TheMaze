@@ -30,7 +30,6 @@ void showPlayersInfo(playerPos *player, int playersCnt){
     Update_window_rect(0, 0, SCREEN_WIDTH_1, SCREEN_HEIGHT_1);
 }
 
-
 playerPos botMoves(int **maze, playerPos player){
     srand(time(NULL));
 

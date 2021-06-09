@@ -159,6 +159,33 @@ MyGame/fast:
 	cd /d D:\AllCodes\TheMaze\cmake-build-debug && $(MAKE) $(MAKESILENT) -f src\local-game\CMakeFiles\MyGame.dir\build.make src/local-game/CMakeFiles/MyGame.dir/build
 .PHONY : MyGame/fast
 
+__/client/client_server_interface/interface.obj: __/client/client_server_interface/interface.c.obj
+
+.PHONY : __/client/client_server_interface/interface.obj
+
+# target to build an object file
+__/client/client_server_interface/interface.c.obj:
+	cd /d D:\AllCodes\TheMaze\cmake-build-debug && $(MAKE) $(MAKESILENT) -f src\local-game\CMakeFiles\MyGame.dir\build.make src/local-game/CMakeFiles/MyGame.dir/__/client/client_server_interface/interface.c.obj
+.PHONY : __/client/client_server_interface/interface.c.obj
+
+__/client/client_server_interface/interface.i: __/client/client_server_interface/interface.c.i
+
+.PHONY : __/client/client_server_interface/interface.i
+
+# target to preprocess a source file
+__/client/client_server_interface/interface.c.i:
+	cd /d D:\AllCodes\TheMaze\cmake-build-debug && $(MAKE) $(MAKESILENT) -f src\local-game\CMakeFiles\MyGame.dir\build.make src/local-game/CMakeFiles/MyGame.dir/__/client/client_server_interface/interface.c.i
+.PHONY : __/client/client_server_interface/interface.c.i
+
+__/client/client_server_interface/interface.s: __/client/client_server_interface/interface.c.s
+
+.PHONY : __/client/client_server_interface/interface.s
+
+# target to generate assembly for a file
+__/client/client_server_interface/interface.c.s:
+	cd /d D:\AllCodes\TheMaze\cmake-build-debug && $(MAKE) $(MAKESILENT) -f src\local-game\CMakeFiles\MyGame.dir\build.make src/local-game/CMakeFiles/MyGame.dir/__/client/client_server_interface/interface.c.s
+.PHONY : __/client/client_server_interface/interface.c.s
+
 game.obj: game.c.obj
 
 .PHONY : game.obj
@@ -283,6 +310,9 @@ help:
 	@echo ... rebuild_cache
 	@echo ... Local_game
 	@echo ... MyGame
+	@echo ... __/client/client_server_interface/interface.obj
+	@echo ... __/client/client_server_interface/interface.i
+	@echo ... __/client/client_server_interface/interface.s
 	@echo ... game.obj
 	@echo ... game.i
 	@echo ... game.s

@@ -185,6 +185,14 @@
 		<Unit filename="D:/AllCodes/TheMaze/src/client/client.c">
 			<Option target="Client"/>
 		</Unit>
+		<Unit filename="D:/AllCodes/TheMaze/src/client/client_server_interface/interface.c">
+			<Option target="Client"/>
+			<Option target="MyGame"/>
+		</Unit>
+		<Unit filename="D:/AllCodes/TheMaze/src/client/client_server_interface/interface.h">
+			<Option target="Client"/>
+			<Option target="MyGame"/>
+		</Unit>
 		<Unit filename="D:/AllCodes/TheMaze/src/local-game/game.c">
 			<Option target="Local_game"/>
 			<Option target="MyGame"/>

@@ -1,5 +1,6 @@
 file(REMOVE_RECURSE
   "CMakeFiles/Client.dir/client.c.obj"
+  "CMakeFiles/Client.dir/client_server_interface/interface.c.obj"
   "Client.exe"
   "Client.exe.manifest"
   "Client.pdb"

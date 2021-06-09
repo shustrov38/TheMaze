@@ -8,12 +8,12 @@ typedef struct{
     char *login;
     int MMR;
     int inGameStatus;
-} PLAYERS;
+} PLAYERS_STRUCT;
 
 typedef struct{
     char *roomName;
     int playersCnt;
-} ROOMS;
+} ROOMS_STRUCT;
 
 
 enum {

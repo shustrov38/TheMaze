@@ -57,6 +57,24 @@ playerPos *initAllPlayers(int playersCnt, SDL_Surface **icons, int iconsCnt) {
     return players;
 }
 
+void startSession() {
+    client = socket(AF_INET, SOCK_STREAM, IPPROTO_IP);
+    if (client == INVALID_SOCKET) {
+        printf("Error create socket\n");
+        return;
+    }
+    struct sockaddr_in server;
+    server.sin_family = AF_INET;
+    server.sin_port = htons(5510); //the same as in server
+//  server.sin_addr.S_un.S_addr = inet_addr("127.0.0.1"); //special look-up address
+    server.sin_addr.S_un.S_addr = inet_addr("26.173.251.89");
+    if (connect(client, (struct sockaddr *) &server, sizeof(server)) == SOCKET_ERROR) {
+        printf("Can't connect to server\n");
+        closesocket(client);
+        return;
+    }
+}
+
 static void Process_login() {
     TTF_Init();
     SDL_Event event;
@@ -132,6 +150,7 @@ static void Process_login() {
                             temp[--temp_size] = 0;
                         }
                         break;
+
                     case SDLK_SPACE:
                         if (temp_size == 0) {
                             break;
@@ -143,8 +162,14 @@ static void Process_login() {
                             temp_size = 0;
                         } else if (enterCnt == 2) {
                             strcpy(password, temp);
-                            done = 1;
-                            game_status = GAME_MENU;
+                            if (LOGIN(login, password) == 1) {
+                                done = 1;
+                                game_status = GAME_MENU;
+                            } else {
+                                enterCnt = 1;
+                                memset(password, 0, 128);
+                                memset(temp, 0, 128);
+                            }
                         }
                         break;
                 }
@@ -169,18 +194,19 @@ static void Process_login() {
 
         if (event.type == SDL_QUIT) {
             SDL_Quit();
+            DISCONNECT();
             exit(0);
         }
 
     }
 
-    printf("\nUser login: %s\npassword: %s", login, password);
-
 }
 
-static void Process_leaderboard(PLAYERS *users) {
+static void Process_leaderboard(/*PLAYERS_STRUCT *users*/) {
     SDL_Event event;
     TTF_Init();
+
+    GET_LDB();
 
     SDL_Surface *menu_background = Load_img("../../../src/local-game/Textures/menu/menu_back.jpg");
     Draw_image(screen, menu_background, 0, 0);
@@ -193,7 +219,7 @@ static void Process_leaderboard(PLAYERS *users) {
     int selectionPos = 0;
     int drawFlag = 1;
 
-    int begin = 0, end = 7;
+    int begin = 0, end = getScoreboardSize();
     int loginPos_Y = 365;
     char textMMR[5], textInGameStatus[1];
 
@@ -204,9 +230,9 @@ static void Process_leaderboard(PLAYERS *users) {
 
     Draw_image(screen, menu_pointer, 275, 365);
     for (int i = begin; i <= end; ++i) {
-        WriteText(315, loginPos_Y, users[i].login, 24, 255, 255, 255);
+        WriteText(315, loginPos_Y, scoreboard[i].NAME, 24, 255, 255, 255);
 
-        itoa(users[i].MMR, textMMR, 10);
+        itoa(scoreboard[i].score, textMMR, 10);
         WriteText(475, loginPos_Y, textMMR, 24, 255, 0, 0);
 
         loginPos_Y += 30;
@@ -215,6 +241,9 @@ static void Process_leaderboard(PLAYERS *users) {
     Update_window_rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 
     while (!done) {
+
+        GET_LDB();
+
         while (SDL_PollEvent(&event)) {
             if (event.type == SDL_KEYDOWN) {
                 switch (event.key.keysym.sym) {
@@ -249,9 +278,9 @@ static void Process_leaderboard(PLAYERS *users) {
                             }
 
                             for (int i = begin; i <= end; ++i) {
-                                WriteText(315, loginPos_Y, users[i].login, 24, 255, 255, 255);
+                                WriteText(315, loginPos_Y, scoreboard[i].NAME, 24, 255, 255, 255);
 
-                                itoa(users[i].MMR, textMMR, 10);
+                                itoa(scoreboard[i].score, textMMR, 10);
                                 WriteText(475, loginPos_Y, textMMR, 24, 255, 0, 0);
 
                                 loginPos_Y += 30;
@@ -293,9 +322,9 @@ static void Process_leaderboard(PLAYERS *users) {
                             }
 
                             for (int i = begin; i <= end; ++i) {
-                                WriteText(315, loginPos_Y, users[i].login, 24, 255, 255, 255);
+                                WriteText(315, loginPos_Y, scoreboard[i].NAME, 24, 255, 255, 255);
 
-                                itoa(users[i].MMR, textMMR, 10);
+                                itoa(scoreboard[i].score, textMMR, 10);
                                 WriteText(475, loginPos_Y, textMMR, 24, 255, 0, 0);
 
                                 loginPos_Y += 30;
@@ -328,17 +357,19 @@ static void Process_leaderboard(PLAYERS *users) {
 
             if (event.type == SDL_QUIT) {
                 SDL_Quit();
+                DISCONNECT();
                 exit(0);
             }
         }
     }
 }
 
-static void Process_rooms(ROOMS *rooms, int roomsCnt) {
+static void Process_rooms(ROOMS_STRUCT *rooms, int roomsCnt) {
     SDL_Event event;
     TTF_Init();
 
-    game_status = GAME_MENU;
+
+    game_status = GAME_ROOMS;
     SDL_Surface *menu_background = Load_img("../../../src/local-game/Textures/menu/menu_back.jpg");
 
     SDL_Surface *room = Load_img("../../../src/local-game/Textures/menu/room.bmp");
@@ -346,47 +377,58 @@ static void Process_rooms(ROOMS *rooms, int roomsCnt) {
     SDL_Surface *pointer = Load_img("../../../src/local-game/Textures/menu/pointer.png");
     SDL_Surface *menu_pointer = ScaleSurface(pointer, 30, 30);
 
+
     int done = 0;
     int currentRoom = 0;
-
-    Draw_image(screen, menu_background, 0, 0);
-    Draw_image(screen, room, 285, 235);
-    WriteText(342, 356, rooms[currentRoom].roomName, 30, 255, 255, 255);
-
     char text[15];
-    itoa(rooms[currentRoom].playersCnt, text, 10);
-    WriteText(527, 430, text, 30, 255, 255, 255);
-    Update_window_rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 
+    if (lobbies[currentRoom].pcnt != 0) {
+        Draw_image(screen, menu_background, 0, 0);
+        Draw_image(screen, room, 285, 235);
+        WriteText(342, 356, lobbies[currentRoom].NAME, 30, 255, 255, 255);
+
+        itoa(lobbies[currentRoom].pcnt, text, 10);
+        WriteText(527, 430, text, 30, 255, 255, 255);
+        Update_window_rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+    } else {
+        Draw_image(screen, menu_background, 0, 0);
+        Update_window_rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+    }
 
     while (!done) {
+
+        LOBBY();
+
         while (SDL_PollEvent(&event)) {
             if (event.type == SDL_KEYDOWN) {
                 switch (event.key.keysym.sym) {
+                    case SDLK_f:
+                        CREATE_ROOM();
+                        break;
 
                     case SDLK_e:
-                        if (currentRoom != 4){
+                        if (lobbies[currentRoom + 1].pcnt != 0) {
                             currentRoom++;
                             Draw_image(screen, menu_background, 0, 0);
                             Draw_image(screen, room, 285, 235);
-                            WriteText(342, 356, rooms[currentRoom].roomName, 30, 255, 255, 255);
+                            WriteText(342, 356, lobbies[currentRoom].NAME, 30, 255, 255, 255);
 
                             char textRoom[15];
-                            itoa(rooms[currentRoom].playersCnt, text, 10);
+                            itoa(lobbies[currentRoom].pcnt, text, 10);
                             WriteText(527, 430, text, 30, 255, 255, 255);
                             Update_window_rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
                         }
                         break;
 
                     case SDLK_q:
-                        if (currentRoom != 0){
+                        if (currentRoom != 0) {
                             currentRoom--;
                             Draw_image(screen, menu_background, 0, 0);
                             Draw_image(screen, room, 285, 235);
-                            WriteText(342, 356, rooms[currentRoom].roomName, 30, 255, 255, 255);
+                            WriteText(342, 356, lobbies[currentRoom].NAME, 30, 255, 255, 255);
 
                             char textRoom[15];
-                            itoa(rooms[currentRoom].playersCnt, text, 10);
+                            itoa(lobbies[currentRoom].pcnt, text, 10);
                             WriteText(527, 430, text, 30, 255, 255, 255);
                             Update_window_rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
                         }
@@ -397,11 +439,11 @@ static void Process_rooms(ROOMS *rooms, int roomsCnt) {
                         break;
 
                     case SDLK_ESCAPE:
-                        done  = 1;
+                        done = 1;
                         break;
                 }
 
-                if (done == 1){
+                if (done == 1) {
                     Draw_image(screen, menu_background, 0, 0);
                     WriteText(369, 323, "PLAYROOMS", 30, 255, 255, 255);
                     WriteText(359, 400, "LEADERBOARD", 30, 255, 255, 255);
@@ -412,7 +454,7 @@ static void Process_rooms(ROOMS *rooms, int roomsCnt) {
                     return;
                 }
 
-                if (done == 2){
+                if (done == 2) {
                     game_status = GAME_RUNNING;
                     return;
                 }
@@ -421,6 +463,7 @@ static void Process_rooms(ROOMS *rooms, int roomsCnt) {
 
             if (event.type == SDL_QUIT) {
                 SDL_Quit();
+                DISCONNECT();
                 exit(0);
             }
         }
@@ -490,12 +533,13 @@ static void Process_menu() {
                             game_status = GAME_ROOMS;
                             return;
                         }
-                        if (selectionPos == 1){
+                        if (selectionPos == 1) {
                             game_status = GAME_LEADERBOARD;
                             return;
                         }
                         if (selectionPos == 2) {
                             SDL_Quit();
+                            DISCONNECT();
                             exit(0);
                         }
                         break;
@@ -504,6 +548,7 @@ static void Process_menu() {
 
             if (event.type == SDL_QUIT) {
                 SDL_Quit();
+                DISCONNECT();
                 exit(0);
             }
 
@@ -534,9 +579,19 @@ int checkFinishPoint(playerPos player, int **maze) {
 }
 
 
-int WinMain(int argc, char *argv[]) {
+int main(int argc, char *argv[]) {
     srand(time(NULL));
+//init socket
+    WSADATA wsd;
+    if (WSAStartup(MAKEWORD(1, 1), &wsd) != 0) {
+        printf("Can't connect to socket lib");
+        return 1;
+    }
 
+    startSession();
+//init socket
+
+//init of rooms and players
     int playersCnt;
     printf("Enter players count: ");
     scanf("%d", &playersCnt);
@@ -546,13 +601,13 @@ int WinMain(int argc, char *argv[]) {
     scanf("%d", &roomsCnt);
 
 
-    PLAYERS *users = (PLAYERS *) malloc(30 * sizeof(PLAYERS));
+    PLAYERS_STRUCT *users = (PLAYERS_STRUCT *) malloc(30 * sizeof(PLAYERS_STRUCT));
     for (int i = 0; i < 30; ++i) {
         users[i].login = (char *) malloc(16 * sizeof(char));
         scanf("%s %d", users[i].login, &users[i].MMR);
     }
 
-    ROOMS *rooms = (ROOMS *) malloc(5 * sizeof(ROOMS));
+    ROOMS_STRUCT *rooms = (ROOMS_STRUCT *) malloc(5 * sizeof(ROOMS_STRUCT));
     for (int i = 0; i < roomsCnt; ++i){
         rooms[i].roomName = (char *) malloc(30 * sizeof(char));
         scanf("%s %d", rooms[i].roomName, &rooms[i].playersCnt);
@@ -562,18 +617,20 @@ int WinMain(int argc, char *argv[]) {
 //        printf("\n%s - %d - %d", users[i].login, users[i].MMR, users[i].inGame);
 //    }
 
+//init of rooms and players
+
 //login
     Init_window("Maze", SCREEN_WIDTH, SCREEN_HEIGHT);
     Process_login();
 //login
 
 //menu
-    while(game_status != GAME_RUNNING) {
-        if (game_status == GAME_MENU){
+    while (game_status != GAME_RUNNING) {
+        if (game_status == GAME_MENU) {
             Process_menu();
         }
         if (game_status == GAME_LEADERBOARD) {
-            Process_leaderboard(users);
+            Process_leaderboard(/*users*/);
         }
         if (game_status == GAME_ROOMS) {
             Process_rooms(rooms, roomsCnt);

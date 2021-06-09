@@ -71,7 +71,7 @@ extern COMMAND_PROTOTYPE C;
 extern SOCKET client;
 
 char *make_command(SOCKET client, COMMAND_PROTOTYPE proto);
-void try_login(SOCKET client, COMMAND_PROTOTYPE C, char *name, char *password);
+int try_login(SOCKET client, COMMAND_PROTOTYPE C, char *name, char *password);
 void cli_exit(SOCKET client, COMMAND_PROTOTYPE C);
 void move_self(SOCKET client, COMMAND_PROTOTYPE C, int x, int y);
 void cli_send(SOCKET client, COMMAND_PROTOTYPE C, char *str);
@@ -81,6 +81,8 @@ void create_room(SOCKET client, COMMAND_PROTOTYPE C);
 void enter_room(SOCKET client, COMMAND_PROTOTYPE C, char *name);
 void leave_room(SOCKET client, COMMAND_PROTOTYPE C);
 void upd_st(SOCKET client, COMMAND_PROTOTYPE C);
+int getLobbySize();
+int getScoreboardSize();
 
 #define LOGIN(NAME, PASS) try_login(client, C, NAME,PASS)
 #define GET_LDB() upd_ld_board(client, C)
