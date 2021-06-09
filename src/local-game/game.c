@@ -321,6 +321,7 @@ static void Process_leaderboard(PLAYERS *users) {
                     WriteText(404, 594, "EXIT", 25, 255, 255, 255);
                     Draw_image(screen, menu_pointer, 320, 400);
                     Update_window_rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+                    game_status = GAME_MENU;
                     return;
                 }
             }
@@ -392,7 +393,6 @@ static void Process_rooms(ROOMS *rooms, int roomsCnt) {
                         break;
 
                     case SDLK_SPACE:
-                        game_status = GAME_RUNNING;
                         done = 2;
                         break;
 
@@ -408,10 +408,12 @@ static void Process_rooms(ROOMS *rooms, int roomsCnt) {
                     WriteText(404, 594, "EXIT", 25, 255, 255, 255);
                     Draw_image(screen, menu_pointer, 320, 323);
                     Update_window_rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+                    game_status = GAME_MENU;
                     return;
                 }
 
                 if (done == 2){
+                    game_status = GAME_RUNNING;
                     return;
                 }
 
@@ -427,7 +429,7 @@ static void Process_rooms(ROOMS *rooms, int roomsCnt) {
 
 }
 
-static void Process_menu(PLAYERS *users, ROOMS *rooms, int roomsCnt) {
+static void Process_menu() {
     SDL_Event event;
     TTF_Init();
 
@@ -485,10 +487,13 @@ static void Process_menu(PLAYERS *users, ROOMS *rooms, int roomsCnt) {
 
                     case SDLK_SPACE:
                         if (selectionPos == 0) {
-                            Process_rooms(rooms, roomsCnt);
-                            if (game_status == GAME_RUNNING) return;
+                            game_status = GAME_ROOMS;
+                            return;
                         }
-                        if (selectionPos == 1) Process_leaderboard(users);
+                        if (selectionPos == 1){
+                            game_status = GAME_LEADERBOARD;
+                            return;
+                        }
                         if (selectionPos == 2) {
                             SDL_Quit();
                             exit(0);
@@ -563,7 +568,17 @@ int WinMain(int argc, char *argv[]) {
 //login
 
 //menu
-    Process_menu(users, rooms, roomsCnt);
+    while(game_status != GAME_RUNNING) {
+        if (game_status == GAME_MENU){
+            Process_menu();
+        }
+        if (game_status == GAME_LEADERBOARD) {
+            Process_leaderboard(users);
+        }
+        if (game_status == GAME_ROOMS) {
+            Process_rooms(rooms, roomsCnt);
+        }
+    }
 //menu
 
 

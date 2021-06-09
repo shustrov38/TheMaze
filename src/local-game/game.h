@@ -19,6 +19,8 @@ typedef struct{
 enum {
     GAME_LOGIN,
     GAME_MENU,
+    GAME_ROOMS,
+    GAME_LEADERBOARD,
     GAME_RUNNING,
     GAME_OVER
 };
