@@ -1,7 +1,3 @@
-//
-// Created by Igor on 09.06.2021.
-//
-
 #ifndef THEMAZE_INTERFACE_H
 #define THEMAZE_INTERFACE_H
 #include <winsock.h>
@@ -15,11 +11,10 @@
 
 
 typedef enum {
-    //TAG:          // WHAT IT DOES:                     ARGS "<> ...":            DIR:
-    CONNECTION,     // connect this client to server    "<CONNECTION> NAME PASS"   TO
-    SYS_MSG,        // message STR from/to server       "<SYS_MSG> STR"            TO/FROM
-    MOV_RIVAL,      // move enemy NAME to X Y           "<MOV_RIVAL> NAME X Y"     FROM
-    MOV_SELF,       // move this player to X Y          "<MOV_SELF> X Y"           TO
+    CONNECTION,
+    SYS_MSG,
+    GET_RENDER_CORD,
+    MOV_SELF,
     EXIT,
     LEADERBOARD,
     ROOMS,

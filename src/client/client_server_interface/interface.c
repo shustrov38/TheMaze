@@ -16,6 +16,7 @@ char *make_command(SOCKET client, COMMAND_PROTOTYPE proto) {
     int parsable_ret_menu = 0;
     int state_check = 0;
     int check_nei = 0;
+    int check_cord = 0;
     char *command = malloc(sizeof(char) * TRANSACTION_CAPACITY);
     memset(command, 0, TRANSACTION_CAPACITY);
     switch (proto.TAG) {
@@ -58,6 +59,10 @@ char *make_command(SOCKET client, COMMAND_PROTOTYPE proto) {
         case ROOM_NEIGHBOURS:
             sprintf(command,"%s", "<ROOM_NEIGHBOURS>");
             check_nei = 1;
+            break;
+        case GET_RENDER_CORD:
+            sprintf(command,"%s", "<GET_RENDER_CORD>");
+            check_cord = 1;
             break;
     }
     if (!parsable_ret_ld) printf(">>%s\n", command);
@@ -151,6 +156,30 @@ char *make_command(SOCKET client, COMMAND_PROTOTYPE proto) {
         }
         for (int i = 0; i < 4; i++) {
             if(strlen(pl_render_info[i].NAME)>0)printf("%s ", pl_render_info[i].NAME);
+        }
+    }
+
+    if (check_cord) {
+        int z = 0;
+        int j = 0;
+        char tmp[32];
+        memset(tmp, 0, 32);
+        for (int i = 0; i < strlen(command) && j < 4; i++) {
+            if (command[i] == '#') {
+//              printf("%s->", tmp);
+                z = 0;
+                sscanf(tmp, "%s %d %d", pl_render_info[j].NAME,&pl_render_info[j].X,&pl_render_info[j].Y);
+                if(strlen(pl_render_info[j].NAME)>0) j++;
+                else {
+                    memset(pl_render_info[j].NAME,0,PL_PARAM_SIZE);
+                }
+                memset(tmp, 0, 32);
+                continue;
+            }
+            tmp[z++] = command[i];
+        }
+        for (int i = 0; i < 4; i++) {
+            if(strlen(pl_render_info[i].NAME)>0)printf(tmp, "%s %d %d\n", pl_render_info[j].NAME,pl_render_info[j].X,pl_render_info[j].Y);
         }
     }
 
