@@ -12,7 +12,7 @@
 
 #define SQL_ERROR 10
 
-#define _SERVER_DEBUG
+//#define _SERVER_DEBUG
 
 char *get_current_time() {
     time_t r_time;
@@ -95,22 +95,22 @@ int db_execute(char *sql, int (*callback)(void *, int, char **, char **), void *
 
 // callbacks
 
-int callback_check_if_exists(void *param, int argc, char **argv, char **col_name) {
-    int *exists = (int *) param;
-    *exists = atoi(argv[0]);
+int callback_check_if_true(void *param, int argc, char **argv, char **col_name) {
+    int *result = (int *) param;
+    *result = atoi(argv[0]);
     return 0;
 }
 
 int callback_select_leaderboard(void *param, int argc, char **argv, char **col_name) {
     char *users = (char *) param;
     for (int i = 0; i < argc; i += 3) {
-        strcat(users, "# ");
         strcat(users, argv[i + 0]); // login
         strcat(users, " ");
         strcat(users, argv[i + 1]); // rating
         strcat(users, " ");
         strcat(users, argv[i + 2]); // online
         strcat(users, " ");
+        strcat(users, "# ");
     }
     return 0;
 }
@@ -118,11 +118,11 @@ int callback_select_leaderboard(void *param, int argc, char **argv, char **col_n
 int callback_select_rooms(void *param, int argc, char **argv, char **col_name) {
     char *rooms = (char *) param;
     for (int i = 0; i < argc; i += 2) {
-        strcat(rooms, "# ");
         strcat(rooms, argv[i + 0]); // room
         strcat(rooms, " ");
         strcat(rooms, argv[i + 1]); // count
         strcat(rooms, " ");
+        strcat(rooms, "# ");
     }
     return 0;
 }
@@ -202,6 +202,7 @@ void *client_callback(void *param) {
     char sql_add_client[sql_request_buffer_length];
     char sql_select_rooms[sql_request_buffer_length];
     char sql_change_room[sql_request_buffer_length];
+    char sql_leave_room[sql_request_buffer_length];
 
     while (1) {
         char receive[_MESSAGE_LENGTH], transmit[_MESSAGE_LENGTH];
@@ -212,6 +213,11 @@ void *client_callback(void *param) {
         _RECV()
 
         receive[ret] = '\0';
+
+#ifdef _SERVER_DEBUG
+        PRINTF_WITH_SERVER_AND_CLIENT_PREFIX(0, ": %s.\n", (strlen(receive) ? receive : "EMPTY MESSAGE"));
+#endif
+
         sscanf(receive, "%s", tag);
 
 //        Sleep(500);
@@ -290,8 +296,15 @@ void *client_callback(void *param) {
                     data.login, data.login
             );
 
+            sprintf(sql_leave_room,
+                    "UPDATE Data "
+                    "SET Room = \'\' "
+                    "WHERE Login = \'%s\';",
+                    data.login
+            );
+
             int exists = 0;
-            SQL_THREAD_EXEC(sql_if_exists_name, callback_check_if_exists, (void *) &exists, err);
+            SQL_THREAD_EXEC(sql_if_exists_name, callback_check_if_true, (void *) &exists, err);
 
             if (!exists) {
                 SQL_THREAD_EXEC(sql_add_client, 0, 0, err);
@@ -301,7 +314,7 @@ void *client_callback(void *param) {
                 if (strcmp(stored_password, data.password) != 0) {
                     PRINTF_WITH_SERVER_AND_CLIENT_PREFIX(0, "<- in danger.\n");
 
-                    sprintf(transmit, "LOGIN_FAILURE");
+                    sprintf(transmit, "CONNECTION_FAILURE");
                     _SEND()
                     continue;
                 }
@@ -310,14 +323,13 @@ void *client_callback(void *param) {
 
             first_time = 0;
 
-            sprintf(transmit, "LOGIN_SUCCESS");
+            sprintf(transmit, "CONNECTION_SUCCESS");
             _SEND()
             continue;
         }
 
         if (!strcmp(tag, "<LEADERBOARD>") && !first_time) {
             SQL_THREAD_EXEC(sql_select_leaderboard, callback_select_leaderboard, (void *) &transmit, err);
-            strcat(transmit, "#"); // end symbol for leaderboard table list
 
             _SEND()
             continue;
@@ -325,17 +337,82 @@ void *client_callback(void *param) {
 
         if (!strcmp(tag, "<ROOMS>") && !first_time) {
             SQL_THREAD_EXEC(sql_select_rooms, callback_select_rooms, (void *) &transmit, err);
-            strcat(transmit, "#"); // end symbol for rooms table list
 
             _SEND()
             continue;
         }
 
         if (!strcmp(tag, "<CREATE_ROOM>") && !first_time) {
-            strcat(transmit, "ROOM_CREATED ");
-            strcat(transmit, data.login);
+            strcat(transmit, "CREATE_ROOM_SUCCESS");
 
             SQL_THREAD_EXEC(sql_change_room, 0, 0, err);
+
+            _SEND()
+            continue;
+        }
+
+        if (!strcmp(tag, "<ENTER_ROOM>") && !first_time) {
+            char room_name[128];
+            sscanf(receive, "%s %s", tag, room_name);
+
+            int success = 0;
+            sqlite3_mutex_enter(db_mutex); // may cause errors
+
+            char sql_enter_room[sql_request_buffer_length];
+            sprintf(sql_enter_room,
+                    "SELECT count("
+                    "   CASE WHEN Room = \'%s\' THEN "
+                    "       1 "
+                    "   ELSE "
+                    "       NULL "
+                    "   END"
+                    ") AS Total "
+                    "FROM Data;",
+                    room_name
+            );
+
+            int rc = sqlite3_exec(db, sql_enter_room, callback_check_if_true, (void *) &success, &err);
+
+            if (rc != SQLITE_OK) {
+                pthread_fprintf("[SQL ERROR] %s\n", err);
+                sqlite3_free(err);
+
+                return (void *) SQL_ERROR;
+            }
+
+            if (success) {
+                char sql_enter_room_update[sql_request_buffer_length];
+                sprintf(sql_enter_room_update,
+                        "UPDATE Data "
+                        "SET Room = \'%s\' "
+                        "WHERE Login = \'%s\';",
+                        room_name, data.login
+                );
+
+                rc = sqlite3_exec(db, sql_enter_room_update, 0, 0, &err);
+
+                if (rc != SQLITE_OK) {
+                    pthread_fprintf("[SQL ERROR] %s\n", err);
+                    sqlite3_free(err);
+
+                    return (void *) SQL_ERROR;
+                }
+
+                strcat(transmit, "ENTER_ROOM_SUCCESS");
+            } else {
+                strcat(transmit, "ENTER_ROOM_FAILURE");
+            }
+
+            sqlite3_mutex_leave(db_mutex);
+
+            _SEND()
+            continue;
+        }
+
+        if (!strcmp(tag, "<LEAVE_ROOM>") && !first_time) {
+            strcat(transmit, "LEAVE_ROOM_SUCCESS");
+
+            SQL_THREAD_EXEC(sql_leave_room, 0, 0, err);
 
             _SEND()
             continue;
@@ -355,10 +432,6 @@ void *client_callback(void *param) {
             _SEND()
             continue;
         }
-
-#ifdef _SERVER_DEBUG
-        PRINTF_WITH_SERVER_AND_CLIENT_PREFIX(0, ": %s.\n", (strlen(receive) ? receive : "EMPTY MESSAGE"));
-#endif
 
         sprintf(transmit, "I have nothing to say to you.");
         _SEND()
