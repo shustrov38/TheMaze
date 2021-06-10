@@ -38,6 +38,7 @@ char *make_command(SOCKET client, COMMAND_PROTOTYPE proto) {
     int state_check = 0;
     int check_nei = 0;
     int check_cord = 0;
+    int check_seed = 0;
     char *command = malloc(sizeof(char) * TRANSACTION_CAPACITY);
     memset(command, 0, TRANSACTION_CAPACITY);
     switch (proto.TAG) {
@@ -87,12 +88,17 @@ char *make_command(SOCKET client, COMMAND_PROTOTYPE proto) {
             break;
         case START_ROOM:
             sprintf(command, "%s", "<START_ROOM>");
-            check_cord = 1;
+            break;
+        case GET_SEED:
+            sprintf(command, "%s", "<GET_SEED>");
+            check_seed = 1;
             break;
     }
     if (!parsable_ret_ld) printf(">>%s\n", command);
     send(client, command, TRANSACTION_CAPACITY, 0);
     recv(client, command, TRANSACTION_CAPACITY, 0);
+
+    if (check_seed == 1) curSeed = atoi (command);
 
     printf("<<%s\n", command);
 
@@ -280,6 +286,12 @@ void get_rooms(SOCKET client, COMMAND_PROTOTYPE C) {
 
 void create_room(SOCKET client, COMMAND_PROTOTYPE C) {
     C.TAG = CREATE_ROOM;
+    C.VALID_ARG_CNT = 0;
+    make_command(client, C);
+}
+
+void get_seed(SOCKET client, COMMAND_PROTOTYPE C) {
+    C.TAG = GET_STATE;
     C.VALID_ARG_CNT = 0;
     make_command(client, C);
 }

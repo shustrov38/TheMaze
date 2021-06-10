@@ -24,7 +24,8 @@ typedef enum {
     DESTROY_ROOM,
     GET_STATE,
     ROOM_NEIGHBOURS,
-    START_ROOM
+    START_ROOM,
+    GET_SEED
 } INNER_INTERFACE;
 
 typedef enum{
@@ -82,6 +83,7 @@ void upd_st(SOCKET client, COMMAND_PROTOTYPE C);
 void nei(SOCKET client, COMMAND_PROTOTYPE C);
 void cords(SOCKET client, COMMAND_PROTOTYPE C);
 void start_room(SOCKET client, COMMAND_PROTOTYPE C);
+void get_seed(SOCKET client, COMMAND_PROTOTYPE C);
 
 int getLobbySize();
 int getParticipantsSize();
@@ -101,4 +103,5 @@ int getScoreboardSize();
 #define UPD_RENDER_INFO() cord(client,C)
 #define GET_STATUS() upd_st(client, C)
 #define START() start_room(client, C)
+#define GET_SEED() get_seed(client, C)
 #endif //THEMAZE_INTERFACE_H
