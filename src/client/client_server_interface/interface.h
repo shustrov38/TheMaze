@@ -100,5 +100,5 @@ int getScoreboardSize();
 #define GET_NEIGHBOURS() nei(client, C)
 #define UPD_RENDER_INFO() cord(client,C)
 #define GET_STATUS() upd_st(client, C)
-#define START() start_room(SOCKET client, COMMAND_PROTOTYPE C)
+#define START() start_room(client, C)
 #endif //THEMAZE_INTERFACE_H
