@@ -1,3 +1,3 @@
-C:\Users\anros\AppData\Local\JetBrains\Toolbox\apps\CLion\ch-0\203.7148.70\bin\cmake\win\bin\cmake.exe -E rm -f CMakeFiles\MyGame.dir/objects.a
-"D:\For apps\mingw64\bin\ar.exe" cr CMakeFiles\MyGame.dir/objects.a @CMakeFiles\MyGame.dir\objects1.rsp
-"D:\For apps\mingw64\bin\gcc.exe" -g   -Wl,--whole-archive CMakeFiles\MyGame.dir/objects.a -Wl,--no-whole-archive  -o MyGame.exe -Wl,--out-implib,libMyGame.dll.a -Wl,--major-image-version,0,--minor-image-version,0 @CMakeFiles\MyGame.dir\linklibs.rsp
+"C:\Program Files\JetBrains\CLion 2020.3\bin\cmake\win\bin\cmake.exe" -E rm -f CMakeFiles\MyGame.dir/objects.a
+C:\PROGRA~1\MINGW-~1\X86_64~1.0-P\mingw64\bin\ar.exe cr CMakeFiles\MyGame.dir/objects.a @CMakeFiles\MyGame.dir\objects1.rsp
+C:\PROGRA~1\MINGW-~1\X86_64~1.0-P\mingw64\bin\gcc.exe -g   -Wl,--whole-archive CMakeFiles\MyGame.dir/objects.a -Wl,--no-whole-archive  -o MyGame.exe -Wl,--out-implib,libMyGame.dll.a -Wl,--major-image-version,0,--minor-image-version,0 @CMakeFiles\MyGame.dir\linklibs.rsp

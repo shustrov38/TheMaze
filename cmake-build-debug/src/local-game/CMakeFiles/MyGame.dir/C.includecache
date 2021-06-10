@@ -6,7 +6,7 @@
 
 #IncludeRegexTransform: 
 
-D:/AllCodes/TheMaze/src/client/client_server_interface/interface.h
+D:/TheMaze/src/client/client_server_interface/interface.h
 winsock.h
 -
 stdio.h
@@ -18,33 +18,33 @@ stdlib.h
 unistd.h
 -
 
-D:/AllCodes/TheMaze/src/local-game/game.c
+D:/TheMaze/src/local-game/game.c
 game.h
-D:/AllCodes/TheMaze/src/local-game/game.h
+D:/TheMaze/src/local-game/game.h
 utilities.h
-D:/AllCodes/TheMaze/src/local-game/utilities.h
+D:/TheMaze/src/local-game/utilities.h
 maze_generator.h
-D:/AllCodes/TheMaze/src/local-game/maze_generator.h
+D:/TheMaze/src/local-game/maze_generator.h
 playerInfo.h
-D:/AllCodes/TheMaze/src/local-game/playerInfo.h
+D:/TheMaze/src/local-game/playerInfo.h
 
-D:/AllCodes/TheMaze/src/local-game/game.h
+D:/TheMaze/src/local-game/game.h
 
-D:/AllCodes/TheMaze/src/local-game/maze_generator.h
+D:/TheMaze/src/local-game/maze_generator.h
 utilities.h
-D:/AllCodes/TheMaze/src/local-game/utilities.h
+D:/TheMaze/src/local-game/utilities.h
 
-D:/AllCodes/TheMaze/src/local-game/playerInfo.h
+D:/TheMaze/src/local-game/playerInfo.h
 utilities.h
-D:/AllCodes/TheMaze/src/local-game/utilities.h
+D:/TheMaze/src/local-game/utilities.h
 
-D:/AllCodes/TheMaze/src/local-game/utilities.h
+D:/TheMaze/src/local-game/utilities.h
 SDL2/SDL.h
-D:/AllCodes/TheMaze/src/local-game/SDL2/SDL.h
+D:/TheMaze/src/local-game/SDL2/SDL.h
 SDL2/SDL_image.h
-D:/AllCodes/TheMaze/src/local-game/SDL2/SDL_image.h
+D:/TheMaze/src/local-game/SDL2/SDL_image.h
 SDL2/SDL_ttf.h
-D:/AllCodes/TheMaze/src/local-game/SDL2/SDL_ttf.h
+D:/TheMaze/src/local-game/SDL2/SDL_ttf.h
 stdio.h
 -
 stdlib.h
@@ -56,5 +56,5 @@ malloc.h
 conio.h
 -
 ../client/client_server_interface/interface.h
-D:/AllCodes/TheMaze/src/client/client_server_interface/interface.h
+D:/TheMaze/src/client/client_server_interface/interface.h
 

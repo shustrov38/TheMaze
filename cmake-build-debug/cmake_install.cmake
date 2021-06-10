@@ -1,4 +1,4 @@
-# Install script for directory: D:/AllCodes/TheMaze
+# Install script for directory: D:/TheMaze
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -34,17 +34,17 @@ endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("D:/AllCodes/TheMaze/cmake-build-debug/src/server/cmake_install.cmake")
+  include("D:/TheMaze/cmake-build-debug/src/server/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("D:/AllCodes/TheMaze/cmake-build-debug/src/client/cmake_install.cmake")
+  include("D:/TheMaze/cmake-build-debug/src/client/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("D:/AllCodes/TheMaze/cmake-build-debug/src/local-game/cmake_install.cmake")
+  include("D:/TheMaze/cmake-build-debug/src/local-game/cmake_install.cmake")
 endif()
 
 if(CMAKE_INSTALL_COMPONENT)
@@ -55,5 +55,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "D:/AllCodes/TheMaze/cmake-build-debug/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "D:/TheMaze/cmake-build-debug/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")
