@@ -13,8 +13,8 @@ typedef struct {
 } playerPos;
 
 
-void showPlayersInfo(playerPos *player, int playersCnt);
-playerPos playerMoves(int **maze, playerPos player);
-playerPos botMoves(int **maze, playerPos player);
+void showPlayersInfo(RECV_PL_INFO *player, int playersCnt);
+RECV_PL_INFO playerMoves(int **maze, RECV_PL_INFO player, int curPos);
+playerPos botMoves(int **maze, RECV_PL_INFO player);
 
 #endif //THEMAZE_PLAYERINFO_H

@@ -198,6 +198,8 @@ char *make_command(SOCKET client, COMMAND_PROTOTYPE proto) {
             if (command[i] == '#') {
 //              printf("%s->", tmp);
                 z = 0;
+                pl_render_info[j].X_prev = pl_render_info[j].X;
+                pl_render_info[j].Y_prev = pl_render_info[j].Y;
                 sscanf(tmp, "%s %d %d", pl_render_info[j].NAME, &pl_render_info[j].X, &pl_render_info[j].Y);
                 if (strlen(pl_render_info[j].NAME) > 0) j++;
                 else {

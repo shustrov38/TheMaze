@@ -5,6 +5,7 @@
 #include <time.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <SDL2/SDL.h>
 #define TRANSACTION_CAPACITY    1024
 #define PL_PARAM_SIZE           16
 #define PL_CNT                  50
@@ -58,6 +59,9 @@ typedef struct{
     char NAME[PL_PARAM_SIZE];
     int X;
     int Y;
+    int X_prev;
+    int Y_prev;
+    SDL_Surface *icon;
 } RECV_PL_INFO;
 
 extern PLAYER scoreboard[PL_CNT];
@@ -100,7 +104,7 @@ int getScoreboardSize();
 #define ENTER(NAME) enter_room(client, C, NAME)
 #define LEAVE() leave_room(client, C)
 #define GET_NEIGHBOURS() nei(client, C)
-#define UPD_RENDER_INFO() cord(client,C)
+#define UPD_RENDER_INFO() cords(client,C)
 #define GET_STATUS() upd_st(client, C)
 #define START() start_room(client, C)
 #define GET_SEED() get_seed(client, C)

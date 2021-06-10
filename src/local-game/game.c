@@ -833,7 +833,7 @@ int checkFinishPoint(playerPos player, int **maze) {
 
 
 int main(int argc, char *argv[]) {
-    srand(time(NULL));
+
 
 //init socket
     WSADATA wsd;
@@ -896,9 +896,6 @@ int main(int argc, char *argv[]) {
 
 
 //textures
-    //SDL_Surface *background = Load_img("D:\\AllCodes\\TheMaze\\src\\local-game\\Textures\\wall2.jpg");
-    //SDL_Surface *scaled_background = ScaleSurface(background,750,750);
-
     SDL_Surface *wall = Load_img("../../../src/local-game/Textures/maze/maze_wall3.bmp");
     SDL_Surface *scaled_wall = ScaleSurface(wall, TILE_SIZE, TILE_SIZE);
 
@@ -917,6 +914,8 @@ int main(int argc, char *argv[]) {
 
 //    playerPos *players = initAllPlayers(playersCnt, ICONS, iconsCnt);
 
+    GET_SEED();
+    srand(curSeed);
 
     int height = MAZE_SIZE;
     int width = MAZE_SIZE;
@@ -962,8 +961,26 @@ int main(int argc, char *argv[]) {
         }
 
         //begin positions
-        for (int i = 0; i < playersCnt; ++i) {
-            Draw_image(screen, players[i].icon, (players[i].X * TILE_SIZE) - 3, (players[i].Y * TILE_SIZE) - 3);
+        UPD_RENDER_INFO();
+
+        for (int i = 0; i < pl_render_infoCnt; ++i) {
+            int iconNum;
+            int iconUsing[iconsCnt];
+            for (int i = 0; i < iconsCnt; ++i) iconUsing[i] = 0;
+
+            for (int i = 0; i < pl_render_infoCnt; ++i) {
+                iconNum = rand() % iconsCnt;
+                if (iconUsing[iconNum] == 0) {
+                    pl_render_info[i].icon = ICONS[iconNum];
+                    iconUsing[iconNum]++;
+                } else {
+                    i--;
+                }
+            }
+        }
+
+        for (int i = 0; i < pl_render_infoCnt; ++i) {
+            Draw_image(screen, pl_render_info[i].icon, (pl_render_info[i].X * TILE_SIZE) - 3, (pl_render_info[i].Y * TILE_SIZE) - 3);
         }
         Update_window_rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
     }
@@ -974,19 +991,23 @@ int main(int argc, char *argv[]) {
     while (client_game_status != GAME_OVER) {
         Process_exit_game();
         if (client_game_status == GAME_OVER) break;
-        players[0] = playerMoves(maze, players[0]);
-        for (int i = 1; i < playersCnt; ++i) {
-            players[i] = botMoves(maze, players[i]);
-        }
 
-        for (int i = 0; i < playersCnt; ++i) {
-            client_game_status = checkFinishPoint(players[i], maze);
-            if (client_game_status == GAME_OVER) break;
-            Draw_image(screen, scaled_floor, (TILE_SIZE * players[i].Prev_X) - 3,
-                       (TILE_SIZE * players[i].Prev_Y) - 3);
-            Draw_image(screen, players[i].icon, (TILE_SIZE * players[i].X) - 3, (TILE_SIZE * players[i].Y) - 3);
+        int myCurPosition = -1;
+        for (int i = 0; i < pl_render_infoCnt; ++i){
+            if (strcmp(login, pl_render_info[i].NAME) == 0) myCurPosition = i;
         }
-        showPlayersInfo(players, playersCnt);
+        pl_render_info[myCurPosition] = playerMoves(maze, pl_render_info[myCurPosition], myCurPosition);
+
+
+
+        for (int i = 0; i < pl_render_infoCnt; ++i) {
+            //client_game_status = checkFinishPoint(players[i], maze);
+            //if (client_game_status == GAME_OVER) break;
+            Draw_image(screen, scaled_floor, (TILE_SIZE * pl_render_info[i].X_prev) - 3,
+                       (TILE_SIZE * pl_render_info[i].Y_prev) - 3);
+            Draw_image(screen, pl_render_info[i].icon, (TILE_SIZE * pl_render_info[i].X) - 3, (TILE_SIZE * pl_render_info[i].Y) - 3);
+        }
+        showPlayersInfo(pl_render_info, playersCnt);
         Draw_image(screen, scaled_exitPoint, TILE_SIZE * x_finishPoint, TILE_SIZE * y_finishPoint);
         Update_window_rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 
