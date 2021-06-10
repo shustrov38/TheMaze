@@ -211,7 +211,7 @@ static void Process_leaderboard(/*PLAYERS_STRUCT *users*/) {
 
     GET_LDB();
 
-    SDL_Surface *menu_background = Load_img("../../../src/local-game/Textures/menu/menu_back.bmp");
+    SDL_Surface *menu_background = Load_img("../../../src/local-game/Textures/menu/menu_back.jpg");
     Draw_image(screen, menu_background, 0, 0);
     Update_window_rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 
@@ -222,7 +222,10 @@ static void Process_leaderboard(/*PLAYERS_STRUCT *users*/) {
     int selectionPos = 0;
     int drawFlag = 1;
 
-    int begin = 0, end = getScoreboardSize();
+    int count = getScoreboardSize();
+    int begin = 0; int end = 7;
+    int curPage = 1; int pageCnt = (getScoreboardSize() / 8) + 1;
+
     int loginPos_Y = 365;
     char textMMR[5], textInGameStatus[1];
 
@@ -232,12 +235,13 @@ static void Process_leaderboard(/*PLAYERS_STRUCT *users*/) {
     Update_window_rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 
     Draw_image(screen, menu_pointer, 275, 365);
-    for (int i = begin; i <= end; ++i) {
+    for (int i = begin * pageCnt; i <= end * pageCnt; ++i) {
         WriteText(315, loginPos_Y, scoreboard[i].NAME, 24, 255, 255, 255);
 
-        itoa(scoreboard[i].score, textMMR, 10);
-        WriteText(475, loginPos_Y, textMMR, 24, 255, 0, 0);
-
+        if (strlen(scoreboard[i].NAME) != 0) {
+            itoa(scoreboard[i].score, textMMR, 10);
+            WriteText(475, loginPos_Y, textMMR, 24, 255, 0, 0);
+        }
         loginPos_Y += 30;
     }
     loginPos_Y = 365;
@@ -246,13 +250,21 @@ static void Process_leaderboard(/*PLAYERS_STRUCT *users*/) {
     while (!done) {
 
         GET_LDB();
+        pageCnt = (getScoreboardSize() / 8) + 1;
 
         while (SDL_PollEvent(&event)) {
+
+
             if (event.type == SDL_KEYDOWN) {
                 switch (event.key.keysym.sym) {
                     case SDLK_w:
                         if (selectionPos != 0) {
                             selectionPos--;
+                            if (selectionPos == (end - 8) && (curPage - 1) != 1){
+                                curPage--;
+                                begin -= 8;
+                                end -= 8;
+                            }
                         } else {
                             drawFlag = 0;
                         }
@@ -262,42 +274,33 @@ static void Process_leaderboard(/*PLAYERS_STRUCT *users*/) {
                             WriteText(315, 310, "PLAYERS", 28, 255, 0, 0);
                             WriteText(475, 310, "MMR", 28, 255, 0, 0);
                             WriteText(555, 310, "Status", 28, 255, 0, 0);
+                            Draw_image(screen, menu_pointer, 275, 365 + (30 * (selectionPos % 8)));
                             Update_window_rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
-                            Update_window_rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 
-
-//                            if (selectionPos <= 4) {
-//                                begin = 0;
-//                                end = 7;
-//                                Draw_image(screen, menu_pointer, 275, 365 + 30 * (selectionPos));
-//                            } else if (selectionPos >= 25) {
-//                                begin = 21;
-//                                end = 29;
-//                                Draw_image(screen, menu_pointer, 275, 365 + 30 * (selectionPos - begin));
-//                            } else {
-//                                begin = selectionPos - 4;
-//                                end = selectionPos + 4;
-//                                Draw_image(screen, menu_pointer, 275, 365 + 30 * (end - selectionPos));
-//                            }
-
-                            for (int i = begin; i <= end; ++i) {
+                            for (int i = begin * curPage; i <= end * curPage; ++i) {
                                 WriteText(315, loginPos_Y, scoreboard[i].NAME, 24, 255, 255, 255);
 
-                                itoa(scoreboard[i].score, textMMR, 10);
-                                WriteText(475, loginPos_Y, textMMR, 24, 255, 0, 0);
-
+                                if (strlen(scoreboard[i].NAME) != 0) {
+                                    itoa(scoreboard[i].score, textMMR, 10);
+                                    WriteText(475, loginPos_Y, textMMR, 24, 255, 0, 0);
+                                }
                                 loginPos_Y += 30;
                             }
-
                             loginPos_Y = 365;
+
                             Update_window_rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
                         }
                         drawFlag = 1;
                         break;
 
                     case SDLK_s:
-                        if (selectionPos != 29) {
+                        if (selectionPos != count) {
                             selectionPos++;
+                            if (selectionPos == begin + 8 && (curPage + 1) != pageCnt){
+                                curPage++;
+                                begin += 8;
+                                end += 8;
+                            }
                         } else {
                             drawFlag = 0;
                         }
@@ -307,33 +310,21 @@ static void Process_leaderboard(/*PLAYERS_STRUCT *users*/) {
                             WriteText(315, 310, "PLAYERS", 28, 255, 0, 0);
                             WriteText(475, 310, "MMR", 28, 255, 0, 0);
                             WriteText(555, 310, "Status", 28, 255, 0, 0);
+                            Draw_image(screen, menu_pointer, 275, 365 + (30 * (selectionPos % 8)));
                             Update_window_rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
-                            Update_window_rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 
-//                            if (selectionPos <= 4) {
-//                                begin = 0;
-//                                end = 7;
-//                                Draw_image(screen, menu_pointer, 275, 365 + 30 * (selectionPos));
-//                            } else if (selectionPos >= 25) {
-//                                begin = 21;
-//                                end = 29;
-//                                Draw_image(screen, menu_pointer, 275, 365 + 30 * (selectionPos - begin));
-//                            } else {
-//                                begin = selectionPos - 4;
-//                                end = selectionPos + 4;
-//                                Draw_image(screen, menu_pointer, 275, 365 + 30 * (end - selectionPos));
-//                            }
+                            for (int i = begin * curPage; i <= end * curPage; ++i) {
+                                WriteText(315, loginPos_Y, scoreboard[i - 1].NAME, 24, 255, 255, 255);
 
-                            for (int i = begin; i <= end; ++i) {
-                                WriteText(315, loginPos_Y, scoreboard[i].NAME, 24, 255, 255, 255);
-
-                                itoa(scoreboard[i].score, textMMR, 10);
-                                WriteText(475, loginPos_Y, textMMR, 24, 255, 0, 0);
+                                if (strlen(scoreboard[i - 1].NAME) != 0) {
+                                    itoa(scoreboard[i - 1].score, textMMR, 10);
+                                    WriteText(475, loginPos_Y, textMMR, 24, 255, 0, 0);
+                                }
 
                                 loginPos_Y += 30;
                             }
-
                             loginPos_Y = 365;
+
                             Update_window_rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
                         }
                         drawFlag = 1;
@@ -371,7 +362,7 @@ static void Process_waiting() {
     SDL_Event event;
     TTF_Init();
 
-    SDL_Surface *menu_background = Load_img("../../../src/local-game/Textures/menu/menu_back.bmp");
+    SDL_Surface *menu_background = Load_img("../../../src/local-game/Textures/menu/menu_back.jpg");
     Draw_image(screen, menu_background, 0, 0);
 
 
@@ -414,7 +405,7 @@ static void Process_rooms(/*ROOMS_STRUCT *rooms, int roomsCnt*/) {
 
     LOBBY();
 
-    SDL_Surface *menu_background = Load_img("../../../src/local-game/Textures/menu/menu_back.bmp");
+    SDL_Surface *menu_background = Load_img("../../../src/local-game/Textures/menu/menu_back.jpg");
 
     SDL_Surface *room_join = Load_img("../../../src/local-game/Textures/menu/room_1.bmp");
     SDL_Surface *room_create = Load_img("../../../src/local-game/Textures/menu/room_2.bmp");
@@ -711,6 +702,7 @@ int checkFinishPoint(playerPos player, int **maze) {
 
 int main(int argc, char *argv[]) {
     srand(time(NULL));
+
 //init socket
     WSADATA wsd;
     if (WSAStartup(MAKEWORD(1, 1), &wsd) != 0) {
