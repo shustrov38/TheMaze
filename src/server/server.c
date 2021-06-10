@@ -127,6 +127,16 @@ int callback_select_rooms(void *param, int argc, char **argv, char **col_name) {
     return 0;
 }
 
+int callback_get_room_neighbours(void *param, int argc, char **argv, char **col_name) {
+    char *rooms = (char *) param;
+    for (int i = 0; i < argc; i += 1) {
+        strcat(rooms, argv[i + 0]); // room
+        strcat(rooms, " ");
+        strcat(rooms, "# ");
+    }
+    return 0;
+}
+
 int callback_get_one_string(void *param, int argc, char **argv, char **col_name) {
     char *result = (char *) param;
     sprintf(result, "%s", argv[0]);
@@ -209,6 +219,14 @@ void *client_callback(void *param) {
     char sql_update_state_winner[sql_request_buffer_length];
     char sql_update_state_loser[sql_request_buffer_length];
     char sql_update_state_in_room[sql_request_buffer_length];
+    char sql_get_room_neighbours[sql_request_buffer_length];
+    char sql_if_room_eq_login[sql_request_buffer_length];
+    char sql_close_room[sql_request_buffer_length];
+    char sql_start_room[sql_request_buffer_length];
+    char sql_select_login_by_room[sql_request_buffer_length];
+    char sql_get_seed[sql_request_buffer_length];
+    char sql_get_coord[sql_request_buffer_length];
+    char sql_get_all_coordinates[sql_request_buffer_length];
 
     while (1) {
         char receive[_MESSAGE_LENGTH], transmit[_MESSAGE_LENGTH];
@@ -260,14 +278,16 @@ void *client_callback(void *param) {
                     "   FROM Data "
                     "   WHERE Login = \'%s\' "
                     "   LIMIT 1"
-                    ") AS exist;",
+                    ") AS exist "
+                    "LIMIT 1;",
                     data.login
             );
 
             sprintf(sql_select_leaderboard,
                     "SELECT Login, Rating, Online "
                     "FROM Data "
-                    "ORDER BY Rating, Online, Login;"
+                    "ORDER BY Rating, Online, Login ASC "
+                    "LIMIT 50;"
             );
 
             sprintf(sql_get_password_by_name,
@@ -310,44 +330,119 @@ void *client_callback(void *param) {
             );
 
             sprintf(sql_get_state,
-                    "SELECT State"
+                    "SELECT State "
                     "FROM Data "
-                    "WHERE Login = \'%s\';",
+                    "WHERE Login = \'%s\' "
+                    "LIMIT 1;",
                     data.login
             );
 
             sprintf(sql_update_state_in_room,
                     "UPDATE Data "
-                    "SET State = LOSER "
+                    "SET State = \'IN_ROOM\' "
                     "WHERE Login = \'%s\';",
                     data.login
             );
 
             sprintf(sql_update_state_in_menu,
                     "UPDATE Data "
-                    "SET State = IN_MENU "
+                    "SET State = \'IN_MENU\' "
                     "WHERE Login = \'%s\';",
                     data.login
             );
 
             sprintf(sql_update_state_in_game,
                     "UPDATE Data "
-                    "SET State = IN_GAME "
+                    "SET State = \'IN_GAME\' "
                     "WHERE Login = \'%s\';",
                     data.login
             );
 
             sprintf(sql_update_state_winner,
                     "UPDATE Data "
-                    "SET State = WINNER "
+                    "SET State = \'WINNER\' "
                     "WHERE Login = \'%s\';",
                     data.login
             );
 
             sprintf(sql_update_state_loser,
                     "UPDATE Data "
-                    "SET State = LOSER "
+                    "SET State = \'LOSER\' "
                     "WHERE Login = \'%s\';",
+                    data.login
+            );
+
+            sprintf(sql_get_room_neighbours,
+                    "SELECT Login "
+                    "FROM Data "
+                    "WHERE Room = ("
+                    "   SELECT Room"
+                    "   FROM Data "
+                    "   WHERE Login = \'%s\'"
+                    ") "
+                    "LIMIT 4;",
+                    data.login
+            );
+
+            sprintf(sql_if_room_eq_login,
+                    "SELECT ("
+                    "   CASE WHEN (Room = \'%s\' AND Login = \'%s\') THEN "
+                    "       1 "
+                    "   ELSE "
+                    "       0 "
+                    "   END"
+                    ") as Result "
+                    "FROM ("
+                    "   SELECT Room, Login "
+                    "   FROM Data "
+                    "   WHERE Login = \'%s\' "
+                    "   LIMIT 1"
+                    ") "
+                    "LIMIT 1;",
+                    data.login, data.login, data.login
+            );
+
+            sprintf(sql_close_room,
+                    "UPDATE Data "
+                    "SET Room = '', State = \'IN_MENU\' "
+                    "WHERE Room = \'%s\';",
+                    data.login
+            );
+
+            sprintf(sql_select_login_by_room,
+                    "SELECT Login "
+                    "FROM Data "
+                    "WHERE Room = \'%s\' "
+                    "LIMIT 4;",
+                    data.login
+            );
+
+            sprintf(sql_get_seed,
+                    "SELECT Seed "
+                    "FROM Data "
+                    "WHERE Login = \'%s\' "
+                    "LIMIT 1;",
+                    data.login
+            );
+
+            sprintf(sql_get_coord,
+                    "SELECT X, Y "
+                    "FROM Data "
+                    "WHERE Login = \'%s\' "
+                    "LIMIT 1;",
+                    data.login
+            );
+
+            sprintf(sql_get_all_coordinates,
+                    "SELECT Login, X, Y "
+                    "FROM Data "
+                    "WHERE Room = ("
+                    "   SELECT Room "
+                    "   FROM Data "
+                    "   WHERE Login = \'%s\' "
+                    "   LIMIT 1"
+                    ") "
+                    "LIMIT 4;",
                     data.login
             );
 
@@ -395,6 +490,8 @@ void *client_callback(void *param) {
 
             SQL_THREAD_EXEC(sql_change_room, 0, 0, err);
 
+            SQL_THREAD_EXEC(sql_update_state_in_room, 0, 0, err);
+
             _SEND()
             continue;
         }
@@ -415,7 +512,8 @@ void *client_callback(void *param) {
                     "       NULL "
                     "   END"
                     ") AS Total "
-                    "FROM Data;",
+                    "FROM Data "
+                    "LIMIT 1;",
                     room_name
             );
 
@@ -445,13 +543,15 @@ void *client_callback(void *param) {
 
                     return (void *) SQL_ERROR;
                 }
+                sqlite3_mutex_leave(db_mutex);
+
+                SQL_THREAD_EXEC(sql_update_state_in_room, 0, 0, err);
 
                 strcat(transmit, "ENTER_ROOM_SUCCESS");
             } else {
+                sqlite3_mutex_leave(db_mutex);
                 strcat(transmit, "ENTER_ROOM_FAILURE");
             }
-
-            sqlite3_mutex_leave(db_mutex);
 
             _SEND()
             continue;
@@ -460,7 +560,24 @@ void *client_callback(void *param) {
         if (!strcmp(tag, "<LEAVE_ROOM>") && !first_time) {
             strcat(transmit, "LEAVE_ROOM_SUCCESS");
 
-            SQL_THREAD_EXEC(sql_leave_room, 0, 0, err);
+
+            int result = 0;
+
+            SQL_THREAD_EXEC(sql_if_room_eq_login, callback_check_if_true, (void *) &result, err);
+
+            if (result) {
+                SQL_THREAD_EXEC(sql_close_room, 0, 0, err);
+            } else {
+                SQL_THREAD_EXEC(sql_leave_room, 0, 0, err);
+                SQL_THREAD_EXEC(sql_update_state_in_menu, 0, 0, err);
+            }
+
+            _SEND()
+            continue;
+        }
+
+        if (!strcmp(tag, "<ROOM_NEIGHBOURS>") && !first_time) {
+            SQL_THREAD_EXEC(sql_get_room_neighbours, callback_get_room_neighbours, (void *) transmit, err);
 
             _SEND()
             continue;
@@ -469,6 +586,109 @@ void *client_callback(void *param) {
         if (!strcmp(tag, "<GET_STATE>") && !first_time) {
             SQL_THREAD_EXEC(sql_get_state, callback_get_one_string, (void *) transmit, err);
 
+            _SEND()
+            continue;
+        }
+
+        if (!strcmp(tag, "<GET_SEED>") && !first_time) {
+            SQL_THREAD_EXEC(sql_get_seed, callback_get_one_string, (void *) transmit, err);
+
+            _SEND()
+            continue;
+        }
+
+        if (!strcmp(tag, "<START_ROOM>") && !first_time) {
+            memset(sql_start_room, 0, sql_request_buffer_length);
+            sprintf(sql_start_room,
+                    "UPDATE Data "
+                    "SET State = \'IN_GAME\', Seed = %d "
+                    "WHERE Room = \'%s\'",
+                    rand() % 10000, data.login
+            );
+
+            sqlite3_mutex_enter(db_mutex); // may cause errors
+
+            int rc = sqlite3_exec(db, sql_start_room, 0, 0, &err);
+
+            if (rc != SQLITE_OK) {
+                pthread_fprintf("[SQL ERROR] %s\n", err);
+                sqlite3_free(err);
+
+                return (void *) SQL_ERROR;
+            }
+
+            char temp[512];
+            memset(temp, 0, 512);
+            // neighbours callback return sum of names
+            rc = sqlite3_exec(db, sql_select_login_by_room, callback_get_room_neighbours, (void *) temp, &err);
+
+            if (rc != SQLITE_OK) {
+                pthread_fprintf("[SQL ERROR] %s\n", err);
+                sqlite3_free(err);
+
+                return (void *) SQL_ERROR;
+            }
+
+            pthread_fprintf("%s\n", temp);
+
+            int X[4] = {1, 48, 48, 1};
+            int Y[4] = {1, 48, 1, 48};
+
+            int i = 0;
+            char *pch = strtok(temp, " #");
+
+            while (pch != NULL) {
+                char sql_set_coords_by_login[sql_request_buffer_length];
+                sprintf(sql_set_coords_by_login,
+                        "UPDATE Data "
+                        "SET X = %d, Y = %d "
+                        "WHERE Login = \'%s\'",
+                        X[i], Y[i], pch
+                );
+//                pthread_fprintf("-> %s %d %d\n", pch, X[i], Y[i]);
+
+                rc = sqlite3_exec(db, sql_set_coords_by_login, 0, 0, &err);
+
+                if (rc != SQLITE_OK) {
+                    pthread_fprintf("[SQL ERROR] %s\n", err);
+                    sqlite3_free(err);
+
+                    return (void *) SQL_ERROR;
+                }
+
+                ++i;
+                pch = strtok(NULL, " #");
+            }
+
+            sqlite3_mutex_leave(db_mutex);
+
+            sprintf(transmit, "START_ROOM_SUCCESS");
+            _SEND()
+            continue;
+        }
+
+        if (!strcmp(tag, "<GET_RENDER_CORD>") && !first_time) {
+            SQL_THREAD_EXEC(sql_get_all_coordinates, callback_select_leaderboard, (void *) transmit, err);
+
+            _SEND()
+            continue;
+        }
+
+        if (!strcmp(tag, "<MOV_SELF>") && !first_time) {
+            int X, Y;
+            sscanf(receive, "%s %d %d", tag, &X, &Y);
+
+            char sql_set_coords_by_login[sql_request_buffer_length];
+            sprintf(sql_set_coords_by_login,
+                    "UPDATE Data "
+                    "SET X = %d, Y = %d "
+                    "WHERE Login = \'%s\'",
+                    X, Y, data.login
+            );
+
+            SQL_THREAD_EXEC(sql_set_coords_by_login, 0, 0, err);
+
+            sprintf(transmit, "MOV_SELF_SUCCESS");
             _SEND()
             continue;
         }
@@ -669,6 +889,9 @@ int create_server() {
 }
 
 int main() {
+    srand(time(0));
+    rand();
+
     WSADATA wsd;
 
     if (WSAStartup(MAKEWORD(1, 1), &wsd) == 0) {

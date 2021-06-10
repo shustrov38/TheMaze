@@ -89,7 +89,7 @@ void cords(SOCKET client, COMMAND_PROTOTYPE C);
 #define CREATE_ROOM() create_room(client, C)
 #define ENTER(NAME) enter_room(client, C, NAME)
 #define LEAVE() leave_room(client, C)
-#define GET_NEIGHBORS() nei(client, C)
+#define GET_NEIGHBOURS() nei(client, C)
 #define UPD_RENDER_INFO() cord(client,C)
 
 #endif //THEMAZE_INTERFACE_H
