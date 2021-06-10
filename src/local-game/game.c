@@ -1000,6 +1000,7 @@ int main(int argc, char *argv[]) {
         for (int i = 0; i < pl_render_infoCnt; ++i){
             if (strcmp(login, pl_render_info[i].NAME) == 0) myCurPosition = i;
         }
+        UPD_RENDER_INFO();
         pl_render_info[myCurPosition] = playerMoves(maze, pl_render_info[myCurPosition], myCurPosition);
 
 
@@ -1018,5 +1019,4 @@ int main(int argc, char *argv[]) {
         SDL_Delay(125);
     }
 //game (movements of players)
-
 }

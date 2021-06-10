@@ -76,31 +76,27 @@ RECV_PL_INFO playerMoves(int **maze, RECV_PL_INFO player, int curPos) {
             player.X_prev = player.X;
             player.Y_prev = player.Y;
             player.Y -= 1;
-            changesFlag = 1;
         }
     } else if (curKey[SDL_SCANCODE_LEFT] || curKey[SDL_SCANCODE_A]) {
         if (maze[player.X - 1][player.Y] != 1) {
             player.X_prev = player.X;
             player.Y_prev = player.Y;
             player.X -= 1;
-            changesFlag = 1;
         }
     } else if (curKey[SDL_SCANCODE_RIGHT] || curKey[SDL_SCANCODE_D]) {
         if (maze[player.X + 1][player.Y] != 1) {
             player.X_prev = player.X;
             player.Y_prev = player.Y;
             player.X += 1;
-            changesFlag = 1;
         }
     } else if (curKey[SDL_SCANCODE_DOWN] || curKey[SDL_SCANCODE_S]) {
         if (maze[player.X][player.Y + 1] != 1) {
             player.X_prev = player.X;
             player.Y_prev = player.Y;
             player.Y += 1;
-            changesFlag = 1;
         }
     }
-    GO(pl_render_info[curPos].X, pl_render_info[curPos].Y);
+        GO(player.X, player.Y);
     return player;
 }
 
