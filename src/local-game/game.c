@@ -411,8 +411,19 @@ static void Process_waiting() {
             pos_y = 402;
         }
         if (strcmp(curPlayerRoom, login) == 0) {
+            if (currentChoose == 1) {
+                Draw_image(screen, menu_background, 0, 0);
+                Draw_image(screen, admin_waiting_leave, 248, 227);
+                WriteText(326, 334, roomName, 30, 255, 255, 255);
+                for (int i = 0; i < pl_render_infoCnt; ++i) {
+                    WriteText(345, pos_y, pl_render_info[i].NAME, 30, 255, 255, 255);
+
+                    pos_y += 40;
+                }
+                pos_y = 402;
+            } else if (currentChoose == 2) {
             Draw_image(screen, menu_background, 0, 0);
-            Draw_image(screen, admin_waiting_leave, 248, 227);
+            Draw_image(screen, admin_waiting_start, 248, 227);
             WriteText(326, 334, roomName, 30, 255, 255, 255);
             for (int i = 0; i < pl_render_infoCnt; ++i) {
                 WriteText(345, pos_y, pl_render_info[i].NAME, 30, 255, 255, 255);
@@ -420,6 +431,7 @@ static void Process_waiting() {
                 pos_y += 40;
             }
             pos_y = 402;
+            }
         }
         Update_window_rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 
