@@ -235,7 +235,7 @@ static void Process_leaderboard(/*PLAYERS_STRUCT *users*/) {
     Update_window_rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 
     Draw_image(screen, menu_pointer, 275, 365);
-    for (int i = begin * pageCnt; i <= end * pageCnt; ++i) {
+    for (int i = begin; i <= end; ++i) {
         WriteText(315, loginPos_Y, scoreboard[i].NAME, 24, 255, 255, 255);
 
         if (strlen(scoreboard[i].NAME) != 0) {
@@ -260,7 +260,7 @@ static void Process_leaderboard(/*PLAYERS_STRUCT *users*/) {
                     case SDLK_w:
                         if (selectionPos != 0) {
                             selectionPos--;
-                            if (selectionPos == (end - 8) && (curPage - 1) != 1){
+                            if (selectionPos == (end - 8) && (curPage - 1) != 0){
                                 curPage--;
                                 begin -= 8;
                                 end -= 8;
@@ -277,7 +277,7 @@ static void Process_leaderboard(/*PLAYERS_STRUCT *users*/) {
                             Draw_image(screen, menu_pointer, 275, 365 + (30 * (selectionPos % 8)));
                             Update_window_rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 
-                            for (int i = begin * curPage; i <= end * curPage; ++i) {
+                            for (int i = begin; i <= end; ++i) {
                                 WriteText(315, loginPos_Y, scoreboard[i].NAME, 24, 255, 255, 255);
 
                                 if (strlen(scoreboard[i].NAME) != 0) {
@@ -294,9 +294,9 @@ static void Process_leaderboard(/*PLAYERS_STRUCT *users*/) {
                         break;
 
                     case SDLK_s:
-                        if (selectionPos != count) {
+                        if (selectionPos != count - 1) {
                             selectionPos++;
-                            if (selectionPos == begin + 8 && (curPage + 1) != pageCnt){
+                            if (selectionPos == begin + 8 && curPage != pageCnt){
                                 curPage++;
                                 begin += 8;
                                 end += 8;
@@ -313,11 +313,11 @@ static void Process_leaderboard(/*PLAYERS_STRUCT *users*/) {
                             Draw_image(screen, menu_pointer, 275, 365 + (30 * (selectionPos % 8)));
                             Update_window_rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 
-                            for (int i = begin * curPage; i <= end * curPage; ++i) {
-                                WriteText(315, loginPos_Y, scoreboard[i - 1].NAME, 24, 255, 255, 255);
+                            for (int i = begin; i <= end; ++i) {
+                                WriteText(315, loginPos_Y, scoreboard[i].NAME, 24, 255, 255, 255);
 
-                                if (strlen(scoreboard[i - 1].NAME) != 0) {
-                                    itoa(scoreboard[i - 1].score, textMMR, 10);
+                                if (strlen(scoreboard[i].NAME) != 0) {
+                                    itoa(scoreboard[i].score, textMMR, 10);
                                     WriteText(475, loginPos_Y, textMMR, 24, 255, 0, 0);
                                 }
 
@@ -374,8 +374,21 @@ static void Process_waiting() {
 
 
     int done = 0;
-
+    int pos_y = 402;
     while (!done) {
+
+        GET_NEIGHBOURS();
+        Draw_image(screen, menu_background, 0, 0);
+        Draw_image(screen, waiting, 248, 227);
+        WriteText(326, 334, curPlayerRoom, 30, 255, 255, 255);
+        for (int i = 0; i < pl_render_infoCnt; ++i){
+            WriteText(345, pos_y, pl_render_info[i].NAME, 30, 255, 255, 255);
+
+            pos_y += 40;
+        }
+        pos_y = 402;
+        Update_window_rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+
         while (SDL_PollEvent(&event)) {
             if (event.type == SDL_KEYDOWN) {
                 switch (event.key.keysym.sym) {
@@ -442,6 +455,16 @@ static void Process_rooms(/*ROOMS_STRUCT *rooms, int roomsCnt*/) {
     while (!done) {
 
         LOBBY();
+        if (roomCreatingFlag == 0 && getLobbySize()) {
+
+            Draw_image(screen, room_join, 285, 235);
+            WriteText(342, 356, lobbies[currentRoom].NAME, 30, 255, 255, 255);
+
+            itoa(lobbies[currentRoom].pcnt, text, 10);
+            WriteText(527, 430, text, 30, 255, 255, 255);
+            Update_window_rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+            roomCreatingFlag = 1;
+        }
 
         while (SDL_PollEvent(&event)) {
             if (event.type == SDL_KEYDOWN) {

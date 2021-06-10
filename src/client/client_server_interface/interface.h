@@ -1,7 +1,3 @@
-//
-// Created by Igor on 09.06.2021.
-//
-
 #ifndef THEMAZE_INTERFACE_H
 #define THEMAZE_INTERFACE_H
 #include <winsock.h>
@@ -15,11 +11,10 @@
 
 
 typedef enum {
-    //TAG:          // WHAT IT DOES:                     ARGS "<> ...":            DIR:
-    CONNECTION,     // connect this client to server    "<CONNECTION> NAME PASS"   TO
-    SYS_MSG,        // message STR from/to server       "<SYS_MSG> STR"            TO/FROM
-    MOV_RIVAL,      // move enemy NAME to X Y           "<MOV_RIVAL> NAME X Y"     FROM
-    MOV_SELF,       // move this player to X Y          "<MOV_SELF> X Y"           TO
+    CONNECTION,
+    SYS_MSG,
+    GET_RENDER_CORD,
+    MOV_SELF,
     EXIT,
     LEADERBOARD,
     ROOMS,
@@ -27,7 +22,8 @@ typedef enum {
     ENTER_ROOM,
     LEAVE_ROOM,
     DESTROY_ROOM,
-    ASK_STATE
+    GET_STATE,
+    ROOM_NEIGHBOURS
 } INNER_INTERFACE;
 
 typedef enum{
@@ -69,6 +65,7 @@ extern PL_STATE myState;
 extern int curSeed;
 extern COMMAND_PROTOTYPE C;
 extern SOCKET client;
+extern int pl_render_infoCnt;
 
 char *make_command(SOCKET client, COMMAND_PROTOTYPE proto);
 int try_login(SOCKET client, COMMAND_PROTOTYPE C, char *name, char *password);
@@ -81,8 +78,13 @@ void create_room(SOCKET client, COMMAND_PROTOTYPE C);
 void enter_room(SOCKET client, COMMAND_PROTOTYPE C, char *name);
 void leave_room(SOCKET client, COMMAND_PROTOTYPE C);
 void upd_st(SOCKET client, COMMAND_PROTOTYPE C);
+void nei(SOCKET client, COMMAND_PROTOTYPE C);
+void cords(SOCKET client, COMMAND_PROTOTYPE C);
+
 int getLobbySize();
+int getParticipantsSize();
 int getScoreboardSize();
+
 
 #define LOGIN(NAME, PASS) try_login(client, C, NAME,PASS)
 #define GET_LDB() upd_ld_board(client, C)
@@ -93,5 +95,7 @@ int getScoreboardSize();
 #define CREATE_ROOM() create_room(client, C)
 #define ENTER(NAME) enter_room(client, C, NAME)
 #define LEAVE() leave_room(client, C)
+#define GET_NEIGHBOURS() nei(client, C)
+#define UPD_RENDER_INFO() cord(client,C)
 
 #endif //THEMAZE_INTERFACE_H
