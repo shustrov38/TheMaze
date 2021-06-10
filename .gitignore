@@ -17,6 +17,9 @@ ehthumbs_vista.db
 # Recycle Bin used on file shares
 $RECYCLE.BIN/
 
+#git ignore
+cmake-build-debug/
+
 # Windows Installer files
 *.cab
 *.msi

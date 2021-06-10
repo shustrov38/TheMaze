@@ -1,3 +1,0 @@
-"C:\Program Files\JetBrains\CLion 2020.3\bin\cmake\win\bin\cmake.exe" -E rm -f CMakeFiles\Local_game.dir/objects.a
-C:\PROGRA~1\MINGW-~1\X86_64~1.0-P\mingw64\bin\ar.exe cr CMakeFiles\Local_game.dir/objects.a @CMakeFiles\Local_game.dir\objects1.rsp
-C:\PROGRA~1\MINGW-~1\X86_64~1.0-P\mingw64\bin\gcc.exe -g   -Wl,--whole-archive CMakeFiles\Local_game.dir/objects.a -Wl,--no-whole-archive  -o Local_game.exe -Wl,--out-implib,libLocal_game.dll.a -Wl,--major-image-version,0,--minor-image-version,0 @CMakeFiles\Local_game.dir\linklibs.rsp
