@@ -606,7 +606,7 @@ static void Process_menu() {
     SDL_Event event;
     TTF_Init();
 
-    game_status = GAME_MENU;
+
     SDL_Surface *menu_background = Load_img("../../../src/local-game/Textures/menu/menu_back.jpg");
 
     SDL_Surface *pointer = Load_img("../../../src/local-game/Textures/menu/pointer.png");
