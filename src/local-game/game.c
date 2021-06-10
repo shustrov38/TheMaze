@@ -692,7 +692,10 @@ static void Process_waiting() {
     while (!done) {
 
         GET_STATUS();
-        if (myState != IN_ROOM) {
+        if (myState == IN_GAME) {
+            client_game_status = GAME_RUNNING;
+            return;
+        } else if (myState != IN_ROOM) {
             LEAVE();
             client_game_status = GAME_ROOMS;
             memset(roomName, 0, 50);
@@ -736,6 +739,7 @@ static void Process_waiting() {
             }
         }
         Update_window_rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+
 
         while (SDL_PollEvent(&event)) {
             if (event.type == SDL_KEYDOWN) {
