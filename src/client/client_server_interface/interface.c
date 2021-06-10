@@ -85,6 +85,10 @@ char *make_command(SOCKET client, COMMAND_PROTOTYPE proto) {
             sprintf(command, "%s", "<GET_RENDER_CORD>");
             check_cord = 1;
             break;
+        case START_ROOM:
+            sprintf(command, "%s", "<START_ROOM>");
+            check_cord = 1;
+            break;
     }
     if (!parsable_ret_ld) printf(">>%s\n", command);
     send(client, command, TRANSACTION_CAPACITY, 0);
@@ -276,6 +280,12 @@ void get_rooms(SOCKET client, COMMAND_PROTOTYPE C) {
 
 void create_room(SOCKET client, COMMAND_PROTOTYPE C) {
     C.TAG = CREATE_ROOM;
+    C.VALID_ARG_CNT = 0;
+    make_command(client, C);
+}
+
+void start_room(SOCKET client, COMMAND_PROTOTYPE C) {
+    C.TAG = START_ROOM;
     C.VALID_ARG_CNT = 0;
     make_command(client, C);
 }
