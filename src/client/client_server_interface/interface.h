@@ -97,5 +97,5 @@ int getScoreboardSize();
 #define LEAVE() leave_room(client, C)
 #define GET_NEIGHBOURS() nei(client, C)
 #define UPD_RENDER_INFO() cord(client,C)
-
+#define GET_STATUS() upd_st(client, C)
 #endif //THEMAZE_INTERFACE_H
