@@ -873,6 +873,9 @@ static void Process_game() {
 
 
 //game (movements of players)
+    Uint32 startTime = SDL_GetTicks();
+    int fps = 30;
+
     while (client_game_status != GAME_OVER) {
         Process_exit_game();
 
@@ -880,13 +883,17 @@ static void Process_game() {
         for (int i = 0; i < pl_render_infoCnt; ++i) {
             if (strcmp(login, pl_render_info[i].NAME) == 0) myCurPosition = i;
         }
-        UPD_RENDER_INFO();
-        pl_render_info[myCurPosition] = playerMoves(maze, pl_render_info[myCurPosition], myCurPosition);
 
-        GET_STATUS();
-        if (myState == WINNER || myState == LOSER) {
-            client_game_status = GAME_RESULTS;
-            return;
+        if (SDL_GetTicks() - startTime >= 1000/fps) {
+            startTime = SDL_GetTicks();
+            UPD_RENDER_INFO();
+            pl_render_info[myCurPosition] = playerMoves(maze, pl_render_info[myCurPosition], myCurPosition);
+
+            GET_STATUS();
+            if (myState == WINNER || myState == LOSER) {
+                client_game_status = GAME_RESULTS;
+                return;
+            }
         }
 
 
