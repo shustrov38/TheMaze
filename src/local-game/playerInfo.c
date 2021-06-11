@@ -13,20 +13,22 @@ void showPlayersInfo(RECV_PL_INFO *player, int playersCnt){
     Draw_rectangle(screen, BLACK_BLOCK, 750, 0, 150, 750);
     WriteText(770, 0, "Players", 28, 255, 255, 255);
 
-    for (int i = 0; i < playersCnt; ++i) {
+    for (int i = 0; i < pl_render_infoCnt; ++i) {
         char text1[50];
         SDL_Surface *icon = ScaleSurface(player[i].icon, TILE_SIZE_1 + 10, TILE_SIZE_1 + 10);
-        Draw_image(screen, icon, pos_X - 40, pos_Y + 68);
+        WriteText(pos_X - 35, pos_Y + 40, player[i].NAME, 24, 255, 255, 255);
+        Draw_image(screen, icon, pos_X - 60, pos_Y + 44);
 
-        itoa(player[i].X, text1, 10);
-        WriteText(pos_X, pos_Y + 40, "X:", 28, 255, 255, 255);
-        WriteText(pos_X + 20, pos_Y + 40, text1, 28, 255, 255, 255);
+        double dest = sqrt((24.5 - player[i].X)*(24.5 - player[i].X) + (24.5 - player[i].Y)*(24.5 - player[i].Y));
 
-        itoa(player[i].Y, text1, 10);
-        WriteText(pos_X, pos_Y + 80, "Y:", 28, 255, 255, 255);
-        WriteText(pos_X + 20, pos_Y + 80, text1, 28, 255, 255, 255);
+        sprintf(text1, "POS: (%d : %d)", player[i].X, player[i].Y);
+        WriteText(pos_X - 55, pos_Y + 70, text1, 24, 255, 255, 255);
+        memset(text1, 0, 50);
 
-        pos_Y += 100;
+        sprintf(text1, "AIM: %.2f", dest);
+        WriteText(pos_X - 55, pos_Y + 100, text1, 24, 255, 255, 255);
+
+        pos_Y += 120;
     }
     Update_window_rect(0, 0, SCREEN_WIDTH_1, SCREEN_HEIGHT_1);
 }
