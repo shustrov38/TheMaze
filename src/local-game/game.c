@@ -8,59 +8,11 @@ const int SCREEN_HEIGHT = 750;
 const int SCREEN_WIDTH = 900;
 
 static int client_game_status;
-static int server_game_status;
 
 char login[128];
 char password[128];
 char curPlayerRoom[50];
 
-playerPos *initAllPlayers(int playersCnt, SDL_Surface **icons, int iconsCnt) {
-    playerPos *players = (playerPos *) malloc(playersCnt * sizeof(playerPos));
-
-    for (int i = 0; i < playersCnt; ++i) {
-        if (i == 0) {
-            players[i].X = 1;
-            players[i].Y = 1;
-            players[i].Prev_X = 1;
-            players[i].Prev_Y = 1;
-        } else if (i == 1) {
-            players[i].X = MAZE_SIZE - 2;
-            players[i].Y = MAZE_SIZE - 2;
-            players[i].Prev_X = MAZE_SIZE - 2;
-            players[i].Prev_Y = MAZE_SIZE - 2;
-        } else if (i == 2) {
-            players[i].X = MAZE_SIZE - 2;
-            players[i].Y = 1;
-            players[i].Prev_X = MAZE_SIZE - 2;
-            players[i].Prev_Y = 1;
-        } else if (i == 3) {
-            players[i].X = 1;
-            players[i].Y = MAZE_SIZE - 2;
-            players[i].Prev_X = 1;
-            players[i].Prev_Y = MAZE_SIZE - 2;
-        }
-    }
-
-    int iconNum;
-    int iconUsing[iconsCnt];
-    for (int i = 0; i < iconsCnt; ++i) iconUsing[i] = 0;
-
-    for (int i = 0; i < playersCnt; ++i) {
-        iconNum = rand() % iconsCnt;
-        if (iconUsing[iconNum] == 0) {
-            players[i].icon = icons[iconNum];
-            iconUsing[iconNum]++;
-        } else {
-            i--;
-        }
-    }
-
-    for (int i = 0; i < playersCnt; ++i) {
-        players[i].login = (char *) malloc(20 * sizeof(char));
-    }
-
-    return players;
-}
 
 
 static void Process_login() {
@@ -815,6 +767,7 @@ static void Process_waiting() {
 
 }
 
+
 static void Process_exit_game() {
     SDL_Event event;
 
@@ -849,32 +802,6 @@ int main(int argc, char *argv[]) {
     startSession();
 //init socket
 
-//init of rooms and players
-    int playersCnt;
-//    printf("Enter players count: ");
-//    scanf("%d", &playersCnt);
-//
-//    int roomsCnt;
-//    printf("Enter rooms count: ");
-//    scanf("%d", &roomsCnt);
-//
-//
-//    PLAYERS_STRUCT *users = (PLAYERS_STRUCT *) malloc(30 * sizeof(PLAYERS_STRUCT));
-//    for (int i = 0; i < 30; ++i) {
-//        users[i].login = (char *) malloc(16 * sizeof(char));
-//        scanf("%s %d", users[i].login, &users[i].MMR);
-//    }
-//
-//    ROOMS_STRUCT *rooms = (ROOMS_STRUCT *) malloc(5 * sizeof(ROOMS_STRUCT));
-//    for (int i = 0; i < roomsCnt; ++i) {
-//        rooms[i].roomName = (char *) malloc(30 * sizeof(char));
-//        scanf("%s %d", rooms[i].roomName, &rooms[i].playersCnt);
-//    }
-//
-//    for (int i = 0; i < 30; ++i){
-//        printf("\n%s - %d - %d", users[i].login, users[i].MMR, users[i].inGame);
-//    }
-//init of rooms and players
 
 //login
     Init_window("Maze", SCREEN_WIDTH, SCREEN_HEIGHT);
@@ -1003,6 +930,11 @@ int main(int argc, char *argv[]) {
         UPD_RENDER_INFO();
         pl_render_info[myCurPosition] = playerMoves(maze, pl_render_info[myCurPosition], myCurPosition);
 
+        GET_STATUS();
+        if (myState == WINNER || myState == LOSER){
+            client_game_status = GAME_RESULTS;
+            break;
+        }
 
 
         for (int i = 0; i < pl_render_infoCnt; ++i) {
@@ -1012,11 +944,25 @@ int main(int argc, char *argv[]) {
                        (TILE_SIZE * pl_render_info[i].Y_prev) - 3);
             Draw_image(screen, pl_render_info[i].icon, (TILE_SIZE * pl_render_info[i].X) - 3, (TILE_SIZE * pl_render_info[i].Y) - 3);
         }
-        showPlayersInfo(pl_render_info, playersCnt);
+        showPlayersInfo(pl_render_info, pl_render_infoCnt);
         Draw_image(screen, scaled_exitPoint, TILE_SIZE * x_finishPoint, TILE_SIZE * y_finishPoint);
         Update_window_rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 
         SDL_Delay(125);
+    }
+
+    if (client_game_status == GAME_RESULTS){
+        SDL_Surface *win = Load_img("../../../src/local-game/Textures/results/win.bmp");
+        SDL_Surface *lose = Load_img("../../../src/local-game/Textures/results/lose.png");
+
+        while (1) {
+            if (myState == WINNER) {
+                Draw_image(screen, win, 0, 0);
+            } else if (myState == LOSER) {
+                Draw_image(screen, lose, 0 ,0);
+            }
+            Update_window_rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+        }
     }
 //game (movements of players)
 }

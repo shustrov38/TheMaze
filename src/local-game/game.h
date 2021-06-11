@@ -23,6 +23,7 @@ enum {
     GAME_WAITING,
     GAME_LEADERBOARD,
     GAME_RUNNING,
+    GAME_RESULTS,
     GAME_OVER
 };
 
