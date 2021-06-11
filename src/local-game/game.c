@@ -13,7 +13,17 @@ char login[128];
 char password[128];
 char curPlayerRoom[50];
 
+static void Process_exit_game() {
+    SDL_Event event;
 
+    while (SDL_PollEvent(&event) != 0) {
+
+        if (event.type == SDL_QUIT) {
+            client_game_status = GAME_OVER;
+            return;
+        }
+    }
+}
 
 static void Process_login() {
     TTF_Init();
@@ -679,15 +689,15 @@ static void Process_waiting() {
                 }
                 pos_y = 402;
             } else if (currentChoose == 2) {
-            Draw_image(screen, menu_background, 0, 0);
-            Draw_image(screen, admin_waiting_start, 248, 227);
-            WriteText(326, 334, roomName, 30, 255, 255, 255);
-            for (int i = 0; i < pl_render_infoCnt; ++i) {
-                WriteText(345, pos_y, pl_render_info[i].NAME, 30, 255, 255, 255);
+                Draw_image(screen, menu_background, 0, 0);
+                Draw_image(screen, admin_waiting_start, 248, 227);
+                WriteText(326, 334, roomName, 30, 255, 255, 255);
+                for (int i = 0; i < pl_render_infoCnt; ++i) {
+                    WriteText(345, pos_y, pl_render_info[i].NAME, 30, 255, 255, 255);
 
-                pos_y += 40;
-            }
-            pos_y = 402;
+                    pos_y += 40;
+                }
+                pos_y = 402;
             }
         }
         Update_window_rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
@@ -767,66 +777,8 @@ static void Process_waiting() {
 
 }
 
-
-static void Process_exit_game() {
-    SDL_Event event;
-
-    while (SDL_PollEvent(&event) != 0) {
-
-        if (event.type == SDL_QUIT) {
-            client_game_status = GAME_OVER;
-            return;
-        }
-    }
-}
-
-int checkFinishPoint(playerPos player, int **maze) {
-    if (maze[player.X][player.Y] == 5) {
-        return GAME_OVER;
-    } else {
-        return GAME_RUNNING;
-    }
-}
-
-
-int main(int argc, char *argv[]) {
-
-
-//init socket
-    WSADATA wsd;
-    if (WSAStartup(MAKEWORD(1, 1), &wsd) != 0) {
-        printf("Can't connect to socket lib");
-        return 1;
-    }
-
-    startSession();
-//init socket
-
-
-//login
-    Init_window("Maze", SCREEN_WIDTH, SCREEN_HEIGHT);
-    Process_login();
-//login
-    SDL_SetWindowTitle(window, login);
-//menu
-    while (client_game_status != GAME_RUNNING) {
-        if (client_game_status == GAME_MENU) {
-            Process_menu();
-        }
-        if (client_game_status == GAME_LEADERBOARD) {
-            Process_leaderboard(/*users*/);
-        }
-        if (client_game_status == GAME_ROOMS) {
-            Process_rooms(/*rooms, roomsCnt*/);
-        }
-        if (client_game_status == GAME_WAITING) {
-            Process_waiting();
-        }
-    }
-//menu
-
-
-//textures
+static void Process_game() {
+    //textures
     SDL_Surface *wall = Load_img("../../../src/local-game/Textures/maze/maze_wall3.bmp");
     SDL_Surface *scaled_wall = ScaleSurface(wall, TILE_SIZE, TILE_SIZE);
 
@@ -911,7 +863,8 @@ int main(int argc, char *argv[]) {
         }
 
         for (int i = 0; i < pl_render_infoCnt; ++i) {
-            Draw_image(screen, pl_render_info[i].icon, (pl_render_info[i].X * TILE_SIZE) - 3, (pl_render_info[i].Y * TILE_SIZE) - 3);
+            Draw_image(screen, pl_render_info[i].icon, (pl_render_info[i].X * TILE_SIZE) - 3,
+                       (pl_render_info[i].Y * TILE_SIZE) - 3);
         }
         Update_window_rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
     }
@@ -921,28 +874,26 @@ int main(int argc, char *argv[]) {
 //game (movements of players)
     while (client_game_status != GAME_OVER) {
         Process_exit_game();
-        if (client_game_status == GAME_OVER) break;
 
         int myCurPosition = -1;
-        for (int i = 0; i < pl_render_infoCnt; ++i){
+        for (int i = 0; i < pl_render_infoCnt; ++i) {
             if (strcmp(login, pl_render_info[i].NAME) == 0) myCurPosition = i;
         }
         UPD_RENDER_INFO();
         pl_render_info[myCurPosition] = playerMoves(maze, pl_render_info[myCurPosition], myCurPosition);
 
         GET_STATUS();
-        if (myState == WINNER || myState == LOSER){
+        if (myState == WINNER || myState == LOSER) {
             client_game_status = GAME_RESULTS;
-            break;
+            return;
         }
 
 
         for (int i = 0; i < pl_render_infoCnt; ++i) {
-            //client_game_status = checkFinishPoint(players[i], maze);
-            //if (client_game_status == GAME_OVER) break;
             Draw_image(screen, scaled_floor, (TILE_SIZE * pl_render_info[i].X_prev) - 3,
                        (TILE_SIZE * pl_render_info[i].Y_prev) - 3);
-            Draw_image(screen, pl_render_info[i].icon, (TILE_SIZE * pl_render_info[i].X) - 3, (TILE_SIZE * pl_render_info[i].Y) - 3);
+            Draw_image(screen, pl_render_info[i].icon, (TILE_SIZE * pl_render_info[i].X) - 3,
+                       (TILE_SIZE * pl_render_info[i].Y) - 3);
         }
         showPlayersInfo(pl_render_info, pl_render_infoCnt);
         Draw_image(screen, scaled_exitPoint, TILE_SIZE * x_finishPoint, TILE_SIZE * y_finishPoint);
@@ -950,19 +901,90 @@ int main(int argc, char *argv[]) {
 
         SDL_Delay(125);
     }
+}
 
-    if (client_game_status == GAME_RESULTS){
-        SDL_Surface *win = Load_img("../../../src/local-game/Textures/results/win.bmp");
-        SDL_Surface *lose = Load_img("../../../src/local-game/Textures/results/lose.png");
+static void Process_results() {
+    SDL_Event event;
+    TTF_Init();
 
-        while (1) {
-            if (myState == WINNER) {
-                Draw_image(screen, win, 0, 0);
-            } else if (myState == LOSER) {
-                Draw_image(screen, lose, 0 ,0);
+    SDL_Surface *win = Load_img("../../../src/local-game/Textures/results/win.bmp");
+    SDL_Surface *lose = Load_img("../../../src/local-game/Textures/results/lose.png");
+
+    if (myState == WINNER) {
+        Draw_image(screen, win, 0, 0);
+    } else if (myState == LOSER) {
+        Draw_image(screen, lose, 0, 0);
+    }
+    Update_window_rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+
+    int done = 0;
+
+    while (!done) {
+        while (SDL_PollEvent(&event)) {
+            if (event.type == SDL_KEYDOWN) {
+                switch (event.key.keysym.sym) {
+                    case SDLK_SPACE:
+                        client_game_status = GAME_MENU;
+                        LEAVE();
+                        return;
+                        break;
+                }
             }
-            Update_window_rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+
+            if (event.type == SDL_QUIT) {
+                SDL_Quit();
+                LEAVE();
+                DISCONNECT();
+                exit(0);
+            }
         }
     }
-//game (movements of players)
+
+}
+
+
+
+
+int main(int argc, char *argv[]) {
+
+
+//init socket
+    WSADATA wsd;
+    if (WSAStartup(MAKEWORD(1, 1), &wsd) != 0) {
+        printf("Can't connect to socket lib");
+        return 1;
+    }
+
+    startSession();
+//init socket
+
+
+//login
+    Init_window("Maze", SCREEN_WIDTH, SCREEN_HEIGHT);
+    Process_login();
+//login
+    SDL_SetWindowTitle(window, login);
+//menu
+    while (client_game_status != GAME_OVER) {
+        if (client_game_status == GAME_MENU) {
+            Process_menu();
+        }
+        if (client_game_status == GAME_LEADERBOARD) {
+            Process_leaderboard(/*users*/);
+        }
+        if (client_game_status == GAME_ROOMS) {
+            Process_rooms(/*rooms, roomsCnt*/);
+        }
+        if (client_game_status == GAME_WAITING) {
+            Process_waiting();
+        }
+        if (client_game_status == GAME_RUNNING) {
+            Process_game();
+        }
+        if (client_game_status == GAME_RESULTS) {
+            Process_results();
+        }
+    }
+//menu
+
 }
