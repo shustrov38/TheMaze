@@ -1,5 +1,11 @@
 #include "interface.h"
 
+#ifdef _DEBUG
+#define DEBUG_PRINT(...) do{ printf(__VA_ARGS__ ); } while(0)
+#else
+#define DEBUG_PRINT(...) do{ } while (0)
+#endif
+
 PLAYER scoreboard[PL_CNT];
 ROOM lobbies[PL_CNT];
 RECV_PL_INFO pl_render_info[4];
@@ -94,14 +100,14 @@ char *make_command(SOCKET client, COMMAND_PROTOTYPE proto) {
             check_seed = 1;
             break;
     }
-    if (!parsable_ret_ld) printf(">>%s\n", command);
+    if (!parsable_ret_ld) DEBUG_PRINT(">>%s\n", command);
     send(client, command, TRANSACTION_CAPACITY, 0);
     recv(client, command, TRANSACTION_CAPACITY, 0);
 
 
     if (check_seed == 1) curSeed = atoi (command);
 
-    printf("<<%s\n", command);
+    DEBUG_PRINT("<<%s\n", command);
 
     if (state_check) {
         if (strcmp(command, "IN_MENU") == 0) {
@@ -127,7 +133,7 @@ char *make_command(SOCKET client, COMMAND_PROTOTYPE proto) {
         memset(tmp, 0, 32);
         for (int i = 0; i < strlen(command) && j < PL_CNT; i++) {
             if (command[i] == '#') {
-//              printf("%s->", tmp);
+//              DEBUG_PRINT("%s->", tmp);
                 z = 0;
                 sscanf(tmp, "%s %d %d", scoreboard[j].NAME, &scoreboard[j].score, &scoreboard[j].is_online);
                 j++;
@@ -138,7 +144,7 @@ char *make_command(SOCKET client, COMMAND_PROTOTYPE proto) {
         }
         for (int i = 0; i < PL_CNT; i++) {
             if (strlen(scoreboard[i].NAME) > 0)
-                printf("%d %s %d %d\n", i + 1, scoreboard[i].NAME, scoreboard[i].score, scoreboard[i].is_online);
+                DEBUG_PRINT("%d %s %d %d\n", i + 1, scoreboard[i].NAME, scoreboard[i].score, scoreboard[i].is_online);
         }
     }
     if (parsable_ret_menu) {
@@ -149,7 +155,7 @@ char *make_command(SOCKET client, COMMAND_PROTOTYPE proto) {
         memset(tmp, 0, 32);
         for (int i = 0; i < strlen(command) && j < PL_CNT; i++) {
             if (command[i] == '#') {
-//              printf("%s->", tmp);
+//              DEBUG_PRINT("%s->", tmp);
                 z = 0;
                 sscanf(tmp, "%s %d", lobbies[j].NAME, &lobbies[j].pcnt);
                 j++;
@@ -159,7 +165,7 @@ char *make_command(SOCKET client, COMMAND_PROTOTYPE proto) {
             tmp[z++] = command[i];
         }
         for (int i = 0; i < PL_CNT; i++) {
-            if (strlen(lobbies[i].NAME) > 0)printf("%s's room %d/4\n", lobbies[i].NAME, lobbies[i].pcnt);
+            if (strlen(lobbies[i].NAME) > 0)DEBUG_PRINT("%s's room %d/4\n", lobbies[i].NAME, lobbies[i].pcnt);
         }
     }
 
@@ -171,7 +177,7 @@ char *make_command(SOCKET client, COMMAND_PROTOTYPE proto) {
         memset(tmp, 0, 32);
         for (int i = 0; i < strlen(command) && j < 4; i++) {
             if (command[i] == '#') {
-//              printf("%s->", tmp);
+//              DEBUG_PRINT("%s->", tmp);
                 z = 0;
                 sscanf(tmp, "%s", pl_render_info[j].NAME);
                 if (strlen(pl_render_info[j].NAME) > 0) j++;
@@ -185,7 +191,7 @@ char *make_command(SOCKET client, COMMAND_PROTOTYPE proto) {
         }
         pl_render_infoCnt = j;
         for (int i = 0; i < 4; i++) {
-            if (strlen(pl_render_info[i].NAME) > 0)printf("%s ", pl_render_info[i].NAME);
+            if (strlen(pl_render_info[i].NAME) > 0)DEBUG_PRINT("%s ", pl_render_info[i].NAME);
         }
     }
 
@@ -197,7 +203,7 @@ char *make_command(SOCKET client, COMMAND_PROTOTYPE proto) {
         memset(tmp, 0, 32);
         for (int i = 0; i < strlen(command) && j < 4; i++) {
             if (command[i] == '#') {
-//              printf("%s->", tmp);
+//              DEBUG_PRINT("%s->", tmp);
                 z = 0;
                 pl_render_info[j].X_prev = pl_render_info[j].X;
                 pl_render_info[j].Y_prev = pl_render_info[j].Y;
@@ -213,7 +219,7 @@ char *make_command(SOCKET client, COMMAND_PROTOTYPE proto) {
         }
         for (int i = 0; i < 4; i++) {
             if (strlen(pl_render_info[i].NAME) > 0)
-                printf(tmp, "%s %d %d\n", pl_render_info[j].NAME, pl_render_info[j].X, pl_render_info[j].Y);
+                DEBUG_PRINT(tmp, "%s %d %d\n", pl_render_info[j].NAME, pl_render_info[j].X, pl_render_info[j].Y);
         }
     }
 

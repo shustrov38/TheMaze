@@ -3,6 +3,8 @@
 #include "maze_generator.h"
 #include "playerInfo.h"
 
+#define sq(X) (X)*(X)
+
 const int TILE_SIZE = 15;
 const int SCREEN_HEIGHT = 750;
 const int SCREEN_WIDTH = 900;
@@ -12,6 +14,57 @@ static int client_game_status;
 char login[128];
 char password[128];
 char curPlayerRoom[50];
+
+void set_pixel(SDL_Surface *surface, int x, int y, Uint8 r, Uint8 g, Uint8 b, Uint8 a) {
+    SDL_Rect rect;
+    rect.x = x - 4;
+    rect.y = y - 4;
+    rect.w = 8;
+    rect.h = 8;
+    SDL_FillRect(surface, &rect, SDL_MapRGB(surface->format, r, g, b));
+}
+
+void draw_circle(SDL_Surface *surface, int n_cx, int n_cy, int radius, Uint8 r, Uint8 g, Uint8 b, Uint8 a) {
+    // if the first pixel in the screen is represented by (0,0) (which is in sdl)
+    // remember that the beginning of the circle is not in the middle of the pixel
+    // but to the left-top from it:
+
+    double error = (double) -radius;
+    double x = (double) radius - 0.5;
+    double y = (double) 0.5;
+    double cx = n_cx - 0.5;
+    double cy = n_cy - 0.5;
+
+    while (x >= y) {
+        set_pixel(surface, (int) (cx + x), (int) (cy + y), r, g, b, a);
+        set_pixel(surface, (int) (cx + y), (int) (cy + x), r, g, b, a);
+
+        if (x != 0) {
+            set_pixel(surface, (int) (cx - x), (int) (cy + y), r, g, b, a);
+            set_pixel(surface, (int) (cx + y), (int) (cy - x), r, g, b, a);
+        }
+
+        if (y != 0) {
+            set_pixel(surface, (int) (cx + x), (int) (cy - y), r, g, b, a);
+            set_pixel(surface, (int) (cx - y), (int) (cy + x), r, g, b, a);
+        }
+
+        if (x != 0 && y != 0) {
+            set_pixel(surface, (int) (cx - x), (int) (cy - y), r, g, b, a);
+            set_pixel(surface, (int) (cx - y), (int) (cy - x), r, g, b, a);
+        }
+
+        error += y;
+        ++y;
+        error += y;
+
+        if (error >= 0) {
+            --x;
+            error -= x;
+            error -= x;
+        }
+    }
+}
 
 static void Process_exit_game() {
     SDL_Event event;
@@ -874,17 +927,19 @@ static void Process_game() {
 
 //game (movements of players)
     Uint32 startTime = SDL_GetTicks();
-    int fps = 30;
+    int fps = 7;
 
     while (client_game_status != GAME_OVER) {
         Process_exit_game();
 
-        int myCurPosition = -1;
+        int myCurPosition = 0;
         for (int i = 0; i < pl_render_infoCnt; ++i) {
-            if (strcmp(login, pl_render_info[i].NAME) == 0) myCurPosition = i;
+            if (strcmp(login, pl_render_info[i].NAME) == 0) {
+                myCurPosition = i;
+            }
         }
 
-        if (SDL_GetTicks() - startTime >= 1000/fps) {
+        if (SDL_GetTicks() - startTime >= 1000 / fps) {
             startTime = SDL_GetTicks();
             UPD_RENDER_INFO();
             pl_render_info[myCurPosition] = playerMoves(maze, pl_render_info[myCurPosition], myCurPosition);
@@ -896,18 +951,61 @@ static void Process_game() {
             }
         }
 
+        // redraw maze
+        for (int i = 0; i < width; i++) {
+            for (int j = 0; j < height; j++) {
+                if (maze[i][j] == 1) {
+                    Draw_image(screen, scaled_wall, TILE_SIZE * i, TILE_SIZE * j);
+                }
+            }
+        }
 
+        for (int i = 0; i < width; i++) {
+            for (int j = 0; j < height; j++) {
+                if (maze[i][j] == 0 || maze[i][j] == 2) {
+                    Draw_image(screen, scaled_floor, TILE_SIZE * i - 3, TILE_SIZE * j - 3);
+                }
+            }
+        }
+
+        // draw players
         for (int i = 0; i < pl_render_infoCnt; ++i) {
             Draw_image(screen, scaled_floor, (TILE_SIZE * pl_render_info[i].X_prev) - 3,
                        (TILE_SIZE * pl_render_info[i].Y_prev) - 3);
             Draw_image(screen, pl_render_info[i].icon, (TILE_SIZE * pl_render_info[i].X) - 3,
                        (TILE_SIZE * pl_render_info[i].Y) - 3);
         }
-        showPlayersInfo(pl_render_info, pl_render_infoCnt);
-        Draw_image(screen, scaled_exitPoint, TILE_SIZE * x_finishPoint, TILE_SIZE * y_finishPoint);
-        Update_window_rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 
-        SDL_Delay(125);
+        // rune
+        Draw_image(screen, scaled_exitPoint, TILE_SIZE * x_finishPoint, TILE_SIZE * y_finishPoint);
+
+        // fog
+        myCurPosition = 0;
+        for (int i = 0; i < pl_render_infoCnt; ++i) {
+            if (strcmp(login, pl_render_info[i].NAME) == 0) {
+                myCurPosition = i;
+            }
+        }
+        int x = pl_render_info[myCurPosition].X, y = pl_render_info[myCurPosition].Y;
+        int maze_width = width * TILE_SIZE, maze_height = height * TILE_SIZE;
+        int dist = 0;
+        dist = max(dist, sq(0 - x) + sq(0 - y));
+        dist = max(dist, sq(0 - x) + sq(maze_height - y));
+        dist = max(dist, sq(maze_width - x) + sq(0 - y));
+        dist = max(dist, sq(maze_width - x) + sq(maze_height - y));
+        dist = (int) (sqrt(dist) + 1);
+        for (int r = 100; r < dist; r += 8) {
+            draw_circle(
+                    screen,
+                    x * TILE_SIZE,
+                    y * TILE_SIZE,
+                    r, 0, 0, 0, 0
+            );
+        }
+
+        showPlayersInfo(pl_render_info, pl_render_infoCnt);
+
+        Update_window_rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
     }
 }
 
@@ -949,9 +1047,6 @@ static void Process_results() {
     }
 
 }
-
-
-
 
 int main(int argc, char *argv[]) {
 
