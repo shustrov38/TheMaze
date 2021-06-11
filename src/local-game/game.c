@@ -746,9 +746,10 @@ static void Process_waiting() {
                     case SDLK_SPACE:
                         if (strcmp(curPlayerRoom, login) == 0) {
                             if (currentChoose == 2) {
-                                START();
-                                client_game_status = GAME_RUNNING;
-                                return;
+                                if (strcmp(START(), "START_ROOM_SUCCESS") == 0) {
+                                    client_game_status = GAME_RUNNING;
+                                    return;
+                                }
                             } else if (currentChoose == 1) {
                                 LEAVE();
                                 client_game_status = GAME_ROOMS;

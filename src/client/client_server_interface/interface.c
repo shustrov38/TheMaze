@@ -98,6 +98,7 @@ char *make_command(SOCKET client, COMMAND_PROTOTYPE proto) {
     send(client, command, TRANSACTION_CAPACITY, 0);
     recv(client, command, TRANSACTION_CAPACITY, 0);
 
+
     if (check_seed == 1) curSeed = atoi (command);
 
     printf("<<%s\n", command);
@@ -298,10 +299,11 @@ void get_seed(SOCKET client, COMMAND_PROTOTYPE C) {
     make_command(client, C);
 }
 
-void start_room(SOCKET client, COMMAND_PROTOTYPE C) {
+char *start_room(SOCKET client, COMMAND_PROTOTYPE C) {
     C.TAG = START_ROOM;
     C.VALID_ARG_CNT = 0;
-    make_command(client, C);
+    return make_command(client, C);
+
 }
 
 void enter_room(SOCKET client, COMMAND_PROTOTYPE C, char *name) {

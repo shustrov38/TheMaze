@@ -86,7 +86,7 @@ void leave_room(SOCKET client, COMMAND_PROTOTYPE C);
 void upd_st(SOCKET client, COMMAND_PROTOTYPE C);
 void nei(SOCKET client, COMMAND_PROTOTYPE C);
 void cords(SOCKET client, COMMAND_PROTOTYPE C);
-void start_room(SOCKET client, COMMAND_PROTOTYPE C);
+char *start_room(SOCKET client, COMMAND_PROTOTYPE C);
 void get_seed(SOCKET client, COMMAND_PROTOTYPE C);
 
 int getLobbySize();
