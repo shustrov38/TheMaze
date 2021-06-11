@@ -142,6 +142,13 @@ int callback_get_one_string(void *param, int argc, char **argv, char **col_name)
     sprintf(result, "%s", argv[0]);
     return 0;
 }
+
+int callback_get_two_strings(void *param, int argc, char **argv, char **col_name) {
+    char *result = (char *) param;
+    sprintf(result, "%s %s", argv[0], argv[1]);
+    return 0;
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void printf_server_error_prefix() {
@@ -208,7 +215,7 @@ void *client_callback(void *param) {
     char sql_update_online_1[sql_request_buffer_length];
     char sql_if_exists_name[sql_request_buffer_length];
     char sql_select_leaderboard[sql_request_buffer_length];
-    char sql_get_password_by_name[sql_request_buffer_length];
+    char sql_get_password_and_online_by_login[sql_request_buffer_length];
     char sql_add_client[sql_request_buffer_length];
     char sql_select_rooms[sql_request_buffer_length];
     char sql_change_room[sql_request_buffer_length];
@@ -286,12 +293,12 @@ void *client_callback(void *param) {
             sprintf(sql_select_leaderboard,
                     "SELECT Login, Rating, Online "
                     "FROM Data "
-                    "ORDER BY Rating, Online, Login ASC "
+                    "ORDER BY Rating DESC, Online, Login "
                     "LIMIT 50;"
             );
 
-            sprintf(sql_get_password_by_name,
-                    "SELECT Password "
+            sprintf(sql_get_password_and_online_by_login,
+                    "SELECT Password, Online "
                     "FROM Data "
                     "WHERE Login = \'%s\' "
                     "LIMIT 1;",
@@ -305,13 +312,10 @@ void *client_callback(void *param) {
             );
 
             sprintf(sql_select_rooms,
-                    "SELECT * FROM ("
-                    "   SELECT Room, count(Room) AS Total "
-                    "   FROM Data "
-                    "   WHERE Room <> \'\' "
-                    "   GROUP BY Room"
-                    ") "
-                    "WHERE Total <> 4 "
+                    "SELECT Room, count(Room) AS Total "
+                    "FROM Data "
+                    "WHERE (Room <> \'\' AND State = \'IN_ROOM\') "
+                    "GROUP BY Room"
                     "ORDER BY Total DESC;"
             );
 
@@ -453,9 +457,12 @@ void *client_callback(void *param) {
                 SQL_THREAD_EXEC(sql_add_client, 0, 0, err);
             } else {
                 char stored_password[64];
-                SQL_THREAD_EXEC(sql_get_password_by_name, callback_get_one_string, (void *) stored_password, err);
-                if (strcmp(stored_password, data.password) != 0) {
-                    PRINTF_WITH_SERVER_AND_CLIENT_PREFIX(0, "<- in danger.\n");
+                char temp[64];
+                sprintf(temp, "%s 0", data.password);
+                SQL_THREAD_EXEC(sql_get_password_and_online_by_login, callback_get_two_strings,
+                                (void *) stored_password, err);
+                if (strcmp(stored_password, temp) != 0) {
+                    PRINTF_WITH_SERVER_AND_CLIENT_PREFIX(0, "<- in danger / online.\n");
 
                     sprintf(transmit, "CONNECTION_FAILURE");
                     _SEND()
@@ -598,6 +605,37 @@ void *client_callback(void *param) {
         }
 
         if (!strcmp(tag, "<START_ROOM>") && !first_time) {
+            srand(time(0));
+            rand();
+
+            char temp[512];
+            memset(temp, 0, 512);
+            // neighbours callback return sum of names
+            int rc = sqlite3_exec(db, sql_select_login_by_room, callback_get_room_neighbours, (void *) temp, &err);
+
+            if (rc != SQLITE_OK) {
+                pthread_fprintf("[SQL ERROR] %s\n", err);
+                sqlite3_free(err);
+
+                return (void *) SQL_ERROR;
+            }
+
+            int count = 0;
+            int length = (int) strlen(temp);
+            for (int i = 0; i < length; ++i) {
+                if (temp[i] == '#') {
+                    count++;
+                }
+            }
+
+            if (temp[0] != ' ' && count == 1) {
+                sqlite3_mutex_leave(db_mutex);
+
+                sprintf(transmit, "START_ROOM_FAILURE");
+                _SEND()
+                continue;
+            }
+
             memset(sql_start_room, 0, sql_request_buffer_length);
             sprintf(sql_start_room,
                     "UPDATE Data "
@@ -608,7 +646,7 @@ void *client_callback(void *param) {
 
             sqlite3_mutex_enter(db_mutex); // may cause errors
 
-            int rc = sqlite3_exec(db, sql_start_room, 0, 0, &err);
+            rc = sqlite3_exec(db, sql_start_room, 0, 0, &err);
 
             if (rc != SQLITE_OK) {
                 pthread_fprintf("[SQL ERROR] %s\n", err);
@@ -616,23 +654,13 @@ void *client_callback(void *param) {
 
                 return (void *) SQL_ERROR;
             }
-
-            char temp[512];
-            memset(temp, 0, 512);
-            // neighbours callback return sum of names
-            rc = sqlite3_exec(db, sql_select_login_by_room, callback_get_room_neighbours, (void *) temp, &err);
-
-            if (rc != SQLITE_OK) {
-                pthread_fprintf("[SQL ERROR] %s\n", err);
-                sqlite3_free(err);
-
-                return (void *) SQL_ERROR;
-            }
-
-            pthread_fprintf("%s\n", temp);
 
             int X[4] = {1, 48, 48, 1};
             int Y[4] = {1, 48, 1, 48};
+
+            srand(time(0));
+            rand();
+            int shift = rand() % 4;
 
             int i = 0;
             char *pch = strtok(temp, " #");
@@ -643,9 +671,8 @@ void *client_callback(void *param) {
                         "UPDATE Data "
                         "SET X = %d, Y = %d "
                         "WHERE Login = \'%s\'",
-                        X[i], Y[i], pch
+                        X[(i + shift) % 4], Y[(i + shift) % 4], pch
                 );
-//                pthread_fprintf("-> %s %d %d\n", pch, X[i], Y[i]);
 
                 rc = sqlite3_exec(db, sql_set_coords_by_login, 0, 0, &err);
 
@@ -687,6 +714,35 @@ void *client_callback(void *param) {
             );
 
             SQL_THREAD_EXEC(sql_set_coords_by_login, 0, 0, err);
+
+            if (X == 25 && Y == 25) {
+                char sql_set_winner_and_losers[sql_request_buffer_length * 2];
+                sprintf(sql_set_winner_and_losers,
+                        "UPDATE Data "
+                        "SET State = ( "
+                        "   CASE WHEN Login = \'%s\' THEN "
+                        "       \'WINNER\' "
+                        "   ELSE "
+                        "       \'LOSER\' "
+                        "   END"
+                        "), Rating = ( "
+                        "   CASE WHEN Login = \'%s\' THEN "
+                        "       Rating + %d "
+                        "   ELSE "
+                        "       Rating - %d "
+                        "   END"
+                        ") "
+                        "WHERE Room = ("
+                        "   SELECT Room "
+                        "   FROM Data "
+                        "   WHERE Login = \'%s\' "
+                        "   LIMIT 1 "
+                        ");",
+                        data.login, data.login, 24 + rand() % 10, 24 + rand() % 10, data.login
+                );
+
+                SQL_THREAD_EXEC(sql_set_winner_and_losers, 0, 0, err);
+            }
 
             sprintf(transmit, "MOV_SELF_SUCCESS");
             _SEND()
@@ -889,9 +945,6 @@ int create_server() {
 }
 
 int main() {
-    srand(time(0));
-    rand();
-
     WSADATA wsd;
 
     if (WSAStartup(MAKEWORD(1, 1), &wsd) == 0) {
