@@ -294,7 +294,7 @@ void create_room(SOCKET client, COMMAND_PROTOTYPE C) {
 }
 
 void get_seed(SOCKET client, COMMAND_PROTOTYPE C) {
-    C.TAG = GET_STATE;
+    C.TAG = GET_SEED;
     C.VALID_ARG_CNT = 0;
     make_command(client, C);
 }
