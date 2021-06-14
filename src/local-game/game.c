@@ -1060,7 +1060,7 @@ static void Process_game() {
         dist = max(dist, sq(maze_width - x) + sq(0 - y));
         dist = max(dist, sq(maze_width - x) + sq(maze_height - y));
         dist = (int) (sqrt(dist) + 1);
-        for (int r = 100; r <= dist + 1; r += 8) {
+        for (int r = 100; r <= dist + 32; r += 8) {
             draw_circle(
                     screen,
                     x * TILE_SIZE,
@@ -1081,14 +1081,14 @@ static void Process_results() {
 
     SDL_Surface *win = Load_img("../../../src/local-game/Textures/results/win.bmp");
     SDL_Surface *lose = Load_img("../../../src/local-game/Textures/results/lose.png");
+    SDL_Surface *draw = Load_img("../../../src/local-game/Textures/results/draw.jpg");
 
     if (myState == WINNER) {
         Draw_image(screen, win, 0, 0);
     } else if (myState == LOSER) {
         Draw_image(screen, lose, 0, 0);
     } else if (myState == IN_MENU) {
-        client_game_status = GAME_MENU;
-        return;
+        Draw_image(screen, draw, 0, 0);
     }
     Update_window_rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 
@@ -1125,6 +1125,7 @@ int main(int argc, char *argv[]) {
         printf("Can't connect to socket lib");
         return 1;
     }
+
 
 //init socket
     while (startSession());
