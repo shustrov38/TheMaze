@@ -335,30 +335,30 @@ static void Process_leaderboard(/*PLAYERS_STRUCT *users*/) {
     int loginPos_Y = 365;
     char textMMR[5], textInGameStatus[1];
 
-    WriteText(315, 310, "PLAYERS", 28, 255, 0, 0);
-    WriteText(475, 310, "MMR", 28, 255, 0, 0);
-    WriteText(555, 310, "Status", 28, 255, 0, 0);
-    Update_window_rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
-
-    Draw_image(screen, menu_pointer, 275, 365);
-    for (int i = begin; i <= end; ++i) {
-        WriteText(315, loginPos_Y, scoreboard[i].NAME, 24, 255, 255, 255);
-
-        if (strlen(scoreboard[i].NAME) != 0) {
-            itoa(scoreboard[i].score, textMMR, 10);
-            WriteText(475, loginPos_Y, textMMR, 24, 255, 0, 0);
-        }
-
-        if (strlen(scoreboard[i].NAME) != 0 && scoreboard[i].is_online == 1) {
-            draw_circle(screen, 595, loginPos_Y + 17, 4, 0, 255, 0, 0);
-        } else if (strlen(scoreboard[i].NAME) != 0 && scoreboard[i].is_online == 0){
-            draw_circle(screen, 595, loginPos_Y + 17, 4, 255, 0, 0, 0);
-        }
-
-        loginPos_Y += 30;
-    }
+//    WriteText(315, 310, "PLAYERS", 28, 255, 0, 0);
+//    WriteText(475, 310, "MMR", 28, 255, 0, 0);
+//    WriteText(555, 310, "Status", 28, 255, 0, 0);
+//    Update_window_rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+//
+//    Draw_image(screen, menu_pointer, 275, 365);
+//    for (int i = begin; i <= end; ++i) {
+//        WriteText(315, loginPos_Y, scoreboard[i].NAME, 24, 255, 255, 255);
+//
+//        if (strlen(scoreboard[i].NAME) != 0) {
+//            itoa(scoreboard[i].score, textMMR, 10);
+//            WriteText(475, loginPos_Y, textMMR, 24, 255, 0, 0);
+//        }
+//
+//        if (strlen(scoreboard[i].NAME) != 0 && scoreboard[i].is_online == 1) {
+//            draw_circle(screen, 595, loginPos_Y + 17, 4, 0, 255, 0, 0);
+//        } else if (strlen(scoreboard[i].NAME) != 0 && scoreboard[i].is_online == 0) {
+//            draw_circle(screen, 595, loginPos_Y + 17, 4, 255, 0, 0, 0);
+//        }
+//
+//        loginPos_Y += 30;
+//    }
     loginPos_Y = 365;
-    Update_window_rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+//    Update_window_rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 
     while (!done) {
 
@@ -380,7 +380,7 @@ static void Process_leaderboard(/*PLAYERS_STRUCT *users*/) {
 
             if (strlen(scoreboard[i].NAME) != 0 && scoreboard[i].is_online == 1) {
                 draw_circle(screen, 595, loginPos_Y + 17, 4, 0, 255, 0, 0);
-            } else if (strlen(scoreboard[i].NAME) != 0 && scoreboard[i].is_online == 0){
+            } else if (strlen(scoreboard[i].NAME) != 0 && scoreboard[i].is_online == 0) {
                 draw_circle(screen, 595, loginPos_Y + 17, 4, 255, 0, 0, 0);
             }
 
@@ -394,8 +394,6 @@ static void Process_leaderboard(/*PLAYERS_STRUCT *users*/) {
         pageCnt = (getScoreboardSize() / 8) + 1;
 
         while (SDL_PollEvent(&event)) {
-
-            GET_LDB();
             if (event.type == SDL_KEYDOWN) {
                 switch (event.key.keysym.sym) {
                     case SDLK_w:
@@ -428,7 +426,7 @@ static void Process_leaderboard(/*PLAYERS_STRUCT *users*/) {
 
                                 if (strlen(scoreboard[i].NAME) != 0 && scoreboard[i].is_online == 1) {
                                     draw_circle(screen, 595, loginPos_Y + 17, 4, 0, 255, 0, 0);
-                                } else if (strlen(scoreboard[i].NAME) != 0 && scoreboard[i].is_online == 0){
+                                } else if (strlen(scoreboard[i].NAME) != 0 && scoreboard[i].is_online == 0) {
                                     draw_circle(screen, 595, loginPos_Y + 17, 4, 255, 0, 0, 0);
                                 }
 
@@ -472,7 +470,7 @@ static void Process_leaderboard(/*PLAYERS_STRUCT *users*/) {
 
                                 if (strlen(scoreboard[i].NAME) != 0 && scoreboard[i].is_online == 1) {
                                     draw_circle(screen, 595, loginPos_Y + 17, 4, 0, 255, 0, 0);
-                                } else if (strlen(scoreboard[i].NAME) != 0 && scoreboard[i].is_online == 0){
+                                } else if (strlen(scoreboard[i].NAME) != 0 && scoreboard[i].is_online == 0) {
                                     draw_circle(screen, 595, loginPos_Y + 17, 4, 255, 0, 0, 0);
                                 }
 
@@ -510,14 +508,13 @@ static void Process_leaderboard(/*PLAYERS_STRUCT *users*/) {
                 exit(0);
             }
         }
+        SDL_Delay(100);
     }
 }
 
 static void Process_rooms(/*ROOMS_STRUCT *rooms, int roomsCnt*/) {
     SDL_Event event;
     TTF_Init();
-
-    LOBBY();
 
     SDL_Surface *menu_background = Load_img("../../../src/local-game/Textures/menu/menu_back.jpg");
 
@@ -535,14 +532,13 @@ static void Process_rooms(/*ROOMS_STRUCT *rooms, int roomsCnt*/) {
     int currentRoom = 0;
     int currentPos = 0;
     char text[15];
-    memset(text, 0, 15);
     int roomCreatingFlag = -1;
 
-    if (getLobbySize()) {
+    LOBBY();
+    if (lobbyCnt) {
         Draw_image(screen, room_join, 285, 235);
         WriteText(342, 356, strcat(lobbies[currentRoom].NAME, "'s Room"), 30, 255, 255, 255);
-
-        itoa(lobbies[currentRoom].pcnt, text, 10);
+        sprintf(text, "%d", lobbies[currentRoom].pcnt);
         WriteText(527, 430, text, 30, 255, 255, 255);
         memset(text, 0, 15);
         Update_window_rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
@@ -561,13 +557,12 @@ static void Process_rooms(/*ROOMS_STRUCT *rooms, int roomsCnt*/) {
             Draw_image(screen, menu_background, 0, 0);
             Draw_image(screen, room_join, 285, 235);
             WriteText(342, 356, strcat(lobbies[currentRoom].NAME, "'s Room"), 30, 255, 255, 255);
-
-            itoa(lobbies[currentRoom].pcnt, text, 10);
+            sprintf(text, "%d", lobbies[currentRoom].pcnt);
             WriteText(527, 430, text, 30, 255, 255, 255);
             memset(text, 0, 15);
             Update_window_rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
             roomCreatingFlag = 1;
-        } else if (getLobbySize() == 0) {
+        } else if (lobbyCnt == 0) {
             Draw_image(screen, menu_background, 0, 0);
             Draw_image(screen, room_create_button, 293, 327);
             Update_window_rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
@@ -589,8 +584,7 @@ static void Process_rooms(/*ROOMS_STRUCT *rooms, int roomsCnt*/) {
                                     Draw_image(screen, room_join, 285, 235);
                                     WriteText(342, 356, strcat(lobbies[currentRoom].NAME, "'s Room"), 30, 255, 255,
                                               255);
-
-                                    itoa(lobbies[currentRoom].pcnt, text, 10);
+                                    sprintf(text, "%d", lobbies[currentRoom].pcnt);
                                     WriteText(527, 430, text, 30, 255, 255, 255);
                                     memset(text, 0, 15);
                                     Update_window_rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
@@ -599,8 +593,7 @@ static void Process_rooms(/*ROOMS_STRUCT *rooms, int roomsCnt*/) {
                                     Draw_image(screen, room_create, 285, 235);
                                     WriteText(342, 356, strcat(lobbies[currentRoom].NAME, "'s Room"), 30, 255, 255,
                                               255);
-
-                                    itoa(lobbies[currentRoom].pcnt, text, 10);
+                                    sprintf(text, "%d", lobbies[currentRoom].pcnt);
                                     WriteText(527, 430, text, 30, 255, 255, 255);
                                     memset(text, 0, 15);
                                     Update_window_rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
@@ -618,8 +611,7 @@ static void Process_rooms(/*ROOMS_STRUCT *rooms, int roomsCnt*/) {
                                     Draw_image(screen, room_join, 285, 235);
                                     WriteText(342, 356, strcat(lobbies[currentRoom].NAME, "'s Room"), 30, 255, 255,
                                               255);
-
-                                    itoa(lobbies[currentRoom].pcnt, text, 10);
+                                    sprintf(text, "%d", lobbies[currentRoom].pcnt);
                                     WriteText(527, 430, text, 30, 255, 255, 255);
                                     memset(text, 0, 15);
                                     Update_window_rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
@@ -628,8 +620,7 @@ static void Process_rooms(/*ROOMS_STRUCT *rooms, int roomsCnt*/) {
                                     Draw_image(screen, room_create, 285, 235);
                                     WriteText(342, 356, strcat(lobbies[currentRoom].NAME, "'s Room"), 30, 255, 255,
                                               255);
-
-                                    itoa(lobbies[currentRoom].pcnt, text, 10);
+                                    sprintf(text, "%d", lobbies[currentRoom].pcnt);
                                     WriteText(527, 430, text, 30, 255, 255, 255);
                                     memset(text, 0, 15);
                                     Update_window_rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
@@ -646,8 +637,7 @@ static void Process_rooms(/*ROOMS_STRUCT *rooms, int roomsCnt*/) {
                                 Draw_image(screen, room_create, 285, 235);
                                 WriteText(342, 356, strcat(lobbies[currentRoom].NAME, "'s Room"), 30, 255, 255,
                                           255);
-
-                                itoa(lobbies[currentRoom].pcnt, text, 10);
+                                sprintf(text, "%d", lobbies[currentRoom].pcnt);
                                 WriteText(527, 430, text, 30, 255, 255, 255);
                                 memset(text, 0, 15);
                                 Update_window_rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
@@ -663,8 +653,7 @@ static void Process_rooms(/*ROOMS_STRUCT *rooms, int roomsCnt*/) {
                                 Draw_image(screen, room_join, 285, 235);
                                 WriteText(342, 356, strcat(lobbies[currentRoom].NAME, "'s Room"), 30, 255, 255,
                                           255);
-
-                                itoa(lobbies[currentRoom].pcnt, text, 10);
+                                sprintf(text, "%d", lobbies[currentRoom].pcnt);
                                 WriteText(527, 430, text, 30, 255, 255, 255);
                                 memset(text, 0, 15);
                                 Update_window_rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
@@ -1118,7 +1107,6 @@ static void Process_results() {
 
 int main(int argc, char *argv[]) {
 
-
 //init socket
     WSADATA wsd;
     if (WSAStartup(MAKEWORD(1, 1), &wsd) != 0) {
@@ -1129,19 +1117,33 @@ int main(int argc, char *argv[]) {
 
     Init_window("Maze", SCREEN_WIDTH, SCREEN_HEIGHT);
 
-    SDL_Surface **waiting = (SDL_Surface **) malloc(3 * sizeof(SDL_Surface *));
-    waiting[0] = Load_img("../../../src/local-game/Textures/login/wait1.jpg");
-    waiting[1] = Load_img("../../../src/local-game/Textures/login/wait2.jpg");
-    waiting[2] = Load_img("../../../src/local-game/Textures/login/wait3.jpg");
-    int a = 0;
+    {
+        SDL_Surface **waiting = (SDL_Surface **) malloc(4 * sizeof(SDL_Surface *));
+        waiting[0] = Load_img("../../../src/local-game/Textures/login/wait0.jpg");
+        waiting[1] = Load_img("../../../src/local-game/Textures/login/wait2.jpg");
+        waiting[2] = Load_img("../../../src/local-game/Textures/login/wait3.jpg");
+        waiting[3] = Load_img("../../../src/local-game/Textures/login/wait3.jpg");
 
-    while(1){
-        Draw_image(screen, waiting[a], 0, 0);
-        Update_window_rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
-        ++a;
-        if (a == 3) a = 0;
-        if (!startSession()){
-            break;
+        int done = 0;
+        SDL_Event event;
+        int curr_pic = 0;
+
+        while (!done) {
+            while (SDL_PollEvent(&event)) {
+                if (event.type == SDL_QUIT) {
+                    SDL_Quit();
+                    exit(0);
+                }
+
+            }
+            Draw_image(screen, waiting[curr_pic], 0, 0);
+            Update_window_rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+            if (++curr_pic == 4) {
+                curr_pic = 0;
+            }
+            if (!startSession()) {
+                break;
+            }
         }
     }
 

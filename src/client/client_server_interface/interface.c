@@ -14,6 +14,7 @@ COMMAND_PROTOTYPE C;
 SOCKET client;
 int curSeed;
 int pl_render_infoCnt = 0;
+int lobbyCnt = 0;
 
 void wipe_lobbies(){
     for(int i = 0; i < PL_CNT; i++){
@@ -158,12 +159,14 @@ char *make_command(SOCKET client, COMMAND_PROTOTYPE proto) {
 //              DEBUG_PRINT("%s->", tmp);
                 z = 0;
                 sscanf(tmp, "%s %d", lobbies[j].NAME, &lobbies[j].pcnt);
+//                printf("from server: %d\n", lobbies[j].pcnt);
                 j++;
                 memset(tmp, 0, 32);
                 continue;
             }
             tmp[z++] = command[i];
         }
+        lobbyCnt = j;
         for (int i = 0; i < PL_CNT; i++) {
             if (strlen(lobbies[i].NAME) > 0)DEBUG_PRINT("%s's room %d/4\n", lobbies[i].NAME, lobbies[i].pcnt);
         }

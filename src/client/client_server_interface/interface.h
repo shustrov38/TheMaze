@@ -7,7 +7,7 @@
 #include <unistd.h>
 #include <SDL2/SDL.h>
 #define TRANSACTION_CAPACITY    1024
-#define PL_PARAM_SIZE           16
+#define PL_PARAM_SIZE           20
 #define PL_CNT                  50
 
 
@@ -72,6 +72,7 @@ extern int curSeed;
 extern COMMAND_PROTOTYPE C;
 extern SOCKET client;
 extern int pl_render_infoCnt;
+extern int lobbyCnt;
 
 char *make_command(SOCKET client, COMMAND_PROTOTYPE proto);
 int try_login(SOCKET client, COMMAND_PROTOTYPE C, char *name, char *password);

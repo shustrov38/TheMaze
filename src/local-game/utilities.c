@@ -234,6 +234,7 @@ void WriteText(int x, int y, char text[100], int sz, int r, int g, int b) {
     clr.r = r;
     clr.g = g;  // Зададим параметры цвета
     clr.b = b;
+    clr.a = 255;
     TTF_Font *fnt = TTF_OpenFont("../../../src/local-game/Fonts/impact.ttf",
                                  sz); // Загружаем шрифт по заданному адресу размером sz
     SDL_Rect dest;
