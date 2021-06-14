@@ -350,9 +350,9 @@ static void Process_leaderboard(/*PLAYERS_STRUCT *users*/) {
         }
 
         if (strlen(scoreboard[i].NAME) != 0 && scoreboard[i].is_online == 1) {
-            draw_circle(screen, 575, loginPos_Y + 17, 4, 0, 255, 0, 0);
+            draw_circle(screen, 595, loginPos_Y + 17, 4, 0, 255, 0, 0);
         } else if (strlen(scoreboard[i].NAME) != 0 && scoreboard[i].is_online == 0){
-            draw_circle(screen, 575, loginPos_Y + 17, 4, 255, 0, 0, 0);
+            draw_circle(screen, 595, loginPos_Y + 17, 4, 255, 0, 0, 0);
         }
 
         loginPos_Y += 30;
@@ -363,11 +363,39 @@ static void Process_leaderboard(/*PLAYERS_STRUCT *users*/) {
     while (!done) {
 
         GET_LDB();
+        Draw_image(screen, menu_background, 0, 0);
+        WriteText(315, 310, "PLAYERS", 28, 255, 0, 0);
+        WriteText(475, 310, "MMR", 28, 255, 0, 0);
+        WriteText(555, 310, "Status", 28, 255, 0, 0);
+        Draw_image(screen, menu_pointer, 275, 365 + (30 * (selectionPos % 8)));
+        Update_window_rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+
+        for (int i = begin; i <= end; ++i) {
+            WriteText(315, loginPos_Y, scoreboard[i].NAME, 24, 255, 255, 255);
+
+            if (strlen(scoreboard[i].NAME) != 0) {
+                itoa(scoreboard[i].score, textMMR, 10);
+                WriteText(475, loginPos_Y, textMMR, 24, 255, 0, 0);
+            }
+
+            if (strlen(scoreboard[i].NAME) != 0 && scoreboard[i].is_online == 1) {
+                draw_circle(screen, 595, loginPos_Y + 17, 4, 0, 255, 0, 0);
+            } else if (strlen(scoreboard[i].NAME) != 0 && scoreboard[i].is_online == 0){
+                draw_circle(screen, 595, loginPos_Y + 17, 4, 255, 0, 0, 0);
+            }
+
+
+            loginPos_Y += 30;
+        }
+        loginPos_Y = 365;
+
+        Update_window_rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+
         pageCnt = (getScoreboardSize() / 8) + 1;
 
         while (SDL_PollEvent(&event)) {
 
-
+            GET_LDB();
             if (event.type == SDL_KEYDOWN) {
                 switch (event.key.keysym.sym) {
                     case SDLK_w:
@@ -399,9 +427,9 @@ static void Process_leaderboard(/*PLAYERS_STRUCT *users*/) {
                                 }
 
                                 if (strlen(scoreboard[i].NAME) != 0 && scoreboard[i].is_online == 1) {
-                                    draw_circle(screen, 565, loginPos_Y + 17, 4, 0, 255, 0, 0);
+                                    draw_circle(screen, 595, loginPos_Y + 17, 4, 0, 255, 0, 0);
                                 } else if (strlen(scoreboard[i].NAME) != 0 && scoreboard[i].is_online == 0){
-                                    draw_circle(screen, 565, loginPos_Y + 17, 4, 255, 0, 0, 0);
+                                    draw_circle(screen, 595, loginPos_Y + 17, 4, 255, 0, 0, 0);
                                 }
 
 
@@ -443,9 +471,9 @@ static void Process_leaderboard(/*PLAYERS_STRUCT *users*/) {
                                 }
 
                                 if (strlen(scoreboard[i].NAME) != 0 && scoreboard[i].is_online == 1) {
-                                    draw_circle(screen, 565, loginPos_Y + 17, 4, 0, 255, 0, 0);
+                                    draw_circle(screen, 595, loginPos_Y + 17, 4, 0, 255, 0, 0);
                                 } else if (strlen(scoreboard[i].NAME) != 0 && scoreboard[i].is_online == 0){
-                                    draw_circle(screen, 565, loginPos_Y + 17, 4, 255, 0, 0, 0);
+                                    draw_circle(screen, 595, loginPos_Y + 17, 4, 255, 0, 0, 0);
                                 }
 
                                 loginPos_Y += 30;
