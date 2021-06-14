@@ -5,7 +5,7 @@
 #include <unistd.h>
 #include"client_server_interface/interface.h"
 
-void startSession() {
+void __startSession() {
     client = socket(AF_INET, SOCK_STREAM, IPPROTO_IP);
     if (client == INVALID_SOCKET) {
         printf("Error create socket\n");

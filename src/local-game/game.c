@@ -1125,16 +1125,32 @@ int main(int argc, char *argv[]) {
         printf("Can't connect to socket lib");
         return 1;
     }
-
-
 //init socket
-    while (startSession());
+
+    Init_window("Maze", SCREEN_WIDTH, SCREEN_HEIGHT);
+
+    SDL_Surface **waiting = (SDL_Surface **) malloc(3 * sizeof(SDL_Surface *));
+    waiting[0] = Load_img("../../../src/local-game/Textures/login/wait1.jpg");
+    waiting[1] = Load_img("../../../src/local-game/Textures/login/wait2.jpg");
+    waiting[2] = Load_img("../../../src/local-game/Textures/login/wait3.jpg");
+    int a = 0;
+
+    while(1){
+        Draw_image(screen, waiting[a], 0, 0);
+        Update_window_rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+        ++a;
+        if (a == 3) a = 0;
+        if (!startSession()){
+            break;
+        }
+    }
 
 //login
-    Init_window("Maze", SCREEN_WIDTH, SCREEN_HEIGHT);
     Process_login();
-//login
     SDL_SetWindowTitle(window, login);
+//login
+
+
 //menu
     while (client_game_status != GAME_OVER) {
         if (client_game_status == GAME_MENU) {
