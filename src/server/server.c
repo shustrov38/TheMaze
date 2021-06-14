@@ -534,7 +534,7 @@ void *client_callback(void *param) {
             }
 
             if (success) {
-                PRINTF_WITH_SERVER_AND_CLIENT_PREFIX(0, "entered room \'%s\'\\n", room_name);
+                PRINTF_WITH_SERVER_AND_CLIENT_PREFIX(0, "entered room \'%s\'\n", room_name);
                 char sql_enter_room_update[sql_request_buffer_length];
                 sprintf(sql_enter_room_update,
                         "UPDATE Data "

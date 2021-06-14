@@ -347,9 +347,9 @@ static void Process_leaderboard(/*PLAYERS_STRUCT *users*/) {
         }
 
         if (strlen(scoreboard[i].NAME) != 0 && scoreboard[i].is_online == 1) {
-            draw_circle(screen, 565, loginPos_Y + 17, 4, 0, 255, 0, 0);
+            draw_circle(screen, 575, loginPos_Y + 17, 4, 0, 255, 0, 0);
         } else if (strlen(scoreboard[i].NAME) != 0 && scoreboard[i].is_online == 0){
-            draw_circle(screen, 565, loginPos_Y + 17, 4, 255, 0, 0, 0);
+            draw_circle(screen, 575, loginPos_Y + 17, 4, 255, 0, 0, 0);
         }
 
         loginPos_Y += 30;
@@ -1029,7 +1029,7 @@ static void Process_game() {
         dist = max(dist, sq(maze_width - x) + sq(0 - y));
         dist = max(dist, sq(maze_width - x) + sq(maze_height - y));
         dist = (int) (sqrt(dist) + 1);
-        for (int r = 100; r < dist; r += 8) {
+        for (int r = 100; r <= dist + 1; r += 8) {
             draw_circle(
                     screen,
                     x * TILE_SIZE,
