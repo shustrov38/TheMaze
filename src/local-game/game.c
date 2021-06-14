@@ -73,7 +73,10 @@ static void Process_exit_game() {
 
         if (event.type == SDL_QUIT) {
             client_game_status = GAME_OVER;
-            return;
+            SDL_Quit();
+            LEAVE();
+            DISCONNECT();
+            exit(0);
         }
     }
 }
@@ -1071,7 +1074,6 @@ static void Process_results() {
                         client_game_status = GAME_MENU;
                         LEAVE();
                         return;
-                        break;
                 }
             }
 
