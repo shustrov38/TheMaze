@@ -970,10 +970,17 @@ static void Process_game() {
         if (SDL_GetTicks() - startTime >= 1000 / fps) {
             startTime = SDL_GetTicks();
             UPD_RENDER_INFO();
+
+            for (int i = 0; i < pl_render_infoCnt; ++i) {
+                if (strcmp(login, pl_render_info[i].NAME) == 0) {
+                    myCurPosition = i;
+                }
+            }
+
             pl_render_info[myCurPosition] = playerMoves(maze, pl_render_info[myCurPosition], myCurPosition);
 
             GET_STATUS();
-            if (myState == WINNER || myState == LOSER) {
+            if (myState == WINNER || myState == LOSER || myState == IN_MENU) {
                 client_game_status = GAME_RESULTS;
                 return;
             }
@@ -1048,6 +1055,9 @@ static void Process_results() {
         Draw_image(screen, win, 0, 0);
     } else if (myState == LOSER) {
         Draw_image(screen, lose, 0, 0);
+    } else if (myState == IN_MENU) {
+        client_game_status = GAME_MENU;
+        return;
     }
     Update_window_rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 
