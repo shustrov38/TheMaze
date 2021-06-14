@@ -534,6 +534,7 @@ void *client_callback(void *param) {
             }
 
             if (success) {
+                PRINTF_WITH_SERVER_AND_CLIENT_PREFIX(0, "entered room \'%s\'\\n", room_name);
                 char sql_enter_room_update[sql_request_buffer_length];
                 sprintf(sql_enter_room_update,
                         "UPDATE Data "
@@ -573,8 +574,10 @@ void *client_callback(void *param) {
             SQL_THREAD_EXEC(sql_if_room_eq_login, callback_check_if_true, (void *) &result, err);
 
             if (result) {
+                PRINTF_WITH_SERVER_AND_CLIENT_PREFIX(0, "closed room.\n");
                 SQL_THREAD_EXEC(sql_close_room, 0, 0, err);
             } else {
+                PRINTF_WITH_SERVER_AND_CLIENT_PREFIX(0, "left from room.\n");
                 SQL_THREAD_EXEC(sql_leave_room, 0, 0, err);
                 SQL_THREAD_EXEC(sql_update_state_in_menu, 0, 0, err);
             }
