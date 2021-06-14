@@ -1126,9 +1126,8 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    startSession();
 //init socket
-
+    while (startSession());
 
 //login
     Init_window("Maze", SCREEN_WIDTH, SCREEN_HEIGHT);

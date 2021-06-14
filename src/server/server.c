@@ -499,6 +499,7 @@ void *client_callback(void *param) {
 
             SQL_THREAD_EXEC(sql_update_state_in_room, 0, 0, err);
 
+            PRINTF_WITH_SERVER_AND_CLIENT_PREFIX(0, "created room.\n");
             _SEND()
             continue;
         }
@@ -570,7 +571,6 @@ void *client_callback(void *param) {
 
             SQL_THREAD_EXEC(sql_if_room_eq_login, callback_check_if_true, (void *) &result, err);
 
-            pthread_fprintf("leave - %s %d\n", data.login, result);
             if (result) {
                 PRINTF_WITH_SERVER_AND_CLIENT_PREFIX(0, "closed room.\n");
                 SQL_THREAD_EXEC(sql_close_room, 0, 0, err);
@@ -692,6 +692,7 @@ void *client_callback(void *param) {
 
             sqlite3_mutex_leave(db_mutex);
 
+            PRINTF_WITH_SERVER_AND_CLIENT_PREFIX(0, "started game.\n");
             sprintf(transmit, "START_ROOM_SUCCESS");
             _SEND()
             continue;
@@ -804,11 +805,12 @@ void *server_listener(void *param) {
             break;
         }
 
+        // uncomment if more information is needed
         if (client == INVALID_SOCKET) {
-            pthread_fprintf("[SERVER] Can't accept client.\n");
+//            pthread_fprintf("[SERVER] Can't accept client.\n");
             continue;
         } else {
-            pthread_fprintf("[SERVER] Client is accepted.\n");
+//            pthread_fprintf("[SERVER] Client is accepted.\n");
         }
 
         pthread_t tid;

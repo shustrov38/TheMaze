@@ -39,11 +39,11 @@ int Init_window(const char *title, int width, int height) {
     return 0;
 }
 
-void startSession() {
+int startSession() {
     client = socket(AF_INET, SOCK_STREAM, IPPROTO_IP);
     if (client == INVALID_SOCKET) {
         printf("Error create socket\n");
-        return;
+        exit(1);
     }
     struct sockaddr_in server;
     server.sin_family = AF_INET;
@@ -51,10 +51,11 @@ void startSession() {
 //  server.sin_addr.S_un.S_addr = inet_addr("127.0.0.1"); //special look-up address
     server.sin_addr.S_un.S_addr = inet_addr("26.173.251.89");
     if (connect(client, (struct sockaddr *) &server, sizeof(server)) == SOCKET_ERROR) {
-        printf("Can't connect to server\n");
+//        printf("Can't connect to server\n");
         closesocket(client);
-        return;
+        return 1;
     }
+    return 0;
 }
 
 
