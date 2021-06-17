@@ -246,7 +246,7 @@ void *client_callback(void *param) {
 
             sprintf(sql_update_online_0,
                     "UPDATE Data "
-                    "SET Online = 0, Room = \'\', RoomMessage = \'\', Seed = 0, X = 0, Y = 0, State = \'IN_MENU\' "
+                    "SET Online = 0, Room = \'\', Seed = 0, X = 0, Y = 0, State = \'IN_MENU\' "
                     "WHERE Login = %s",
                     data.login
             );
