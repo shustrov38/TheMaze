@@ -260,7 +260,7 @@ void *client_callback(void *param) {
 
             sprintf(sql_if_exists_name,
                     "SELECT EXISTS("
-                    "   SELECT Id "
+                    "   SELECT Login "
                     "   FROM Data "
                     "   WHERE Login = \'%s\' "
                     "   LIMIT 1"
