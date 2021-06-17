@@ -4,7 +4,7 @@
 #include <windows.h>
 #include <time.h>
 
-#include "../sqlite3.h"
+#include "sqlite3.h"
 
 #define SUCCESS 0
 #define RECEIVE_ERROR 1
@@ -20,23 +20,6 @@ char *get_current_time() {
     char *buffer = asctime(localtime(&r_time));
     buffer[strlen(buffer) - 1] = 0;
     return buffer;
-}
-
-int hash(char *s, int base) {
-    int pow = 1;
-    int length = (int) strlen(s);
-    int value = 0;
-    for (int i = 0; i < length; ++i) {
-        value += (s[i] - 'a' + 1) * pow;
-        pow *= base;
-    }
-    return value;
-}
-
-int hash_combine(char *s1, char *s2) {
-    int h1 = hash(s1, 31);
-    int h2 = hash(s2, 31);
-    return (h1 << 1) ^ h2;
 }
 
 sqlite3 *db;
@@ -161,7 +144,6 @@ void printf_server_prefix() {
 
 typedef struct client_data_t {
     char login[64], password[64];
-    char string_id[10];
 } ClientData;
 
 void printf_client_data(ClientData *client, int show_password) {
@@ -257,26 +239,23 @@ void *client_callback(void *param) {
             memset(tag, 0, 64);
             memset(data.login, 0, 64);
             memset(data.password, 0, 64);
-            memset(data.string_id, 0, 10);
 
             sscanf(receive, "%s %s %s", tag, data.login, data.password);
 
             PRINTF_WITH_SERVER_AND_CLIENT_PREFIX(1, "connected.\n");
 
-            itoa(hash_combine(data.login, data.password), data.string_id, 10);
-
             sprintf(sql_update_online_0,
                     "UPDATE Data "
                     "SET Online = 0, Room = \'\', RoomMessage = \'\', Seed = 0, X = 0, Y = 0, State = \'IN_MENU\' "
-                    "WHERE Id = %s",
-                    data.string_id
+                    "WHERE Login = %s",
+                    data.login
             );
 
             sprintf(sql_update_online_1,
                     "UPDATE Data "
                     "SET Online = 1 "
-                    "WHERE Id = %s",
-                    data.string_id
+                    "WHERE Login = %s",
+                    data.login
             );
 
             sprintf(sql_if_exists_name,
@@ -307,8 +286,8 @@ void *client_callback(void *param) {
 
             sprintf(sql_add_client,
                     "INSERT INTO Data "
-                    "VALUES(%s, \'%s\', \'%s\', 1000, 1, \'\', \'\', 0, 0, 0, \'\');",
-                    data.string_id, data.login, data.password
+                    "VALUES(\'%s\', \'%s\', 1000, 1, \'\', 0, 0, 0, \'IN_MENU\');",
+                    data.login, data.password
             );
 
             sprintf(sql_select_rooms,
@@ -833,7 +812,7 @@ int create_server() {
 
     char *err = 0;
 
-    int rc = sqlite3_open("test.db", &db);
+    int rc = sqlite3_open("the_maze.db", &db);
     if (rc != SQLITE_OK) {
         printf("[SQL ERROR] Cannot open database: %s\n", sqlite3_errmsg(db));
         sqlite3_close(db);
@@ -842,13 +821,11 @@ int create_server() {
     }
 
     const char *sql_create_table = "CREATE TABLE IF NOT EXISTS Data("
-                                   "Id INT, "
                                    "Login TEXT, "
                                    "Password TEXT, "
                                    "Rating INT, "
                                    "Online INT, "
                                    "Room TEXT, "
-                                   "RoomMessage TEXT, "
                                    "Seed INT, "
                                    "X INT, "
                                    "Y INT, "
@@ -866,7 +843,7 @@ int create_server() {
 
     rc = sqlite3_exec(db,
                       "UPDATE Data "
-                      "SET Online = 0, Room = \'\', RoomMessage = \'\', Seed = 0, X = 0, Y = 0, State = \'IN_MENU\';",
+                      "SET Online = 0, Room = \'\', Seed = 0, X = 0, Y = 0, State = \'IN_MENU\';",
                       0, 0, &err
     );
 
@@ -958,6 +935,9 @@ int main() {
         printf("[INIT] Socket lib was not properly linked.\n");
         return EXIT_FAILURE;
     }
+
+    printf("[INIT] SQLITE3 VERSION %s.\n", sqlite3_libversion());
+    printf("[INIT] This is %s SQLITE3 DB.\n", (sqlite3_threadsafe() ? "multithreaded" : "monothreaded"));
 
     return create_server();
 }

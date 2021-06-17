@@ -1,9 +1,6 @@
-link_directories(../../sqlite3_lib)
+link_directories(/)
 
-set(SERVER_SOURCES
-        MazeGenerator.c
-        MazeGenerator.h
-)
+set(SERVER_SOURCES)
 
 add_executable(Server server.c ${SERVER_SOURCES})
 target_link_libraries(Server sqlite3 ws2_32)
