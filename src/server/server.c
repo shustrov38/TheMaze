@@ -247,14 +247,14 @@ void *client_callback(void *param) {
             sprintf(sql_update_online_0,
                     "UPDATE Data "
                     "SET Online = 0, Room = \'\', Seed = 0, X = 0, Y = 0, State = \'IN_MENU\' "
-                    "WHERE Login = %s",
+                    "WHERE Login = \'%s\'",
                     data.login
             );
 
             sprintf(sql_update_online_1,
                     "UPDATE Data "
                     "SET Online = 1 "
-                    "WHERE Login = %s",
+                    "WHERE Login = \'%s\'",
                     data.login
             );
 

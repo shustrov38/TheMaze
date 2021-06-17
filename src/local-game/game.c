@@ -675,7 +675,6 @@ static void Process_rooms(/*ROOMS_STRUCT *rooms, int roomsCnt*/) {
                             memset(curPlayerRoom, 0, 50);
                             strcpy(curPlayerRoom, lobbies[currentRoom].NAME);
                             client_game_status = GAME_WAITING;
-                            printf("Enter %s\n", strcat(lobbies[currentRoom].NAME, "'s Room"));
                             return;
                         }
                         if (roomCreatingFlag == 1 && currentPos == 1) {
